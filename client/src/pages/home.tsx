@@ -85,17 +85,40 @@ export default function Home() {
               MARCH 8, 2026
             </motion.div>
 
-            {/* Thunder Strike Animated Name */}
+            {/* Advanced Letter Formation Animation */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
               className="mb-8"
             >
-              <h1 className="text-7xl md:text-9xl font-black thunder-strike leading-none tracking-tighter" style={{fontFamily: "'Space Grotesk', sans-serif"}}>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
-                  Creation 2K26
+              <h1 className="text-7xl md:text-9xl font-black leading-none tracking-tighter relative" style={{fontFamily: "'Space Grotesk', sans-serif"}}>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent relative">
+                  {"Creation 2K26".split("").map((char, i) => (
+                    <motion.span
+                      key={i}
+                      initial={{ opacity: 0, y: 40 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.6,
+                        delay: 0.3 + (i * 0.05),
+                        ease: "easeOut"
+                      }}
+                      className="inline-block"
+                      style={{
+                        textShadow: "0 0 20px rgba(168, 85, 247, 0.3)"
+                      }}
+                    >
+                      {char === " " ? "\u00A0" : char}
+                    </motion.span>
+                  ))}
                 </span>
+                <motion.div
+                  className="absolute inset-0 pointer-events-none"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
+                >
+                  <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-b from-primary/30 to-transparent rounded-full blur-3xl animate-pulse" />
+                  <div className="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-t from-accent/20 to-transparent rounded-full blur-3xl animate-pulse animation-delay-2000" />
+                </motion.div>
               </h1>
             </motion.div>
 
@@ -311,20 +334,28 @@ export default function Home() {
                   whileHover="hover"
                   className="relative group"
                 >
+                  {/* Lightning Strike Effect */}
                   <motion.div
                     initial={{ opacity: 0 }}
                     whileHover={{ opacity: 1 }}
-                    className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-2xl"
+                    className="absolute inset-0 bg-gradient-to-r from-primary/30 to-accent/30 rounded-3xl blur-3xl"
+                    style={{ animation: "electrical-pulse 2s ease-in-out infinite" }}
                   />
+                  
+                  {/* Main Card Container */}
                   <motion.div
-                    whileHover={{ y: -8 }}
-                    className="relative h-full rounded-3xl overflow-hidden bg-white/5 border border-white/10 hover:border-primary/50 transition-all backdrop-blur"
+                    whileHover={{ y: -12, scale: 1.02 }}
+                    transition={{ duration: 0.3 }}
+                    className="relative h-full rounded-3xl overflow-hidden bg-gradient-to-br from-white/8 to-white/3 border-2 border-primary/30 hover:border-primary/70 transition-all backdrop-blur-xl shadow-2xl"
                   >
+                    {/* Lightning Accent Lines */}
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    
                     <motion.div
                       initial={{ scale: 1 }}
                       whileHover={{ scale: 1.15 }}
                       transition={{ duration: 0.4 }}
-                      className="relative h-64 overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10"
+                      className="relative h-64 overflow-hidden bg-gradient-to-br from-primary/15 to-accent/15"
                     >
                       <img 
                         src={coord.image} 
@@ -334,18 +365,39 @@ export default function Home() {
                       <motion.div 
                         initial={{ opacity: 0 }}
                         whileHover={{ opacity: 1 }}
-                        className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"
+                        className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"
+                      />
+                      {/* Electric Glow on Hover */}
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        whileHover={{ opacity: 0.8 }}
+                        className="absolute inset-0 bg-radial-gradient from-primary/40 to-transparent"
                       />
                     </motion.div>
-                    <div className="p-8 text-center">
-                      <h3 className="text-2xl font-bold mb-2">{coord.name}</h3>
+                    
+                    <div className="p-8 text-center relative">
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                      >
+                        <h3 className="text-2xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">{coord.name}</h3>
+                      </motion.div>
+                      
                       <motion.div
                         initial={{ scaleX: 0 }}
                         whileHover={{ scaleX: 1 }}
-                        className="h-1 w-12 bg-gradient-to-r from-primary to-accent mx-auto rounded-full mb-3 origin-center"
+                        className="h-1.5 w-14 bg-gradient-to-r from-primary via-secondary to-accent mx-auto rounded-full mb-4 origin-center shadow-lg shadow-primary/50"
                       />
-                      <p className="text-base text-primary font-medium mb-1">{coord.role}</p>
-                      <p className="text-sm text-muted-foreground">{coord.dept}</p>
+                      
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        transition={{ delay: i * 0.1 + 0.1 }}
+                      >
+                        <p className="text-base bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-semibold mb-1">{coord.role}</p>
+                        <p className="text-sm text-muted-foreground font-medium">{coord.dept}</p>
+                      </motion.div>
                     </div>
                   </motion.div>
                 </motion.div>
@@ -506,20 +558,29 @@ export default function Home() {
                   whileHover="hover"
                   className="relative group"
                 >
+                  {/* Electrical Pulse Background */}
                   <motion.div
                     initial={{ opacity: 0 }}
                     whileHover={{ opacity: 1 }}
-                    className={`absolute inset-0 rounded-3xl blur-2xl ${i === 0 ? 'bg-gradient-to-r from-secondary/20 to-primary/20' : 'bg-gradient-to-r from-accent/20 to-primary/20'}`}
+                    className={`absolute inset-0 rounded-3xl blur-3xl ${i === 0 ? 'bg-gradient-to-r from-secondary/35 to-primary/35' : 'bg-gradient-to-r from-accent/35 to-primary/35'}`}
+                    style={{ animation: "electrical-pulse 2s ease-in-out infinite" }}
                   />
+                  
+                  {/* Main Card with Lightning Border */}
                   <motion.div
-                    whileHover={{ y: -8 }}
-                    className="relative h-full rounded-3xl overflow-hidden bg-white/5 border border-white/10 hover:border-primary/50 transition-all backdrop-blur"
+                    whileHover={{ y: -12, scale: 1.02 }}
+                    transition={{ duration: 0.3 }}
+                    className={`relative h-full rounded-3xl overflow-hidden bg-gradient-to-br from-white/8 to-white/3 border-2 transition-all backdrop-blur-xl shadow-2xl ${i === 0 ? 'border-secondary/30 hover:border-secondary/70' : 'border-accent/30 hover:border-accent/70'}`}
                   >
+                    {/* Top Lightning Line */}
+                    <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity`} />
+                    
+                    {/* Image Section */}
                     <motion.div
                       initial={{ scale: 1 }}
                       whileHover={{ scale: 1.15 }}
                       transition={{ duration: 0.4 }}
-                      className={`relative h-64 overflow-hidden ${i === 0 ? 'bg-gradient-to-br from-secondary/10 to-primary/10' : 'bg-gradient-to-br from-accent/10 to-primary/10'}`}
+                      className={`relative h-64 overflow-hidden ${i === 0 ? 'bg-gradient-to-br from-secondary/15 to-primary/15' : 'bg-gradient-to-br from-accent/15 to-primary/15'}`}
                     >
                       <img 
                         src={dev.image} 
@@ -529,24 +590,47 @@ export default function Home() {
                       <motion.div 
                         initial={{ opacity: 0 }}
                         whileHover={{ opacity: 1 }}
-                        className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"
+                        className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"
+                      />
+                      {/* Electric Glow Effect */}
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        whileHover={{ opacity: 0.8 }}
+                        className="absolute inset-0 bg-radial-gradient from-primary/40 to-transparent"
                       />
                     </motion.div>
-                    <div className="p-8 text-center">
+                    
+                    <div className="p-8 text-center relative">
                       <motion.div
-                        initial={{ opacity: 0, y: -10 }}
+                        initial={{ opacity: 0, y: 10 }}
                         whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
                         className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-3 ${i === 0 ? 'bg-secondary/20 text-secondary' : 'bg-accent/20 text-accent'}`}
                       >
                         {i === 0 ? 'SENIOR' : 'JUNIOR'}
                       </motion.div>
-                      <h3 className="text-2xl font-bold text-center mb-2">{dev.name}</h3>
+                      
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 + 0.05 }}
+                      >
+                        <h3 className={`text-2xl font-bold text-center mb-3 text-transparent bg-clip-text bg-gradient-to-r ${i === 0 ? 'from-secondary to-primary' : 'from-accent to-primary'}`}>{dev.name}</h3>
+                      </motion.div>
+                      
                       <motion.div
                         initial={{ scaleX: 0 }}
                         whileHover={{ scaleX: 1 }}
-                        className={`h-1 w-12 mx-auto rounded-full mb-3 origin-center ${i === 0 ? 'bg-gradient-to-r from-secondary to-primary' : 'bg-gradient-to-r from-accent to-primary'}`}
+                        className={`h-1.5 w-14 mx-auto rounded-full mb-4 origin-center shadow-lg transition-all ${i === 0 ? 'bg-gradient-to-r from-secondary to-primary shadow-secondary/50' : 'bg-gradient-to-r from-accent to-primary shadow-accent/50'}`}
                       />
-                      <p className={`text-base font-medium text-center ${i === 0 ? 'text-secondary' : 'text-accent'}`}>{dev.role}</p>
+                      
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        transition={{ delay: i * 0.1 + 0.1 }}
+                      >
+                        <p className={`text-base font-semibold text-center text-transparent bg-clip-text bg-gradient-to-r ${i === 0 ? 'from-secondary to-primary' : 'from-accent to-primary'}`}>{dev.role}</p>
+                      </motion.div>
                     </div>
                   </motion.div>
                 </motion.div>

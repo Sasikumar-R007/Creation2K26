@@ -199,6 +199,107 @@
   }
 }
 
+@keyframes letter-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+    text-shadow: 0 0 0 rgba(168, 85, 247, 0);
+  }
+  50% {
+    text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    text-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+  }
+}
+
+@keyframes lightning-strike {
+  0%, 100% {
+    opacity: 0;
+    transform: scaleY(1);
+  }
+  5% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  10% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 0;
+  }
+}
+
+@keyframes electrical-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.3), inset 0 0 20px rgba(168, 85, 247, 0.1);
+    border-color: rgba(168, 85, 247, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.8), inset 0 0 30px rgba(168, 85, 247, 0.3), 0 0 60px rgba(168, 85, 247, 0.4);
+    border-color: rgba(59, 130, 246, 0.8);
+  }
+}
+
+@keyframes card-lightning {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes tech-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  25% {
+    transform: translateY(-10px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  75% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes rotating-border {
+  0% {
+    border-color: rgba(168, 85, 247, 0.3);
+  }
+  25% {
+    border-color: rgba(59, 130, 246, 0.6);
+  }
+  50% {
+    border-color: rgba(139, 92, 246, 0.8);
+  }
+  75% {
+    border-color: rgba(59, 130, 246, 0.6);
+  }
+  100% {
+    border-color: rgba(168, 85, 247, 0.3);
+  }
+}
+
+@keyframes animated-gradient-bg {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 @layer utilities {
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-secondary;
@@ -265,6 +366,35 @@
   .background-drift {
     background-size: 200% 200%;
     animation: background-drift 8s ease-in-out infinite;
+  }
+
+  .letter-reveal {
+    animation: letter-reveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .electrical-pulse {
+    animation: electrical-pulse 2s ease-in-out infinite;
+  }
+
+  .lightning-strike {
+    animation: lightning-strike 0.3s ease-in-out;
+  }
+
+  .card-lightning {
+    animation: card-lightning 3s ease-in-out infinite;
+  }
+
+  .tech-float {
+    animation: tech-float 4s ease-in-out infinite;
+  }
+
+  .rotating-border {
+    animation: rotating-border 4s ease-in-out infinite;
+  }
+
+  .animated-gradient-bg {
+    background-size: 200% 200%;
+    animation: animated-gradient-bg 8s ease-in-out infinite;
   }
 }
 
