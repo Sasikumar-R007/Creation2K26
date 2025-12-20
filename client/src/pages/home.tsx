@@ -3,8 +3,9 @@ import { ParticlesBackground } from "@/components/particles-background";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, Cpu, Globe, Users, Award, Zap, Code, Palette, Briefcase, GraduationCap, Github, Linkedin, Mail } from "lucide-react";
+import { ArrowRight, Cpu, Globe, Users, Award, Zap, Code, Palette, Briefcase, GraduationCap, Github, Linkedin, Mail, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useState } from "react";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -34,26 +35,36 @@ const statVariants = {
 };
 
 export default function Home() {
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
+
   const coordinators = [
-    { name: "Dr. Rahul Kumar", role: "Chief Coordinator", dept: "CSE" },
-    { name: "Prof. Anita Singh", role: "Faculty Lead", dept: "IT" },
-    { name: "Priya Sharma", role: "Event Manager", dept: "CSE" },
-    { name: "Arjun Patel", role: "Technical Lead", dept: "IT" }
+    { name: "Dr. Rahul Kumar", role: "Chief Coordinator", dept: "BCA", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" },
+    { name: "Prof. Anita Singh", role: "Faculty Lead", dept: "BCA", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop" },
+    { name: "Priya Sharma", role: "Event Manager", dept: "BCA", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop" },
+    { name: "Arjun Patel", role: "Technical Lead", dept: "BCA", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop" }
   ];
 
   const developers = [
-    { name: "Aditya Verma", role: "Full Stack Developer", github: "#", linkedin: "#" },
-    { name: "Sneha Gupta", role: "UI/UX Designer", github: "#", linkedin: "#" },
-    { name: "Rohan Mishra", role: "Backend Developer", github: "#", linkedin: "#" }
+    { name: "Aditya Verma", role: "Full Stack Developer", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" },
+    { name: "Sneha Gupta", role: "UI/UX Designer", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop" },
+    { name: "Rohan Mishra", role: "Backend Developer", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop" }
   ];
 
-  const feesStructure = [
-    { event: "Hackathon", fee: 500, discount: "20% for teams" },
-    { event: "Web Development", fee: 250, discount: "15% early bird" },
-    { event: "AI/ML Challenge", fee: 350, discount: "No discount" },
-    { event: "Gaming Tournament", fee: 200, discount: "10% group" },
-    { event: "Technical Events Avg", fee: 300, discount: "Combined ticket" },
-    { event: "Non-Technical Events", fee: 150, discount: "Combined ticket" }
+  const plans = [
+    {
+      title: "Individual Pass",
+      price: "$49",
+      description: "Single event registration",
+      features: ["Register for 1 event", "Access to event venue", "Digital certificate", "Networking badge"],
+      popular: false
+    },
+    {
+      title: "All Access Pass",
+      price: "$149",
+      description: "Attend all events",
+      features: ["Unlimited event registration", "VIP access to all venues", "Premium digital certificate", "Exclusive networking sessions", "Merchandise kit", "Priority support"],
+      popular: true
+    }
   ];
 
   return (
@@ -61,6 +72,7 @@ export default function Home() {
       {/* ========== HERO SECTION ========== */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <ParticlesBackground />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -76,10 +88,19 @@ export default function Home() {
               MARCH 8, 2026
             </motion.div>
 
-            <h1 className="text-6xl md:text-8xl font-display font-bold leading-tight mb-6">
-              <span className="block text-white">Creation</span>
-              <span className="text-gradient text-7xl md:text-8xl">2K26</span>
-            </h1>
+            {/* Thunder Strike Animated Name */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="mb-8"
+            >
+              <h1 className="text-7xl md:text-9xl font-black thunder-strike leading-none tracking-tighter" style={{fontFamily: "'Space Grotesk', sans-serif"}}>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
+                  Creation 2K26
+                </span>
+              </h1>
+            </motion.div>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl mx-auto font-light leading-relaxed">
               The Ultimate National Symposium showcasing innovation, creativity, and technical excellence. 
@@ -124,7 +145,7 @@ export default function Home() {
                     animate="visible"
                     variants={statVariants}
                     whileHover={{ scale: 1.1, rotate: 2 }}
-                    className="p-6 rounded-xl bg-white/5 border border-white/10 hover:border-primary/50 transition-colors cursor-pointer"
+                    className="p-6 rounded-xl bg-white/5 border border-white/10 hover:border-primary/50 transition-colors cursor-pointer card-hover-glow"
                   >
                     <stat.icon className={`w-8 h-8 ${stat.color} mb-3 mx-auto`} />
                     <div className="text-3xl font-bold font-mono mb-1">{stat.value}</div>
@@ -212,10 +233,10 @@ export default function Home() {
             className="grid md:grid-cols-2 gap-12 items-center"
           >
             <div>
-              <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">About the Department</h2>
+              <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">Bachelor of Computer Applications</h2>
               <div className="h-1 w-16 bg-gradient-to-r from-primary to-accent rounded-full mb-8" />
               <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                Our department stands at the forefront of technological innovation and academic excellence. 
+                Our BCA department stands at the forefront of technological innovation and academic excellence. 
                 With state-of-the-art laboratories, experienced faculty, and a vibrant community of students, 
                 we foster an environment where ideas transform into groundbreaking solutions.
               </p>
@@ -251,7 +272,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-accent/20 rounded-3xl blur-3xl" />
               <Card className="relative p-8 bg-white/5 border-white/10">
                 <GraduationCap className="w-16 h-16 text-secondary mb-6" />
-                <h3 className="text-2xl font-bold mb-4">Computer Science & IT</h3>
+                <h3 className="text-2xl font-bold mb-4">BCA Program</h3>
                 <p className="text-muted-foreground">
                   Leading the digital revolution through cutting-edge research, 
                   quality education, and industry collaboration.
@@ -292,14 +313,26 @@ export default function Home() {
                   variants={cardHoverVariants}
                   initial="initial"
                   whileHover="hover"
-                  className="p-6 rounded-xl bg-white/5 border border-white/10 hover:border-primary/50 transition-colors text-center"
+                  className="h-full rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/2 border border-white/10 hover:border-primary/50 transition-colors group"
                 >
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center mx-auto mb-4">
-                    <Users className="w-8 h-8 text-primary" />
+                  <motion.div
+                    initial={{ scale: 1 }}
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 0.3 }}
+                    className="relative h-48 overflow-hidden"
+                  >
+                    <img 
+                      src={coord.image} 
+                      alt={coord.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  </motion.div>
+                  <div className="p-6 text-center">
+                    <h3 className="text-lg font-bold mb-1">{coord.name}</h3>
+                    <p className="text-sm text-primary font-medium mb-2">{coord.role}</p>
+                    <p className="text-xs text-muted-foreground">{coord.dept}</p>
                   </div>
-                  <h3 className="text-lg font-bold mb-1">{coord.name}</h3>
-                  <p className="text-sm text-primary font-medium mb-2">{coord.role}</p>
-                  <p className="text-xs text-muted-foreground">{coord.dept}</p>
                 </motion.div>
               </motion.div>
             ))}
@@ -366,7 +399,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ========== FEES STRUCTURE ========== */}
+      {/* ========== FEES STRUCTURE (with Modal) ========== */}
       <section className="py-24 bg-gradient-to-b from-black/20 to-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -376,10 +409,10 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-display font-bold mb-4">Fees Structure</h2>
+            <h2 className="text-4xl md:text-5xl font-display font-bold mb-4">Pricing Plans</h2>
             <div className="h-1 w-20 bg-gradient-to-r from-primary to-accent mx-auto rounded-full mb-8" />
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Affordable participation with exciting offers and discounts
+              Choose the perfect plan for your symposium experience
             </p>
           </motion.div>
 
@@ -388,26 +421,41 @@ export default function Home() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="overflow-x-auto"
+            className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto"
           >
-            <div className="inline-block min-w-full">
-              <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {feesStructure.map((item, i) => (
-                  <motion.div key={i} variants={itemVariants}>
-                    <motion.div
-                      whileHover={{ scale: 1.05, y: -5 }}
-                      className="p-6 rounded-xl bg-gradient-to-br from-white/5 to-white/2 border border-white/10 hover:border-primary/50 transition-colors text-center cursor-pointer group"
-                    >
-                      <h3 className="font-bold mb-3 text-sm">{item.event}</h3>
-                      <div className="text-3xl font-mono font-bold text-primary mb-3 group-hover:text-accent transition-colors">
-                        ${item.fee}
+            {plans.map((plan, i) => (
+              <motion.div key={i} variants={itemVariants}>
+                <motion.div
+                  whileHover={{ scale: 1.05, y: -10 }}
+                  onClick={() => setSelectedPlan(plan)}
+                  className={`p-8 rounded-2xl border-2 transition-all cursor-pointer ${
+                    plan.popular
+                      ? "bg-gradient-to-br from-primary/20 to-accent/10 border-primary/50"
+                      : "bg-gradient-to-br from-white/5 to-white/2 border-white/10 hover:border-primary/30"
+                  }`}
+                >
+                  {plan.popular && (
+                    <div className="inline-block px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold mb-4">
+                      POPULAR
+                    </div>
+                  )}
+                  <h3 className="text-2xl font-bold mb-2">{plan.title}</h3>
+                  <p className="text-muted-foreground mb-6">{plan.description}</p>
+                  <div className="text-5xl font-bold text-primary mb-6">{plan.price}</div>
+                  <Button className="w-full mb-6" onClick={() => setSelectedPlan(plan)}>
+                    Learn More
+                  </Button>
+                  <div className="space-y-3">
+                    {plan.features.map((feature, j) => (
+                      <div key={j} className="flex items-center gap-2 text-sm">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                        <span>{feature}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{item.discount}</p>
-                    </motion.div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
+                    ))}
+                  </div>
+                </motion.div>
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </section>
@@ -442,38 +490,50 @@ export default function Home() {
                   variants={cardHoverVariants}
                   initial="initial"
                   whileHover="hover"
-                  className="p-8 rounded-2xl bg-gradient-to-br from-white/5 to-white/2 border border-white/10 hover:border-primary/50 transition-colors group"
+                  className="h-full rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/2 border border-white/10 hover:border-primary/50 transition-colors group"
                 >
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center mx-auto mb-6 group-hover:from-primary/60 group-hover:to-accent/60 transition-colors">
-                    <Code className="w-8 h-8 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-bold text-center mb-2">{dev.name}</h3>
-                  <p className="text-sm text-primary text-center font-medium mb-6">{dev.role}</p>
-                  <div className="flex justify-center gap-4">
-                    <motion.a
-                      href={dev.github}
-                      whileHover={{ scale: 1.2, rotate: 10 }}
-                      className="p-2 rounded-lg bg-white/5 hover:bg-primary/20 transition-colors"
-                      data-testid={`link-github-${i}`}
-                    >
-                      <Github className="w-5 h-5 text-foreground" />
-                    </motion.a>
-                    <motion.a
-                      href={dev.linkedin}
-                      whileHover={{ scale: 1.2, rotate: 10 }}
-                      className="p-2 rounded-lg bg-white/5 hover:bg-primary/20 transition-colors"
-                      data-testid={`link-linkedin-${i}`}
-                    >
-                      <Linkedin className="w-5 h-5 text-foreground" />
-                    </motion.a>
-                    <motion.a
-                      href={`mailto:${dev.name.toLowerCase().replace(" ", ".")}@example.com`}
-                      whileHover={{ scale: 1.2, rotate: 10 }}
-                      className="p-2 rounded-lg bg-white/5 hover:bg-primary/20 transition-colors"
-                      data-testid={`link-email-${i}`}
-                    >
-                      <Mail className="w-5 h-5 text-foreground" />
-                    </motion.a>
+                  <motion.div
+                    initial={{ scale: 1 }}
+                    whileHover={{ scale: 1.15 }}
+                    transition={{ duration: 0.3 }}
+                    className="relative h-56 overflow-hidden"
+                  >
+                    <img 
+                      src={dev.image} 
+                      alt={dev.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                  </motion.div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-center mb-2">{dev.name}</h3>
+                    <p className="text-sm text-primary text-center font-medium mb-6">{dev.role}</p>
+                    <div className="flex justify-center gap-4">
+                      <motion.a
+                        href="#"
+                        whileHover={{ scale: 1.2, rotate: 10 }}
+                        className="p-2 rounded-lg bg-white/5 hover:bg-primary/20 transition-colors"
+                        data-testid={`link-github-${i}`}
+                      >
+                        <Github className="w-5 h-5 text-foreground" />
+                      </motion.a>
+                      <motion.a
+                        href="#"
+                        whileHover={{ scale: 1.2, rotate: 10 }}
+                        className="p-2 rounded-lg bg-white/5 hover:bg-primary/20 transition-colors"
+                        data-testid={`link-linkedin-${i}`}
+                      >
+                        <Linkedin className="w-5 h-5 text-foreground" />
+                      </motion.a>
+                      <motion.a
+                        href="#"
+                        whileHover={{ scale: 1.2, rotate: 10 }}
+                        className="p-2 rounded-lg bg-white/5 hover:bg-primary/20 transition-colors"
+                        data-testid={`link-email-${i}`}
+                      >
+                        <Mail className="w-5 h-5 text-foreground" />
+                      </motion.a>
+                    </div>
                   </div>
                 </motion.div>
               </motion.div>
@@ -519,6 +579,65 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+      {/* ========== PLAN MODAL ========== */}
+      {selectedPlan && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setSelectedPlan(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+        >
+          <motion.div
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 20 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-card rounded-2xl border border-white/10 p-8 max-w-lg w-full shadow-2xl"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-3xl font-bold">{selectedPlan.title}</h3>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setSelectedPlan(null)}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                data-testid="button-close-modal"
+              >
+                <X className="w-6 h-6" />
+              </motion.button>
+            </div>
+            <div className="text-5xl font-bold text-primary mb-2">{selectedPlan.price}</div>
+            <p className="text-muted-foreground mb-8">{selectedPlan.description}</p>
+            <div className="space-y-4 mb-8">
+              {selectedPlan.features.map((feature: string, i: number) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="flex items-center gap-3"
+                >
+                  <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                  <span>{feature}</span>
+                </motion.div>
+              ))}
+            </div>
+            <Button size="lg" className="w-full bg-gradient-to-r from-primary to-accent mb-4">
+              Get Started
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full"
+              onClick={() => setSelectedPlan(null)}
+            >
+              Close
+            </Button>
+          </motion.div>
+        </motion.div>
+      )}
     </Layout>
   );
 }
