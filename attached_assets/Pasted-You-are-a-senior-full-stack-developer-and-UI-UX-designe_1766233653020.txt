@@ -1,0 +1,122 @@
+You are a senior full-stack developer and UI/UX designer.
+
+Build a modern, tech-themed symposium website with a public site + a secure management portal for coordinators.
+
+TECH STACK:
+- Frontend: React + Vite
+- Styling: Tailwind CSS (dark theme, neon/tech accents)
+- Animations: Framer Motion
+- Backend: Node.js + Express
+- Database: PostgreSQL (or SQLite for demo)
+- Auth: Email + Password (role-based)
+- Deployment ready (Vercel / Render compatible)
+
+====================================
+PUBLIC WEBSITE (STUDENT VIEW)
+====================================
+
+1. Landing Page
+- Hero section with symposium name, tagline, date, venue
+- Animated background (tech particles / gradients)
+- CTA buttons: Register, Events, Schedule
+- Smooth scroll + page transitions
+
+2. About Symposium
+- College intro
+- Symposium theme
+- Vision & objectives
+- Animated cards
+
+3. Events Page
+- Technical Events
+- Non-Technical Events
+- Each event card includes:
+  • Event name
+  • Description
+  • Rules
+  • Team size
+  • Registration fee
+  • Coordinator contact
+- Modal popup with animation
+
+4. Schedule / Timeline
+- Day-wise schedule
+- Animated vertical timeline
+
+5. Speakers / Guests
+- Profile cards with hover animation
+
+6. Registration
+- Online registration form
+- Event selection
+- Auto-generate registration ID
+- Confirmation screen
+
+7. Contact Page
+- Coordinator list
+- Social links
+- Google Map embed
+
+====================================
+COORDINATOR / ADMIN PORTAL
+====================================
+
+Secure Login System:
+- Roles: Super Admin, Event Coordinator, Volunteer
+
+Dashboard:
+- Total registrations
+- Event-wise registrations
+- Live counters (animated)
+
+Event Management:
+- Add / edit / delete events
+- Assign coordinators
+- Update rules & fees
+
+Registration Management:
+- View all registrations
+- Filter by event
+- Export CSV
+- Mark attendance
+
+User Management (Admin only):
+- Create coordinator accounts
+- Assign roles
+
+Announcements:
+- Post updates shown on public site
+- Push notification banner
+
+====================================
+UI / UX REQUIREMENTS
+====================================
+
+- Dark tech theme (black, gray, neon blue/purple)
+- Smooth transitions
+- Hover effects
+- Page animations
+- Mobile responsive
+- Clean typography
+- Modern card layouts
+
+====================================
+EXTRAS
+====================================
+
+- SEO-friendly
+- Loading animations
+- Error handling
+- Protected routes
+- Clean folder structure
+- README with setup instructions
+
+Generate:
+- Full frontend code
+- Backend APIs
+- Database schema
+- Sample dummy data
+- Instructions to run locally
+
+IMPORTANT:
+Code must be clean, scalable, and production-ready.
