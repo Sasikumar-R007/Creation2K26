@@ -208,7 +208,7 @@ async function seedDatabase() {
       rules: "Max 4 members. Bring your own laptop. Use any programming language.",
       teamSize: 4,
       fee: 500,
-      date: new Date("2025-05-20T09:00:00"),
+      date: new Date("2026-03-08T09:00:00"),
       venue: "Main Auditorium",
       imageUrl: "https://images.unsplash.com/photo-1504384308090-c54be3855091",
     });
@@ -220,7 +220,7 @@ async function seedDatabase() {
       rules: "Weight limit 5kg. Autonomous bots only. No flamethrowers.",
       teamSize: 3,
       fee: 300,
-      date: new Date("2025-05-21T10:00:00"),
+      date: new Date("2026-03-08T10:00:00"),
       venue: "Open Ground",
       imageUrl: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e",
     });
@@ -232,7 +232,7 @@ async function seedDatabase() {
       rules: "Teams of 2-3. Use any framework. Must be mobile-responsive.",
       teamSize: 3,
       fee: 250,
-      date: new Date("2025-05-20T14:00:00"),
+      date: new Date("2026-03-08T14:00:00"),
       venue: "Lab 104",
       imageUrl: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97",
     });
@@ -244,7 +244,7 @@ async function seedDatabase() {
       rules: "Teams of 2-4. Datasets provided. Python/R recommended.",
       teamSize: 4,
       fee: 350,
-      date: new Date("2025-05-21T13:00:00"),
+      date: new Date("2026-03-08T13:00:00"),
       venue: "Lab 305",
       imageUrl: "https://images.unsplash.com/photo-1677442d019cecf8978f4147cf10ed9b468f51aea",
     });
@@ -256,7 +256,7 @@ async function seedDatabase() {
       rules: "Teams of 3-5. No physical attacks. Ethical hacking only.",
       teamSize: 5,
       fee: 300,
-      date: new Date("2025-05-22T09:00:00"),
+      date: new Date("2026-03-08T09:00:00"),
       venue: "Lab 202",
       imageUrl: "https://images.unsplash.com/photo-1550355291-bbee04a92027",
     });
@@ -268,7 +268,7 @@ async function seedDatabase() {
       rules: "Teams of 2-3. 8-hour competition.",
       teamSize: 3,
       fee: 300,
-      date: new Date("2025-05-20T16:00:00"),
+      date: new Date("2026-03-08T16:00:00"),
       venue: "Lab 106",
       imageUrl: "https://images.unsplash.com/photo-1512941691920-25bdb7edecc1",
     });
@@ -280,7 +280,7 @@ async function seedDatabase() {
       rules: "Teams of 3. Components provided.",
       teamSize: 3,
       fee: 280,
-      date: new Date("2025-05-21T15:00:00"),
+      date: new Date("2026-03-08T15:00:00"),
       venue: "Lab 401",
       imageUrl: "https://images.unsplash.com/photo-1518432031498-74d440642117",
     });
@@ -293,7 +293,7 @@ async function seedDatabase() {
       rules: "5v5 Valorant. Singles/Doubles FIFA. Knockout format.",
       teamSize: 5,
       fee: 200,
-      date: new Date("2025-05-21T14:00:00"),
+      date: new Date("2026-03-08T14:00:00"),
       venue: "Lab 204",
       imageUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e",
     });
@@ -305,7 +305,7 @@ async function seedDatabase() {
       rules: "Teams of 3. 15 min prep, 30 min debate.",
       teamSize: 3,
       fee: 100,
-      date: new Date("2025-05-22T10:00:00"),
+      date: new Date("2026-03-08T10:00:00"),
       venue: "Auditorium B",
       imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978",
     });
@@ -317,7 +317,7 @@ async function seedDatabase() {
       rules: "Teams of 2. 60 minutes. Multiple rounds.",
       teamSize: 2,
       fee: 80,
-      date: new Date("2025-05-21T11:00:00"),
+      date: new Date("2026-03-08T11:00:00"),
       venue: "Classroom 101",
       imageUrl: "https://images.unsplash.com/photo-1453614512568-c4024d13c247",
     });
@@ -329,7 +329,7 @@ async function seedDatabase() {
       rules: "Teams of 4. Case given on day. 4 hours to present.",
       teamSize: 4,
       fee: 300,
-      date: new Date("2025-05-22T14:00:00"),
+      date: new Date("2026-03-08T14:00:00"),
       venue: "Conference Hall",
       imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978",
     });
@@ -341,7 +341,7 @@ async function seedDatabase() {
       rules: "Individual. Digital or Physical. Judging by design committee.",
       teamSize: 1,
       fee: 150,
-      date: new Date("2025-05-20T11:00:00"),
+      date: new Date("2026-03-08T11:00:00"),
       venue: "Design Studio",
       imageUrl: "https://images.unsplash.com/photo-1561070791-2526d30994b5",
     });
@@ -353,7 +353,7 @@ async function seedDatabase() {
       rules: "Teams of 3-5. 48-hour creation window.",
       teamSize: 5,
       fee: 250,
-      date: new Date("2025-05-22T18:00:00"),
+      date: new Date("2026-03-08T18:00:00"),
       venue: "Auditorium Main",
       imageUrl: "https://images.unsplash.com/photo-1485095329183-d0ddc3500664",
     });
@@ -365,7 +365,7 @@ async function seedDatabase() {
       rules: "Teams of 3-4. 5 min pitch + 5 min Q&A.",
       teamSize: 4,
       fee: 200,
-      date: new Date("2025-05-21T16:00:00"),
+      date: new Date("2026-03-08T16:00:00"),
       venue: "Board Room",
       imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978",
     });
@@ -377,7 +377,7 @@ async function seedDatabase() {
       rules: "Individual. 5 photos max. Theme: Tech & Nature.",
       teamSize: 1,
       fee: 100,
-      date: new Date("2025-05-20T12:00:00"),
+      date: new Date("2026-03-08T12:00:00"),
       venue: "Gallery Space",
       imageUrl: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd",
     });
