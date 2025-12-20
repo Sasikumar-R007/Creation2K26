@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;700;900&family=Audiowide&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,6 +8,8 @@
   --font-body: 'Outfit', sans-serif;
   --font-display: 'Space Grotesk', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+  --font-tech: 'Orbitron', sans-serif;
+  --font-tech-alt: 'Audiowide', sans-serif;
 
   /* Dark Theme Default */
   --background: 230 25% 5%;

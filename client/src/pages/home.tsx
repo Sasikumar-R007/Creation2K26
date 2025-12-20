@@ -89,7 +89,7 @@ export default function Home() {
             <motion.div
               className="mb-8"
             >
-              <h1 className="text-7xl md:text-9xl font-black leading-none tracking-tighter relative" style={{fontFamily: "'Space Grotesk', sans-serif"}}>
+              <h1 className="text-7xl md:text-9xl font-black leading-none tracking-tighter relative" style={{fontFamily: "var(--font-tech)"}}>
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent relative">
                   {"Creation 2K26".split("").map((char, i) => (
                     <motion.span
@@ -103,7 +103,7 @@ export default function Home() {
                       }}
                       className="inline-block"
                       style={{
-                        textShadow: "0 0 20px rgba(168, 85, 247, 0.3)"
+                        textShadow: "0 0 20px rgba(168, 85, 247, 0.3), 0 0 40px rgba(59, 130, 246, 0.2)"
                       }}
                     >
                       {char === " " ? "\u00A0" : char}
