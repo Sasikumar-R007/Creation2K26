@@ -5,12 +5,33 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 
+import Home from "@/pages/home";
+import Events from "@/pages/events";
+import Schedule from "@/pages/schedule";
+import Announcements from "@/pages/announcements";
+
+// Admin Pages
+import AdminLogin from "@/pages/admin/login";
+import AdminDashboard from "@/pages/admin/dashboard";
+import AdminEvents from "@/pages/admin/events";
+import AdminRegistrations from "@/pages/admin/registrations";
+
 function Router() {
   return (
     <Switch>
-      {/* Add pages below */}
-      {/* <Route path="/" component={Home}/> */}
-      {/* Fallback to 404 */}
+      {/* Public Routes */}
+      <Route path="/" component={Home} />
+      <Route path="/events" component={Events} />
+      <Route path="/schedule" component={Schedule} />
+      <Route path="/announcements" component={Announcements} />
+
+      {/* Admin Routes */}
+      <Route path="/admin/login" component={AdminLogin} />
+      <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin/events" component={AdminEvents} />
+      <Route path="/admin/registrations" component={AdminRegistrations} />
+      
+      {/* Fallback */}
       <Route component={NotFound} />
     </Switch>
   );
