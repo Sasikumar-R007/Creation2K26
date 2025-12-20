@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { Menu, X, Calendar, Home, Layers, Bell } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ParticlesBackground } from "@/components/particles-background";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -16,8 +17,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col font-body text-foreground overflow-x-hidden">
-      <nav className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-white/5 h-16">
+    <div className="min-h-screen bg-background flex flex-col font-body text-foreground overflow-x-hidden relative">
+      <ParticlesBackground />
+      <nav className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-white/5 h-16 relative z-[51]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
@@ -75,7 +77,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         )}
       </nav>
 
-      <main className="flex-1 pt-16">
+      <main className="flex-1 pt-16 relative z-10">
         {children}
       </main>
 

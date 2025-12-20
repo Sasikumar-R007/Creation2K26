@@ -39,15 +39,12 @@ export default function Home() {
 
   const coordinators = [
     { name: "Dr. Rahul Kumar", role: "Chief Coordinator", dept: "BCA", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" },
-    { name: "Prof. Anita Singh", role: "Faculty Lead", dept: "BCA", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop" },
-    { name: "Priya Sharma", role: "Event Manager", dept: "BCA", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop" },
-    { name: "Arjun Patel", role: "Technical Lead", dept: "BCA", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop" }
+    { name: "Prof. Anita Singh", role: "Faculty Lead", dept: "BCA", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop" }
   ];
 
   const developers = [
-    { name: "Aditya Verma", role: "Full Stack Developer", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" },
-    { name: "Sneha Gupta", role: "UI/UX Designer", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop" },
-    { name: "Rohan Mishra", role: "Backend Developer", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop" }
+    { name: "Aditya Verma", role: "Senior Developer", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" },
+    { name: "Sneha Gupta", role: "Junior Developer", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop" }
   ];
 
   const plans = [
@@ -145,7 +142,7 @@ export default function Home() {
                     animate="visible"
                     variants={statVariants}
                     whileHover={{ scale: 1.1, rotate: 2 }}
-                    className="p-6 rounded-xl bg-white/5 border border-white/10 hover:border-primary/50 transition-colors cursor-pointer card-hover-glow"
+                    className="p-6 rounded-xl bg-white/3 border border-white/15 hover:border-primary/40 transition-colors cursor-pointer"
                   >
                     <stat.icon className={`w-8 h-8 ${stat.color} mb-3 mx-auto`} />
                     <div className="text-3xl font-bold font-mono mb-1">{stat.value}</div>
@@ -305,34 +302,52 @@ export default function Home() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+            className="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto"
           >
             {coordinators.map((coord, i) => (
               <motion.div key={i} variants={itemVariants}>
                 <motion.div
-                  variants={cardHoverVariants}
                   initial="initial"
                   whileHover="hover"
-                  className="h-full rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/2 border border-white/10 hover:border-primary/50 transition-colors group"
+                  className="relative group"
                 >
                   <motion.div
-                    initial={{ scale: 1 }}
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.3 }}
-                    className="relative h-48 overflow-hidden"
+                    initial={{ opacity: 0 }}
+                    whileHover={{ opacity: 1 }}
+                    className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-2xl"
+                  />
+                  <motion.div
+                    whileHover={{ y: -8 }}
+                    className="relative h-full rounded-3xl overflow-hidden bg-white/5 border border-white/10 hover:border-primary/50 transition-all backdrop-blur"
                   >
-                    <img 
-                      src={coord.image} 
-                      alt={coord.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <motion.div
+                      initial={{ scale: 1 }}
+                      whileHover={{ scale: 1.15 }}
+                      transition={{ duration: 0.4 }}
+                      className="relative h-64 overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10"
+                    >
+                      <img 
+                        src={coord.image} 
+                        alt={coord.name}
+                        className="w-full h-full object-cover"
+                      />
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        whileHover={{ opacity: 1 }}
+                        className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"
+                      />
+                    </motion.div>
+                    <div className="p-8 text-center">
+                      <h3 className="text-2xl font-bold mb-2">{coord.name}</h3>
+                      <motion.div
+                        initial={{ scaleX: 0 }}
+                        whileHover={{ scaleX: 1 }}
+                        className="h-1 w-12 bg-gradient-to-r from-primary to-accent mx-auto rounded-full mb-3 origin-center"
+                      />
+                      <p className="text-base text-primary font-medium mb-1">{coord.role}</p>
+                      <p className="text-sm text-muted-foreground">{coord.dept}</p>
+                    </div>
                   </motion.div>
-                  <div className="p-6 text-center">
-                    <h3 className="text-lg font-bold mb-1">{coord.name}</h3>
-                    <p className="text-sm text-primary font-medium mb-2">{coord.role}</p>
-                    <p className="text-xs text-muted-foreground">{coord.dept}</p>
-                  </div>
                 </motion.div>
               </motion.div>
             ))}
@@ -482,57 +497,56 @@ export default function Home() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid md:grid-cols-3 gap-8"
+            className="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto"
           >
             {developers.map((dev, i) => (
               <motion.div key={i} variants={itemVariants}>
                 <motion.div
-                  variants={cardHoverVariants}
                   initial="initial"
                   whileHover="hover"
-                  className="h-full rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/2 border border-white/10 hover:border-primary/50 transition-colors group"
+                  className="relative group"
                 >
                   <motion.div
-                    initial={{ scale: 1 }}
-                    whileHover={{ scale: 1.15 }}
-                    transition={{ duration: 0.3 }}
-                    className="relative h-56 overflow-hidden"
+                    initial={{ opacity: 0 }}
+                    whileHover={{ opacity: 1 }}
+                    className={`absolute inset-0 rounded-3xl blur-2xl ${i === 0 ? 'bg-gradient-to-r from-secondary/20 to-primary/20' : 'bg-gradient-to-r from-accent/20 to-primary/20'}`}
+                  />
+                  <motion.div
+                    whileHover={{ y: -8 }}
+                    className="relative h-full rounded-3xl overflow-hidden bg-white/5 border border-white/10 hover:border-primary/50 transition-all backdrop-blur"
                   >
-                    <img 
-                      src={dev.image} 
-                      alt={dev.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                  </motion.div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-center mb-2">{dev.name}</h3>
-                    <p className="text-sm text-primary text-center font-medium mb-6">{dev.role}</p>
-                    <div className="flex justify-center gap-4">
-                      <motion.a
-                        href="#"
-                        whileHover={{ scale: 1.2, rotate: 10 }}
-                        className="p-2 rounded-lg bg-white/5 hover:bg-primary/20 transition-colors"
-                        data-testid={`link-github-${i}`}
+                    <motion.div
+                      initial={{ scale: 1 }}
+                      whileHover={{ scale: 1.15 }}
+                      transition={{ duration: 0.4 }}
+                      className={`relative h-64 overflow-hidden ${i === 0 ? 'bg-gradient-to-br from-secondary/10 to-primary/10' : 'bg-gradient-to-br from-accent/10 to-primary/10'}`}
+                    >
+                      <img 
+                        src={dev.image} 
+                        alt={dev.name}
+                        className="w-full h-full object-cover"
+                      />
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        whileHover={{ opacity: 1 }}
+                        className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"
+                      />
+                    </motion.div>
+                    <div className="p-8 text-center">
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-3 ${i === 0 ? 'bg-secondary/20 text-secondary' : 'bg-accent/20 text-accent'}`}
                       >
-                        <Github className="w-5 h-5 text-foreground" />
-                      </motion.a>
-                      <motion.a
-                        href="#"
-                        whileHover={{ scale: 1.2, rotate: 10 }}
-                        className="p-2 rounded-lg bg-white/5 hover:bg-primary/20 transition-colors"
-                        data-testid={`link-linkedin-${i}`}
-                      >
-                        <Linkedin className="w-5 h-5 text-foreground" />
-                      </motion.a>
-                      <motion.a
-                        href="#"
-                        whileHover={{ scale: 1.2, rotate: 10 }}
-                        className="p-2 rounded-lg bg-white/5 hover:bg-primary/20 transition-colors"
-                        data-testid={`link-email-${i}`}
-                      >
-                        <Mail className="w-5 h-5 text-foreground" />
-                      </motion.a>
+                        {i === 0 ? 'SENIOR' : 'JUNIOR'}
+                      </motion.div>
+                      <h3 className="text-2xl font-bold text-center mb-2">{dev.name}</h3>
+                      <motion.div
+                        initial={{ scaleX: 0 }}
+                        whileHover={{ scaleX: 1 }}
+                        className={`h-1 w-12 mx-auto rounded-full mb-3 origin-center ${i === 0 ? 'bg-gradient-to-r from-secondary to-primary' : 'bg-gradient-to-r from-accent to-primary'}`}
+                      />
+                      <p className={`text-base font-medium text-center ${i === 0 ? 'text-secondary' : 'text-accent'}`}>{dev.role}</p>
                     </div>
                   </div>
                 </motion.div>

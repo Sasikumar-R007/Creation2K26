@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Calendar, Users, IndianRupee } from "lucide-react";
+import { Loader2, Calendar, Users, IndianRupee, Download, FileText } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -150,7 +150,7 @@ function EventCard({ event }: { event: any }) {
           </div>
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex-col gap-3">
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
             <Button className="w-full bg-white/5 hover:bg-primary hover:text-white border border-white/10 transition-colors">
@@ -183,8 +183,18 @@ function EventCard({ event }: { event: any }) {
                     </div>
                   </div>
 
-                  <div className="border-t border-white/10 pt-6">
-                    <h3 className="text-xl font-bold mb-4">Registration</h3>
+                  <div className="border-t border-white/10 pt-6 space-y-4">
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" className="flex-1 gap-2">
+                        <Download className="w-4 h-4" />
+                        Brochure
+                      </Button>
+                      <Button variant="outline" size="sm" className="flex-1 gap-2">
+                        <FileText className="w-4 h-4" />
+                        Poster
+                      </Button>
+                    </div>
+                    <h3 className="text-xl font-bold">Registration</h3>
                     <Form {...form}>
                       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

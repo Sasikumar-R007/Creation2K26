@@ -1,7 +1,9 @@
 import { Layout } from "@/components/layout";
 import { useEvents } from "@/hooks/use-events";
 import { format } from "date-fns";
-import { Loader2, Calendar as CalendarIcon, MapPin, Clock } from "lucide-react";
+import { Loader2, Calendar as CalendarIcon, MapPin, Clock, Download, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 export default function Schedule() {
   const { data: events, isLoading } = useEvents();
@@ -30,9 +32,25 @@ export default function Schedule() {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-4xl font-display font-bold mb-12 text-center">
-          Event <span className="text-gradient">Timeline</span>
-        </h1>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-12"
+        >
+          <h1 className="text-4xl font-display font-bold mb-6 text-center">
+            Event <span className="text-gradient">Timeline</span>
+          </h1>
+          <div className="flex gap-3 justify-center">
+            <Button variant="outline" size="sm" className="gap-2">
+              <Download className="w-4 h-4" />
+              Brochure
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2">
+              <FileText className="w-4 h-4" />
+              Poster
+            </Button>
+          </div>
+        </motion.div>
 
         <div className="space-y-16">
           {Object.entries(groupedEvents || {}).map(([date, dayEvents]) => (
