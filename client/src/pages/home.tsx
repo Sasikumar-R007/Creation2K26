@@ -548,7 +548,7 @@ export default function Home() {
                       />
                       <p className={`text-base font-medium text-center ${i === 0 ? 'text-secondary' : 'text-accent'}`}>{dev.role}</p>
                     </div>
-                  </div>
+                  </motion.div>
                 </motion.div>
               </motion.div>
             ))}
