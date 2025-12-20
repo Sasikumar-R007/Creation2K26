@@ -157,8 +157,8 @@ function EventCard({ event }: { event: any }) {
               View Details & Register
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0">
-             <ScrollArea className="max-h-[85vh] p-6">
+          <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
+             <ScrollArea className="flex-1 overflow-hidden p-6">
                 <DialogHeader className="mb-6">
                   <DialogTitle className="text-2xl font-display">{event.title}</DialogTitle>
                   <DialogDescription className="text-base mt-2">{event.description}</DialogDescription>
