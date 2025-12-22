@@ -21,6 +21,12 @@ import { format } from "date-fns";
 // Schema for registration form, coercing numeric fields
 const registrationFormSchema = insertRegistrationSchema.extend({
   eventId: z.coerce.number(),
+  studentName: z.string().min(1, "Name is required"),
+  studentEmail: z.string().email("Invalid email address").min(1, "Email is required"),
+  mobile: z.string().min(10, "Mobile number must be at least 10 digits").min(1, "Mobile number is required"),
+  year: z.string().min(1, "Year is required"),
+  course: z.string().min(1, "Course is required"),
+  college: z.string().min(1, "College is required"),
 });
 
 type RegistrationFormValues = z.infer<typeof registrationFormSchema>;
@@ -39,7 +45,7 @@ export default function Events() {
     );
   }
 
-  const filteredEvents = events?.filter(event => 
+  const filteredEvents = events?.filter(event =>
     selectedCategory === "all" ? true : event.category === selectedCategory
   );
 
@@ -50,11 +56,11 @@ export default function Events() {
           <div>
             <h1 className="text-4xl font-display font-bold mb-4">Event <span className="text-gradient">Catalog</span></h1>
             <p className="text-muted-foreground max-w-xl">
-              Browse through our wide range of technical and non-technical events. 
+              Browse through our wide range of technical and non-technical events.
               Find your passion and register to compete.
             </p>
           </div>
-          
+
           <Tabs defaultValue="all" className="w-full md:w-auto" onValueChange={setSelectedCategory}>
             <TabsList className="bg-white/5 border border-white/10">
               <TabsTrigger value="all">All Events</TabsTrigger>
@@ -69,9 +75,9 @@ export default function Events() {
             <EventCard key={event.id} event={event} />
           ))}
           {filteredEvents?.length === 0 && (
-             <div className="col-span-full text-center py-20 text-muted-foreground">
-               No events found in this category.
-             </div>
+            <div className="col-span-full text-center py-20 text-muted-foreground">
+              No events found in this category.
+            </div>
           )}
         </div>
       </div>
@@ -85,10 +91,14 @@ function EventCard({ event }: { event: any }) {
 
   const form = useForm<RegistrationFormValues>({
     resolver: zodResolver(registrationFormSchema),
+    mode: "onChange",
     defaultValues: {
       eventId: event.id,
       studentName: "",
       studentEmail: "",
+      mobile: "",
+      year: "",
+      course: "",
       college: "",
       teamDetails: event.teamSize > 1 ? [] : null,
     },
@@ -109,15 +119,15 @@ function EventCard({ event }: { event: any }) {
         <div className="h-48 w-full overflow-hidden rounded-t-xl bg-white/5 relative group">
           {/* Use Unsplash image with descriptive comment */}
           {/* event technology background abstract */}
-          <img 
-            src={event.imageUrl} 
-            alt={event.title} 
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+          <img
+            src={event.imageUrl}
+            alt={event.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
           <div className="absolute top-4 right-4">
-             <Badge variant={event.category === 'technical' ? 'default' : 'secondary'}>
-               {event.category}
-             </Badge>
+            <Badge variant={event.category === 'technical' ? 'default' : 'secondary'}>
+              {event.category}
+            </Badge>
           </div>
         </div>
       )}
@@ -126,7 +136,7 @@ function EventCard({ event }: { event: any }) {
           <CardTitle className="font-display text-xl">{event.title}</CardTitle>
           {!event.imageUrl && (
             <Badge variant={event.category === 'technical' ? 'default' : 'secondary'}>
-               {event.category}
+              {event.category}
             </Badge>
           )}
         </div>
@@ -157,24 +167,25 @@ function EventCard({ event }: { event: any }) {
               View Details & Register
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] w-[95vw] md:w-auto flex flex-col p-0 gap-0 overflow-hidden !rounded-lg">
-             <div className="sticky top-0 bg-background z-10 border-b border-white/10 px-6 py-4">
+          <DialogContent className="max-w-3xl w-full flex flex-col p-0 gap-0 overflow-hidden !rounded-lg block">
+            <div className="max-h-[85vh] overflow-y-auto w-full">
+              <div className="sticky top-0 bg-background z-10 border-b border-white/10 px-6 py-4">
                 <DialogHeader className="mb-0">
                   <DialogTitle className="text-2xl font-display">{event.title}</DialogTitle>
                   <DialogDescription className="text-base mt-2">{event.description}</DialogDescription>
                 </DialogHeader>
-             </div>
-             <ScrollArea className="flex-1 h-0 min-h-0 px-6 py-6">
+              </div>
+              <div className="p-6">
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
-                     <div className="p-4 rounded-lg bg-white/5 border border-white/5">
-                        <Label className="text-muted-foreground">Venue</Label>
-                        <p className="font-medium mt-1">{event.venue}</p>
-                     </div>
-                     <div className="p-4 rounded-lg bg-white/5 border border-white/5">
-                        <Label className="text-muted-foreground">Entry Fee</Label>
-                        <p className="font-medium mt-1">₹{event.fee}</p>
-                     </div>
+                    <div className="p-4 rounded-lg bg-white/5 border border-white/5">
+                      <Label className="text-muted-foreground">Venue</Label>
+                      <p className="font-medium mt-1">{event.venue}</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-white/5 border border-white/5">
+                      <Label className="text-muted-foreground">Entry Fee</Label>
+                      <p className="font-medium mt-1">₹{event.fee}</p>
+                    </div>
                   </div>
 
                   <div>
@@ -204,7 +215,7 @@ function EventCard({ event }: { event: any }) {
                             name="studentName"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Full Name</FormLabel>
+                                <FormLabel>Full Name <span className="text-red-500">*</span></FormLabel>
                                 <FormControl>
                                   <Input placeholder="John Doe" {...field} />
                                 </FormControl>
@@ -217,7 +228,7 @@ function EventCard({ event }: { event: any }) {
                             name="studentEmail"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Email</FormLabel>
+                                <FormLabel>Email <span className="text-red-500">*</span></FormLabel>
                                 <FormControl>
                                   <Input placeholder="john@example.com" {...field} />
                                 </FormControl>
@@ -226,13 +237,13 @@ function EventCard({ event }: { event: any }) {
                             )}
                           />
                         </div>
-                        
+
                         <FormField
                           control={form.control}
                           name="college"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>College Name</FormLabel>
+                              <FormLabel>College Name <span className="text-red-500">*</span></FormLabel>
                               <FormControl>
                                 <Input placeholder="University of Technology" {...field} />
                               </FormControl>
@@ -241,21 +252,70 @@ function EventCard({ event }: { event: any }) {
                           )}
                         />
 
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="mobile"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Mobile Number <span className="text-red-500">*</span></FormLabel>
+                                <FormControl>
+                                  <Input placeholder="1234567890" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="course"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Course/Degree <span className="text-red-500">*</span></FormLabel>
+                                <FormControl>
+                                  <Input placeholder="B.Tech" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="year"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Year <span className="text-red-500">*</span></FormLabel>
+                                <FormControl>
+                                  <Input placeholder="3rd Year" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
                         {event.teamSize > 1 && (
                           <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-md">
-                             <p className="text-sm text-yellow-500 mb-2">Team Event ({event.teamSize} members)</p>
-                             <p className="text-xs text-muted-foreground">Please collect team details. You will need to provide them at the venue.</p>
+                            <p className="text-sm text-yellow-500 mb-2">Team Event ({event.teamSize} members)</p>
+                            <p className="text-xs text-muted-foreground">Please collect team details. You will need to provide them at the venue.</p>
                           </div>
                         )}
 
-                        <Button type="submit" className="w-full" disabled={isPending}>
-                          {isPending ? "Registering..." : "Confirm Registration"}
-                        </Button>
+                        <div title={!form.formState.isValid ? "Fill all the fields to Register" : ""}>
+                          <Button
+                            type="submit"
+                            className={`w-full ${!form.formState.isValid ? "cursor-not-allowed opacity-50" : ""}`}
+                            disabled={isPending || !form.formState.isValid}
+                          >
+                            {isPending ? "Registering..." : "Confirm Registration"}
+                          </Button>
+                        </div>
                       </form>
                     </Form>
                   </div>
                 </div>
-             </ScrollArea>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </CardFooter>

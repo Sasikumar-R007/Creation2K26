@@ -72,58 +72,77 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20 relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             className="text-center mb-12"
           >
-            <motion.div
-              className="inline-block px-6 py-2 rounded-full border border-primary/40 bg-gradient-to-r from-primary/20 to-accent/20 text-primary text-sm font-medium mb-8 neon-text"
-              animate={{ boxShadow: ["0 0 10px rgba(168, 85, 247, 0.5)", "0 0 20px rgba(168, 85, 247, 0.8)"] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              MARCH 8, 2026
-            </motion.div>
+            <div className="w-full flex justify-center mb-8">
+              <motion.div
+                className="inline-block px-6 py-2 rounded-full border border-primary/40 bg-gradient-to-r from-primary/20 to-accent/20 text-primary text-sm font-medium neon-text"
+                animate={{ boxShadow: ["0 0 10px rgba(168, 85, 247, 0.5)", "0 0 20px rgba(168, 85, 247, 0.8)"] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                MARCH 8, 2026
+              </motion.div>
+            </div>
 
-            {/* Advanced Letter Formation Animation */}
-            <motion.div
-              className="mb-8"
-            >
-              <h1 className="text-7xl md:text-9xl font-black leading-none tracking-tighter relative" style={{fontFamily: "var(--font-tech)"}}>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent relative">
-                  {"Creation 2K26".split("").map((char, i) => (
-                    <motion.span
-                      key={i}
-                      initial={{ opacity: 0, y: 40 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        duration: 0.6,
-                        delay: 0.3 + (i * 0.05),
-                        ease: "easeOut"
-                      }}
-                      className="inline-block"
-                      style={{
-                        textShadow: "0 0 20px rgba(168, 85, 247, 0.3), 0 0 40px rgba(59, 130, 246, 0.2)"
-                      }}
-                    >
-                      {char === " " ? "\u00A0" : char}
-                    </motion.span>
-                  ))}
+            {/* Hero Animation Container */}
+            <div className="relative mb-12 hero-title-container cursor-default">
+
+              {/* Smoke Effects */}
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={`smoke-${i}`}
+                  className="smoke"
+                  style={{
+                    left: `${20 + Math.random() * 60}%`,
+                    top: `${50 + Math.random() * 40}%`,
+                    width: `${100 + Math.random() * 100}px`,
+                    height: `${100 + Math.random() * 100}px`,
+                    animation: `smoke-rise ${3 + Math.random() * 2}s infinite ${Math.random() * 2}s`
+                  }}
+                />
+              ))}
+
+              {/* Sparks */}
+              {[...Array(12)].map((_, i) => (
+                <div
+                  key={`spark-${i}`}
+                  className="spark"
+                  style={{
+                    left: "50%",
+                    top: "50%",
+                    // @ts-ignore
+                    "--tx": `${(Math.random() - 0.5) * 400}px`,
+                    "--ty": `${(Math.random() - 0.5) * 400}px`,
+                    animation: `spark-fly ${1 + Math.random()}s infinite ${2 + Math.random()}s`
+                  }}
+                />
+              ))}
+
+              {/* Main Title with Thunder Effect */}
+              <h1
+                className="text-7xl md:text-9xl font-black leading-none tracking-tighter relative hero-title-text select-none"
+                style={{ fontFamily: "var(--font-tech)" }}
+              >
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-white to-secondary relative z-10">
+                  CREATION
                 </span>
-                <motion.div
-                  className="absolute inset-0 pointer-events-none"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.8, duration: 0.5 }}
-                >
-                  <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-b from-primary/30 to-transparent rounded-full blur-3xl animate-pulse" />
-                  <div className="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-t from-accent/20 to-transparent rounded-full blur-3xl animate-pulse animation-delay-2000" />
-                </motion.div>
+                <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary via-white to-accent relative z-10">
+                  2K26
+                </span>
+
+                {/* Glitch Overlay */}
+                <span className="glitch-layer text-primary/50 absolute inset-0 blur-[2px]" aria-hidden="true">
+                  CREATION<br />2K26
+                </span>
               </h1>
-            </motion.div>
+            </div>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl mx-auto font-light leading-relaxed">
-              The Ultimate National Symposium showcasing innovation, creativity, and technical excellence. 
+              The Ultimate National Symposium showcasing innovation, creativity, and technical excellence.
               Join hundreds of participants across technical and non-technical events.
             </p>
 
@@ -182,8 +201,8 @@ export default function Home() {
       <section className="py-24 bg-gradient-to-b from-background to-black/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
             className="text-center mb-16"
@@ -191,7 +210,7 @@ export default function Home() {
             <h2 className="text-4xl md:text-5xl font-display font-bold mb-4">About the Symposium</h2>
             <div className="h-1 w-20 bg-gradient-to-r from-primary to-accent mx-auto rounded-full mb-8" />
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Creation 2K26 is a national-level symposium bringing together the brightest minds in technology, 
+              Creation 2K26 is a national-level symposium bringing together the brightest minds in technology,
               innovation, and creativity for a day of intense competition, learning, and networking.
             </p>
           </motion.div>
@@ -256,8 +275,8 @@ export default function Home() {
               <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">Bachelor of Computer Applications</h2>
               <div className="h-1 w-16 bg-gradient-to-r from-primary to-accent rounded-full mb-8" />
               <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                Our BCA department stands at the forefront of technological innovation and academic excellence. 
-                With state-of-the-art laboratories, experienced faculty, and a vibrant community of students, 
+                Our BCA department stands at the forefront of technological innovation and academic excellence.
+                With state-of-the-art laboratories, experienced faculty, and a vibrant community of students,
                 we foster an environment where ideas transform into groundbreaking solutions.
               </p>
               <div className="space-y-4">
@@ -294,7 +313,7 @@ export default function Home() {
                 <GraduationCap className="w-16 h-16 text-secondary mb-6" />
                 <h3 className="text-2xl font-bold mb-4">BCA Program</h3>
                 <p className="text-muted-foreground">
-                  Leading the digital revolution through cutting-edge research, 
+                  Leading the digital revolution through cutting-edge research,
                   quality education, and industry collaboration.
                 </p>
               </Card>
@@ -307,8 +326,8 @@ export default function Home() {
       <section className="py-24 bg-gradient-to-b from-background to-black/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
             className="text-center mb-16"
@@ -341,7 +360,7 @@ export default function Home() {
                     className="absolute inset-0 bg-gradient-to-r from-primary/30 to-accent/30 rounded-3xl blur-3xl"
                     style={{ animation: "electrical-pulse 2s ease-in-out infinite" }}
                   />
-                  
+
                   {/* Main Card Container */}
                   <motion.div
                     whileHover={{ y: -12, scale: 1.02 }}
@@ -350,19 +369,19 @@ export default function Home() {
                   >
                     {/* Lightning Accent Lines */}
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    
+
                     <motion.div
                       initial={{ scale: 1 }}
                       whileHover={{ scale: 1.15 }}
                       transition={{ duration: 0.4 }}
                       className="relative h-64 overflow-hidden bg-gradient-to-br from-primary/15 to-accent/15"
                     >
-                      <img 
-                        src={coord.image} 
+                      <img
+                        src={coord.image}
                         alt={coord.name}
                         className="w-full h-full object-cover"
                       />
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0 }}
                         whileHover={{ opacity: 1 }}
                         className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"
@@ -374,7 +393,7 @@ export default function Home() {
                         className="absolute inset-0 bg-radial-gradient from-primary/40 to-transparent"
                       />
                     </motion.div>
-                    
+
                     <div className="p-8 text-center relative">
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
@@ -383,13 +402,13 @@ export default function Home() {
                       >
                         <h3 className="text-2xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">{coord.name}</h3>
                       </motion.div>
-                      
+
                       <motion.div
                         initial={{ scaleX: 0 }}
                         whileHover={{ scaleX: 1 }}
                         className="h-1.5 w-14 bg-gradient-to-r from-primary via-secondary to-accent mx-auto rounded-full mb-4 origin-center shadow-lg shadow-primary/50"
                       />
-                      
+
                       <motion.div
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
@@ -411,8 +430,8 @@ export default function Home() {
       <section className="py-24 bg-black/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
             className="text-center mb-16"
@@ -470,8 +489,8 @@ export default function Home() {
       <section className="py-24 bg-gradient-to-b from-black/20 to-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
             className="text-center mb-16"
@@ -495,11 +514,10 @@ export default function Home() {
                 <motion.div
                   whileHover={{ scale: 1.05, y: -10 }}
                   onClick={() => setSelectedPlan(plan)}
-                  className={`p-8 rounded-2xl border-2 transition-all cursor-pointer ${
-                    plan.popular
-                      ? "bg-gradient-to-br from-primary/20 to-accent/10 border-primary/50"
-                      : "bg-gradient-to-br from-white/5 to-white/2 border-white/10 hover:border-primary/30"
-                  }`}
+                  className={`p-8 rounded-2xl border-2 transition-all cursor-pointer ${plan.popular
+                    ? "bg-gradient-to-br from-primary/20 to-accent/10 border-primary/50"
+                    : "bg-gradient-to-br from-white/5 to-white/2 border-white/10 hover:border-primary/30"
+                    }`}
                 >
                   {plan.popular && (
                     <div className="inline-block px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold mb-4">
@@ -531,8 +549,8 @@ export default function Home() {
       <section className="py-24 bg-black/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
             className="text-center mb-16"
@@ -565,7 +583,7 @@ export default function Home() {
                     className={`absolute inset-0 rounded-3xl blur-3xl ${i === 0 ? 'bg-gradient-to-r from-secondary/35 to-primary/35' : 'bg-gradient-to-r from-accent/35 to-primary/35'}`}
                     style={{ animation: "electrical-pulse 2s ease-in-out infinite" }}
                   />
-                  
+
                   {/* Main Card with Lightning Border */}
                   <motion.div
                     whileHover={{ y: -12, scale: 1.02 }}
@@ -574,7 +592,7 @@ export default function Home() {
                   >
                     {/* Top Lightning Line */}
                     <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity`} />
-                    
+
                     {/* Image Section */}
                     <motion.div
                       initial={{ scale: 1 }}
@@ -582,12 +600,12 @@ export default function Home() {
                       transition={{ duration: 0.4 }}
                       className={`relative h-64 overflow-hidden ${i === 0 ? 'bg-gradient-to-br from-secondary/15 to-primary/15' : 'bg-gradient-to-br from-accent/15 to-primary/15'}`}
                     >
-                      <img 
-                        src={dev.image} 
+                      <img
+                        src={dev.image}
                         alt={dev.name}
                         className="w-full h-full object-cover"
                       />
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0 }}
                         whileHover={{ opacity: 1 }}
                         className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"
@@ -599,7 +617,7 @@ export default function Home() {
                         className="absolute inset-0 bg-radial-gradient from-primary/40 to-transparent"
                       />
                     </motion.div>
-                    
+
                     <div className="p-8 text-center relative">
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
@@ -609,7 +627,7 @@ export default function Home() {
                       >
                         {i === 0 ? 'SENIOR' : 'JUNIOR'}
                       </motion.div>
-                      
+
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -617,13 +635,13 @@ export default function Home() {
                       >
                         <h3 className={`text-2xl font-bold text-center mb-3 text-transparent bg-clip-text bg-gradient-to-r ${i === 0 ? 'from-secondary to-primary' : 'from-accent to-primary'}`}>{dev.name}</h3>
                       </motion.div>
-                      
+
                       <motion.div
                         initial={{ scaleX: 0 }}
                         whileHover={{ scaleX: 1 }}
                         className={`h-1.5 w-14 mx-auto rounded-full mb-4 origin-center shadow-lg transition-all ${i === 0 ? 'bg-gradient-to-r from-secondary to-primary shadow-secondary/50' : 'bg-gradient-to-r from-accent to-primary shadow-accent/50'}`}
                       />
-                      
+
                       <motion.div
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
@@ -692,7 +710,7 @@ export default function Home() {
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.9, y: 20 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-card rounded-2xl border border-white/10 p-8 max-w-lg w-full shadow-2xl"
+            className="bg-card rounded-2xl border border-white/10 p-8 max-w-lg w-full shadow-2xl max-h-[85vh] overflow-y-auto"
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-3xl font-bold">{selectedPlan.title}</h3>

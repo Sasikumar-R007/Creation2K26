@@ -25,7 +25,8 @@ export const events = pgTable("events", {
   date: timestamp("date").notNull(),
   venue: text("venue").notNull(),
   imageUrl: text("image_url"),
-  coordinatorId: integer("coordinator_id"), 
+  coordinatorId: integer("coordinator_id"),
+  eventCode: text("event_code").unique(), // Will be auto-generated CR26E01...
 });
 
 export const registrations = pgTable("registrations", {
@@ -33,6 +34,9 @@ export const registrations = pgTable("registrations", {
   eventId: integer("event_id").notNull(),
   studentName: text("student_name").notNull(),
   studentEmail: text("student_email").notNull(),
+  mobile: text("mobile").notNull(),
+  year: text("year").notNull(),
+  course: text("course").notNull(),
   college: text("college").notNull(),
   registrationId: text("registration_id").notNull().unique(), // Auto-generated ID
   teamDetails: jsonb("team_details"), // Store team member names/info
@@ -71,7 +75,9 @@ export const usersRelations = relations(users, ({ many }) => ({
 // === BASE SCHEMAS ===
 
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
-export const insertEventSchema = createInsertSchema(events).omit({ id: true });
+export const insertEventSchema = createInsertSchema(events, {
+  date: z.coerce.date(),
+}).omit({ id: true, eventCode: true });
 export const insertRegistrationSchema = createInsertSchema(registrations).omit({ id: true, createdAt: true, status: true, registrationId: true });
 export const insertAnnouncementSchema = createInsertSchema(announcements).omit({ id: true, createdAt: true });
 

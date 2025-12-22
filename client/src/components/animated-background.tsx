@@ -2,186 +2,135 @@ import { motion } from "framer-motion";
 
 export function AnimatedBackground() {
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-      {/* Base background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-background/95" />
-      
-      {/* Large animated blobs - main visual effect */}
-      <motion.div
-        className="absolute w-[600px] h-[600px] rounded-full blur-3xl opacity-40"
+    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-[#0a0a0f]">
+      {/* Base background - darker for better contrast */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-[#0f0f16] to-[#0a0a0f]" />
+
+      {/* Tech Grid - Main feature */}
+      <div
+        className="absolute inset-0 opacity-[0.1]"
         style={{
-          background: "radial-gradient(circle, rgba(168, 85, 247, 1) 0%, rgba(168, 85, 247, 0) 70%)",
-          top: "-150px",
-          left: "-150px",
-          filter: "blur(80px)"
-        }}
-        animate={{
-          y: [0, 100, 0],
-          x: [0, 50, 0],
-        }}
-        transition={{
-          duration: 12,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      />
-      
-      <motion.div
-        className="absolute w-[500px] h-[500px] rounded-full blur-3xl opacity-35"
-        style={{
-          background: "radial-gradient(circle, rgba(59, 130, 246, 1) 0%, rgba(59, 130, 246, 0) 70%)",
-          top: "100px",
-          right: "-200px",
-          filter: "blur(80px)"
-        }}
-        animate={{
-          y: [0, -80, 0],
-          x: [0, -80, 0],
-        }}
-        transition={{
-          duration: 15,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 0.5
-        }}
-      />
-      
-      <motion.div
-        className="absolute w-[550px] h-[550px] rounded-full blur-3xl opacity-30"
-        style={{
-          background: "radial-gradient(circle, rgba(139, 92, 246, 1) 0%, rgba(139, 92, 246, 0) 70%)",
-          bottom: "-100px",
-          left: "200px",
-          filter: "blur(80px)"
-        }}
-        animate={{
-          y: [0, -120, 0],
-          x: [0, 100, 0],
-        }}
-        transition={{
-          duration: 18,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 1
-        }}
-      />
-      
-      <motion.div
-        className="absolute w-[480px] h-[480px] rounded-full blur-3xl opacity-25"
-        style={{
-          background: "radial-gradient(circle, rgba(168, 85, 247, 0.8) 0%, rgba(168, 85, 247, 0) 70%)",
-          bottom: "50px",
-          right: "100px",
-          filter: "blur(80px)"
-        }}
-        animate={{
-          y: [0, 90, 0],
-          x: [0, -70, 0],
-        }}
-        transition={{
-          duration: 14,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 2
+          backgroundImage: `
+            linear-gradient(rgba(168, 85, 247, 0.15) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(168, 85, 247, 0.15) 1px, transparent 1px)
+          `,
+          backgroundSize: "60px 60px",
+          transform: "perspective(500px) rotateX(20deg)",
+          transformOrigin: "top"
         }}
       />
 
-      {/* Secondary smaller floating elements */}
       <motion.div
-        className="absolute w-72 h-72 rounded-full blur-3xl opacity-20"
-        style={{
-          background: "conic-gradient(from 0deg, rgba(168, 85, 247, 0.5), rgba(59, 130, 246, 0.5), rgba(168, 85, 247, 0.5))",
-          top: "30%",
-          left: "10%",
-          filter: "blur(70px)"
-        }}
-        animate={{
-          rotate: [0, 360],
-          scale: [1, 1.1, 1]
-        }}
-        transition={{
-          rotate: { duration: 30, repeat: Infinity, ease: "linear" },
-          scale: { duration: 10, repeat: Infinity, ease: "easeInOut" }
-        }}
-      />
-
-      {/* Animated diagonal rays */}
-      <div className="absolute inset-0 opacity-10 overflow-hidden">
-        <motion.div
-          className="absolute w-[2px] h-[150%] bg-gradient-to-b from-primary via-secondary to-transparent"
-          style={{
-            left: "20%",
-            top: "-25%",
-            transform: "rotate(-45deg)"
-          }}
-          animate={{
-            opacity: [0.3, 0.7, 0.3],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.div
-          className="absolute w-[2px] h-[150%] bg-gradient-to-b from-secondary via-primary to-transparent"
-          style={{
-            right: "20%",
-            top: "-25%",
-            transform: "rotate(45deg)"
-          }}
-          animate={{
-            opacity: [0.2, 0.6, 0.2],
-          }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1
-          }}
-        />
-      </div>
-
-      {/* Grid pattern with animation */}
-      <motion.div 
         className="absolute inset-0 opacity-[0.08]"
         style={{
-          backgroundImage: `linear-gradient(0deg, transparent 24%, rgba(168, 85, 247, 0.1) 25%, rgba(168, 85, 247, 0.1) 26%, transparent 27%, transparent 74%, rgba(168, 85, 247, 0.1) 75%, rgba(168, 85, 247, 0.1) 76%, transparent 77%, transparent), 
-                           linear-gradient(90deg, transparent 24%, rgba(168, 85, 247, 0.1) 25%, rgba(168, 85, 247, 0.1) 26%, transparent 27%, transparent 74%, rgba(168, 85, 247, 0.1) 75%, rgba(168, 85, 247, 0.1) 76%, transparent 77%, transparent)`,
-          backgroundSize: "60px 60px"
+          backgroundImage: `
+            linear-gradient(rgba(59, 130, 246, 0.2) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(59, 130, 246, 0.2) 1px, transparent 1px)
+          `,
+          backgroundSize: "140px 140px"
         }}
         animate={{
-          backgroundPosition: ["0px 0px", "60px 60px"],
+          backgroundPosition: ["0px 0px", "140px 140px"],
         }}
         transition={{
-          duration: 20,
+          duration: 45,
           repeat: Infinity,
           ease: "linear"
         }}
       />
-      
-      {/* Radial vignette */}
-      <div 
-        className="absolute inset-0 opacity-40"
+
+      {/* Large animated blobs - enhanced visibility */}
+      <motion.div
+        className="absolute w-[800px] h-[800px] rounded-full blur-[120px] opacity-30"
         style={{
-          background: "radial-gradient(circle 800px at center, transparent 0%, rgba(0, 0, 0, 0.9) 100%)"
+          background: "radial-gradient(circle, rgba(168, 85, 247, 0.6) 0%, transparent 70%)",
+          top: "-20%",
+          left: "-10%",
+        }}
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.3, 0.4, 0.3],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut"
         }}
       />
 
-      {/* Top highlight glow */}
       <motion.div
-        className="absolute top-0 left-1/2 w-[800px] h-[400px] -translate-x-1/2 rounded-full blur-3xl opacity-15"
+        className="absolute w-[600px] h-[600px] rounded-full blur-[100px] opacity-20"
         style={{
-          background: "radial-gradient(circle, rgba(59, 130, 246, 0.4), transparent 70%)",
-          filter: "blur(100px)"
+          background: "radial-gradient(circle, rgba(59, 130, 246, 0.7) 0%, transparent 70%)",
+          bottom: "-10%",
+          right: "-5%",
         }}
         animate={{
-          y: [-50, 50, -50],
+          scale: [1, 1.1, 1],
+          opacity: [0.2, 0.3, 0.2],
         }}
         transition={{
-          duration: 8,
+          duration: 15,
           repeat: Infinity,
           ease: "easeInOut"
+        }}
+      />
+
+      {/* Cyberpunk accent lines */}
+      <div className="absolute inset-0">
+        <motion.div
+          className="absolute h-[1px] w-full bg-gradient-to-r from-transparent via-primary/50 to-transparent shadow-[0_0_10px_rgba(168,85,247,0.5)]"
+          style={{ top: "30%" }}
+          animate={{
+            transform: ["translateX(-100%)", "translateX(100%)"],
+            opacity: [0, 1, 0]
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "linear",
+            delay: 2
+          }}
+        />
+        <motion.div
+          className="absolute h-[1px] w-full bg-gradient-to-r from-transparent via-secondary/50 to-transparent shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+          style={{ top: "70%" }}
+          animate={{
+            transform: ["translateX(100%)", "translateX(-100%)"],
+            opacity: [0, 1, 0]
+          }}
+          transition={{
+            duration: 12,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        />
+      </div>
+
+      {/* Matrix-like vertical streams (subtle) */}
+      <div className="absolute inset-0 flex justify-around opacity-[0.03] pointer-events-none">
+        {[...Array(5)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="w-[1px] h-full bg-gradient-to-b from-transparent via-primary to-transparent"
+            animate={{
+              backgroundPosition: ["0% -100%", "0% 200%"],
+            }}
+            transition={{
+              duration: 5 + i * 2,
+              repeat: Infinity,
+              ease: "linear",
+              delay: i
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Vignette for cinematic look */}
+      <div
+        className="absolute inset-0 opacity-60"
+        style={{
+          background: "radial-gradient(circle 800px at center, transparent 0%, rgba(5, 5, 10, 0.8) 100%)"
         }}
       />
     </div>

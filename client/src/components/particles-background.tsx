@@ -33,29 +33,33 @@ export function ParticlesBackground() {
           },
         },
         particles: {
-          color: { value: "#8b5cf6" }, // primary color
+          color: { value: "#a855f7" }, // Primary Purple
           links: {
-            color: "#60a5fa", // secondary color
+            color: "#60a5fa", // Secondary Blue
             distance: 150,
             enable: true,
-            opacity: 0.2,
+            opacity: 0.15,
             width: 1,
+            triangles: {
+              enable: true,
+              opacity: 0.05,
+            },
           },
           move: {
             direction: "none",
             enable: true,
             outModes: { default: "bounce" },
             random: false,
-            speed: 1,
+            speed: 0.5,
             straight: false,
           },
           number: {
-            density: { enable: true, area: 800 },
+            density: { enable: true, area: 1200 },
             value: 60,
           },
-          opacity: { value: 0.3 },
+          opacity: { value: 0.2 },
           shape: { type: "circle" },
-          size: { value: { min: 1, max: 3 } },
+          size: { value: { min: 1, max: 2 } },
         },
         detectRetina: true,
       }}

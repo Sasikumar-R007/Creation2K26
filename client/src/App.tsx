@@ -15,6 +15,9 @@ import AdminLogin from "@/pages/admin/login";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminEvents from "@/pages/admin/events";
 import AdminRegistrations from "@/pages/admin/registrations";
+import { useState } from "react";
+import { LoadingAnimation } from "@/components/loading-animation";
+import { AnimatePresence } from "framer-motion";
 
 function Router() {
   return (
@@ -30,7 +33,7 @@ function Router() {
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/events" component={AdminEvents} />
       <Route path="/admin/registrations" component={AdminRegistrations} />
-      
+
       {/* Fallback */}
       <Route component={NotFound} />
     </Switch>
@@ -38,11 +41,19 @@ function Router() {
 }
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        <Router />
+        <AnimatePresence mode="wait">
+          {isLoading ? (
+            <LoadingAnimation key="loader" onComplete={() => setIsLoading(false)} />
+          ) : (
+            <Router key="router" />
+          )}
+        </AnimatePresence>
       </TooltipProvider>
     </QueryClientProvider>
   );

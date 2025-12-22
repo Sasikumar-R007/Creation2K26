@@ -1,4 +1,3 @@
-import { db } from "./db";
 import {
   users, events, registrations, announcements,
   type User, type InsertUser,
@@ -6,19 +5,17 @@ import {
   type Registration, type InsertRegistration,
   type Announcement, type InsertAnnouncement
 } from "@shared/schema";
-import { eq, desc } from "drizzle-orm";
 import session from "express-session";
-import connectPg from "connect-pg-simple";
-import { pool } from "./db";
+import createMemoryStore from "memorystore";
 
-const PostgresSessionStore = connectPg(session);
+const MemoryStore = createMemoryStore(session);
 
 export interface IStorage {
   // User & Auth
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  
+
   // Events
   getEvents(): Promise<Event[]>;
   getEvent(id: number): Promise<Event | undefined>;
@@ -39,84 +36,140 @@ export interface IStorage {
   sessionStore: session.Store;
 }
 
-export class DatabaseStorage implements IStorage {
+export class MemStorage implements IStorage {
+  private users: Map<number, User>;
+  private events: Map<number, Event>;
+  private registrations: Map<number, Registration>;
+  private announcements: Map<number, Announcement>;
   sessionStore: session.Store;
+  currentUserId: number;
+  currentEventId: number;
+  currentRegistrationId: number;
+  currentAnnouncementId: number;
 
   constructor() {
-    this.sessionStore = new PostgresSessionStore({
-      pool,
-      createTableIfMissing: true,
+    this.users = new Map();
+    this.events = new Map();
+    this.registrations = new Map();
+    this.announcements = new Map();
+    this.currentUserId = 1;
+    this.currentEventId = 1;
+    this.currentRegistrationId = 1;
+    this.currentAnnouncementId = 1;
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000,
     });
   }
 
   // Users
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    return this.users.get(id);
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user;
+    return Array.from(this.users.values()).find(
+      (user) => user.username === username,
+    );
   }
 
-  async createUser(user: InsertUser): Promise<User> {
-    const [newUser] = await db.insert(users).values(user).returning();
-    return newUser;
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const id = this.currentUserId++;
+    const user: User = {
+      ...insertUser,
+      id,
+      createdAt: new Date(),
+      role: insertUser.role || "volunteer"
+    };
+    this.users.set(id, user);
+    return user;
   }
 
   // Events
   async getEvents(): Promise<Event[]> {
-    return await db.select().from(events).orderBy(events.date);
+    return Array.from(this.events.values());
   }
 
   async getEvent(id: number): Promise<Event | undefined> {
-    const [event] = await db.select().from(events).where(eq(events.id, id));
+    return this.events.get(id);
+  }
+
+  async createEvent(insertEvent: InsertEvent): Promise<Event> {
+    const id = this.currentEventId++;
+    const eventCode = `CR26E${id.toString().padStart(2, '0')}`;
+    const event: Event = {
+      ...insertEvent,
+      id,
+      imageUrl: insertEvent.imageUrl || null,
+      coordinatorId: insertEvent.coordinatorId || null,
+      eventCode,
+      teamSize: insertEvent.teamSize || 1,
+      fee: insertEvent.fee || 0
+    };
+    this.events.set(id, event);
     return event;
   }
 
-  async createEvent(event: InsertEvent): Promise<Event> {
-    const [newEvent] = await db.insert(events).values(event).returning();
-    return newEvent;
-  }
-
   async updateEvent(id: number, updates: Partial<InsertEvent>): Promise<Event> {
-    const [updated] = await db.update(events).set(updates).where(eq(events.id, id)).returning();
-    return updated;
+    const event = this.events.get(id);
+    if (!event) throw new Error("Event not found");
+    const updatedEvent = { ...event, ...updates };
+    this.events.set(id, updatedEvent);
+    return updatedEvent;
   }
 
   async deleteEvent(id: number): Promise<void> {
-    await db.delete(events).where(eq(events.id, id));
+    this.events.delete(id);
   }
 
   // Registrations
-  async createRegistration(registration: InsertRegistration): Promise<Registration> {
-    const [newReg] = await db.insert(registrations).values(registration).returning();
-    return newReg;
+  async createRegistration(insertReg: InsertRegistration): Promise<Registration> {
+    const id = this.currentRegistrationId++;
+    const registration: Registration = {
+      ...insertReg,
+      id,
+      status: "pending",
+      createdAt: new Date(),
+      registrationId: insertReg.registrationId || `REG-${id}-${Date.now()}`,
+      teamDetails: insertReg.teamDetails || null
+    };
+    this.registrations.set(id, registration);
+    return registration;
   }
 
   async getRegistrations(): Promise<Registration[]> {
-    return await db.select().from(registrations).orderBy(desc(registrations.createdAt));
+    return Array.from(this.registrations.values()).sort((a, b) =>
+      (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0)
+    );
   }
 
   async getRegistrationsByEvent(eventId: number): Promise<Registration[]> {
-    return await db.select().from(registrations).where(eq(registrations.eventId, eventId));
+    return Array.from(this.registrations.values()).filter(
+      (reg) => reg.eventId === eventId
+    );
   }
 
-  async updateRegistrationStatus(id: number, status: "pending" | "confirmed" | "attended"): Promise<Registration> {
-    const [updated] = await db.update(registrations).set({ status }).where(eq(registrations.id, id)).returning();
-    return updated;
+  async updateRegistrationStatus(id: number, status: string): Promise<Registration> {
+    const registration = this.registrations.get(id);
+    if (!registration) throw new Error("Registration not found");
+    // @ts-ignore
+    const updatedReg: Registration = { ...registration, status };
+    this.registrations.set(id, updatedReg);
+    return updatedReg;
   }
 
   // Announcements
   async getAnnouncements(): Promise<Announcement[]> {
-    return await db.select().from(announcements).orderBy(desc(announcements.createdAt));
+    return Array.from(this.announcements.values()).sort((a, b) =>
+      (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0)
+    );
   }
 
-  async createAnnouncement(announcement: InsertAnnouncement): Promise<Announcement> {
-    const [newAnnouncement] = await db.insert(announcements).values(announcement).returning();
-    return newAnnouncement;
+  async createAnnouncement(insertAnnouncement: InsertAnnouncement): Promise<Announcement> {
+    const id = this.currentAnnouncementId++;
+    const announcement: Announcement = { ...insertAnnouncement, id, createdAt: new Date() };
+    this.announcements.set(id, announcement);
+    return announcement;
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();

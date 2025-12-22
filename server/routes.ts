@@ -47,10 +47,10 @@ export async function registerRoutes(
       try {
         const user = await storage.getUserByUsername(username);
         if (!user) return done(null, false);
-        
+
         const isValid = await comparePasswords(password, user.password);
         if (!isValid) return done(null, false);
-        
+
         return done(null, user);
       } catch (err) {
         return done(err);
@@ -109,7 +109,10 @@ export async function registerRoutes(
       const event = await storage.createEvent(input);
       res.status(201).json(event);
     } catch (err) {
-      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      if (err instanceof z.ZodError) {
+        console.error("Event Creation Validation Error:", JSON.stringify(err.errors, null, 2));
+        return res.status(400).json({ message: err.errors[0].message });
+      }
       throw err;
     }
   });

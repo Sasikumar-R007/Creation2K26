@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { Menu, X, Calendar, Home, Layers, Bell } from "lucide-react";
-import { useState } from "react";
+import { Menu, X, Calendar, Home, Layers, Bell, ArrowUp } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ParticlesBackground } from "@/components/particles-background";
 import { AnimatedBackground } from "@/components/animated-background";
@@ -9,6 +9,19 @@ import { AnimatedBackground } from "@/components/animated-background";
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const links = [
     { href: "/", label: "Home", icon: Home },
@@ -18,10 +31,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col font-body text-foreground overflow-x-hidden relative">
+    <div className="min-h-screen flex flex-col font-body text-foreground overflow-x-hidden relative">
       <AnimatedBackground />
       <ParticlesBackground />
-      <nav className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-white/5 h-16 relative z-[51]">
+      {/* Removed 'relative' class to fix z-index issues with fixed positioning */}
+      <nav className="fixed top-0 left-0 right-0 z-[51] glass-card border-b border-white/5 h-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
@@ -42,12 +56,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </Link>
             ))}
             <Link href="/admin/login">
-               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-white">Admin</Button>
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-white">Admin</Button>
             </Link>
           </div>
 
           {/* Mobile Menu Toggle */}
-          <button 
+          <button
             className="md:hidden text-foreground p-2"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
@@ -59,9 +73,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {isMobileMenuOpen && (
           <div className="md:hidden absolute top-16 left-0 right-0 glass-card border-b border-white/5 p-4 flex flex-col gap-4 animate-in slide-in-from-top-2">
             {links.map((link) => (
-              <Link 
-                key={link.href} 
-                href={link.href} 
+              <Link
+                key={link.href}
+                href={link.href}
                 className={cn(
                   "p-3 rounded-lg flex items-center gap-3 transition-colors",
                   location === link.href ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-white/5"
@@ -72,8 +86,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 {link.label}
               </Link>
             ))}
-             <Link href="/admin/login" onClick={() => setIsMobileMenuOpen(false)}>
-               <div className="p-3 text-muted-foreground text-sm">Admin Access</div>
+            <Link href="/admin/login" onClick={() => setIsMobileMenuOpen(false)}>
+              <div className="p-3 text-muted-foreground text-sm">Admin Access</div>
             </Link>
           </div>
         )}
@@ -99,6 +113,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </footer>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <Button
+          onClick={scrollToTop}
+          size="icon"
+          className="fixed bottom-8 right-8 z-50 rounded-full shadow-lg bg-primary hover:bg-primary/90 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
+        >
+          <ArrowUp className="w-5 h-5" />
+        </Button>
+      )}
     </div>
   );
 }
