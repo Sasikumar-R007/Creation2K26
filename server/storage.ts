@@ -7,6 +7,7 @@ import {
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import { DbStorage } from "./db-storage";
 
 const MemoryStore = createMemoryStore(session);
 
@@ -172,4 +173,10 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Use database storage if DATABASE_URL is set, otherwise use in-memory storage
+// Check if DATABASE_URL is a valid PostgreSQL connection string (not the dummy one)
+const useDatabase = process.env.DATABASE_URL && 
+  process.env.DATABASE_URL !== "postgres://dummy:dummy@localhost:5432/dummy" &&
+  !process.env.DATABASE_URL.includes("dummy");
+
+export const storage = useDatabase ? new DbStorage() : new MemStorage();
