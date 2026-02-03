@@ -4,8 +4,8 @@ export const EVENT_DATE = new Date('2026-02-25T09:00:00');
 
 export const VENUE = {
   name: 'Main Auditorium',
-  college: 'Your College Name',
-  address: 'College Campus, City - 123456',
+  college: 'Bishop Heber College',
+  address: 'Bishop Heber College, Trichy - 620 017, Tamil Nadu',
 };
 
 export const SOCIAL_LINKS = {
