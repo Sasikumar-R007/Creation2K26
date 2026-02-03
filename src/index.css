@@ -168,9 +168,10 @@
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-accent;
   }
 
-  /* Hero CREATION – brush/paint font + iridescent gradient + 3D gloss */
-  .hero-creation-text {
-    font-family: "Rubik Wet Paint", "Pacifico", system-ui, sans-serif;
+  /* Hero CREATION & 2K26 – bold display font + iridescent gradient + 3D gloss */
+  .hero-creation-text,
+  .hero-year-text {
+    font-family: "Bebas Neue", "Oswald", system-ui, sans-serif;
     font-weight: 400;
     background: linear-gradient(
       105deg,

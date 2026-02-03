@@ -73,7 +73,7 @@ const HeroSection = () => {
           </p>
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 animate-fade-in" style={{ animationDelay: "100ms" }}>
             <span className="hero-creation-text block">CREATION</span>
-            <span className="text-foreground block mt-2 text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight">2K26</span>
+            <span className="hero-year-text block mt-2 text-4xl md:text-6xl lg:text-7xl tracking-tight">2K26</span>
           </h1>
 
           {/* Tagline */}
