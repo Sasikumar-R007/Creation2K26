@@ -25,6 +25,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   getParticipationForEvent,
   conflictsWithRegistered,
+  getConflictingRegisteredEvents,
 } from "@/lib/eventParticipation";
 import { MAX_EVENTS_PER_PARTICIPANT } from "@/lib/constants";
 
@@ -69,6 +70,13 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
     () => conflictsWithRegistered(event.name, registeredEventNames),
     [event.name, registeredEventNames]
   );
+
+  const conflictingEventNames = useMemo(
+    () => getConflictingRegisteredEvents(event.name, registeredEventNames),
+    [event.name, registeredEventNames]
+  );
+
+  const showConflict = hasConflict && registeredEventNames.length > 0;
 
   const isAlreadyRegistered = useMemo(
     () => myRegistrations?.some((r) => r.event_id === event.id),
@@ -154,7 +162,7 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
 
   const registerDisabled =
     isRegistering ||
-    hasConflict ||
+    showConflict ||
     isAlreadyRegistered ||
     (atMaxEvents && !isAlreadyRegistered);
   const registerButton = (
@@ -168,7 +176,7 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
           <LucideIcons.Loader2 className="w-4 h-4 animate-spin" />
           Registering...
         </>
-      ) : hasConflict ? (
+      ) : showConflict ? (
         <>
           <LucideIcons.AlertCircle className="w-4 h-4" />
           Can't register - time violates
@@ -314,9 +322,9 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
                 )}
               </div>
             </div>
-            {hasConflict && (
+            {showConflict && (
               <p className="text-xs text-destructive">
-                Can't register - time violates. You're already registered for an event in this time slot.
+                Can't register - time violates. You're already registered for {conflictingEventNames.length === 1 ? conflictingEventNames[0] : conflictingEventNames.join(", ")}, which {conflictingEventNames.length === 1 ? "is" : "are"} in the same time slot. If you didn't register for any event, try refreshing the page.
               </p>
             )}
             {atMaxEvents && !isAlreadyRegistered && (
@@ -333,14 +341,14 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
             <NeonButton variant="ghost" onClick={onClose}>
               Close
             </NeonButton>
-            {hasConflict || (atMaxEvents && !isAlreadyRegistered) ? (
+            {showConflict || (atMaxEvents && !isAlreadyRegistered) ? (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>{registerButton}</TooltipTrigger>
                   <TooltipContent>
                     <p>
-                      {hasConflict
-                        ? "Can't register - time violates. This event conflicts with one you're already in."
+                      {showConflict
+                        ? `Can't register - time violates. You're already in ${conflictingEventNames.length === 1 ? conflictingEventNames[0] : conflictingEventNames.join(", ")}.`
                         : `You can participate in only ${MAX_EVENTS_PER_PARTICIPANT} events.`}
                     </p>
                   </TooltipContent>

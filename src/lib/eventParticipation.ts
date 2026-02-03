@@ -57,3 +57,11 @@ export function conflictsWithRegistered(
 ): boolean {
   return registeredEventNames.some((name) => eventsConflict(eventName, name));
 }
+
+/** Get the list of registered event names that conflict with the given event (for showing in UI) */
+export function getConflictingRegisteredEvents(
+  eventName: string,
+  registeredEventNames: string[]
+): string[] {
+  return registeredEventNames.filter((name) => eventsConflict(eventName, name));
+}
