@@ -47,6 +47,7 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
 
   const { data: allEvents = [] } = useEvents();
   const { data: myRegistrations = [] } = useMyRegistrations();
@@ -84,6 +85,49 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
   );
 
   const atMaxEvents = (myRegistrations?.length ?? 0) >= MAX_EVENTS_PER_PARTICIPANT;
+
+  const conflictingRegistrations = useMemo(
+    () =>
+      (myRegistrations ?? []).filter((r) =>
+        r.events?.name && conflictingEventNames.includes(r.events.name)
+      ),
+    [myRegistrations, conflictingEventNames]
+  );
+
+  const handleSwitchToThisEvent = async () => {
+    if (!user || conflictingRegistrations.length === 0) return;
+    setIsSwitching(true);
+    try {
+      for (const reg of conflictingRegistrations) {
+        const { error } = await supabase
+          .from("event_registrations")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("event_id", reg.event_id);
+        if (error) throw error;
+      }
+      const { error } = await supabase.from("event_registrations").insert({
+        user_id: user.id,
+        event_id: event.id,
+      });
+      if (error) throw error;
+      toast({
+        title: "Switched event",
+        description: `You're now registered for ${event.name} instead.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["registrations"] });
+      onClose();
+    } catch (err: unknown) {
+      console.error("Switch error:", err);
+      toast({
+        title: "Couldn't switch",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSwitching(false);
+    }
+  };
 
   const handleRegister = async () => {
     if (!user) {
@@ -323,9 +367,14 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
               </div>
             </div>
             {showConflict && (
-              <p className="text-xs text-destructive">
-                Can't register - time violates. You're already registered for {conflictingEventNames.length === 1 ? conflictingEventNames[0] : conflictingEventNames.join(", ")}, which {conflictingEventNames.length === 1 ? "is" : "are"} in the same time slot. If you didn't register for any event, try refreshing the page.
-              </p>
+              <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 space-y-2">
+                <p className="text-xs text-amber-200">
+                  You're registered for <strong>{conflictingEventNames.length === 1 ? conflictingEventNames[0] : conflictingEventNames.join(", ")}</strong> (same time slot). You can switch to <strong>{event.name}</strong> instead.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  If you didn't register for any event, refresh the page.
+                </p>
+              </div>
             )}
             {atMaxEvents && !isAlreadyRegistered && (
               <p className="text-xs text-destructive">
@@ -336,21 +385,35 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
 
           <Separator className="bg-border/50" />
 
-          {/* Register Button */}
-          <div className="flex justify-end gap-3">
+          {/* Register / Switch / Close */}
+          <div className="flex justify-end gap-3 flex-wrap">
             <NeonButton variant="ghost" onClick={onClose}>
               Close
             </NeonButton>
-            {showConflict || (atMaxEvents && !isAlreadyRegistered) ? (
+            {showConflict ? (
+              <NeonButton
+                variant={isTechnical ? "cyan" : "purple"}
+                onClick={handleSwitchToThisEvent}
+                disabled={isSwitching}
+              >
+                {isSwitching ? (
+                  <>
+                    <LucideIcons.Loader2 className="w-4 h-4 animate-spin" />
+                    Switching...
+                  </>
+                ) : (
+                  <>
+                    <LucideIcons.RefreshCw className="w-4 h-4" />
+                    Switch to {event.name}
+                  </>
+                )}
+              </NeonButton>
+            ) : (atMaxEvents && !isAlreadyRegistered) ? (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>{registerButton}</TooltipTrigger>
                   <TooltipContent>
-                    <p>
-                      {showConflict
-                        ? `Can't register - time violates. You're already in ${conflictingEventNames.length === 1 ? conflictingEventNames[0] : conflictingEventNames.join(", ")}.`
-                        : `You can participate in only ${MAX_EVENTS_PER_PARTICIPANT} events.`}
-                    </p>
+                    <p>You can participate in only {MAX_EVENTS_PER_PARTICIPANT} events.</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
