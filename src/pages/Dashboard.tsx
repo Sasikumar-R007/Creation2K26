@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Sparkles,
   Clock,
+  Trash2,
 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
@@ -19,7 +20,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
-import { useMyRegistrations } from "@/hooks/useRegistrations";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useMyRegistrations, useUnregisterFromEvent } from "@/hooks/useRegistrations";
 import { useMyMessages } from "@/hooks/useMessages";
 import { useEvents, EventData } from "@/hooks/useEvents";
 import EventModal from "@/components/events/EventModal";
@@ -36,7 +48,16 @@ const Dashboard = () => {
   const { data: registrations, isLoading: loadingRegistrations } = useMyRegistrations();
   const { data: messages, isLoading: loadingMessages } = useMyMessages();
   const { data: events } = useEvents();
+  const unregisterMutation = useUnregisterFromEvent();
   const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
+
+  const handleUnregister = async (eventId: string) => {
+    try {
+      await unregisterMutation.mutateAsync(eventId);
+    } catch {
+      // toast already shown in mutation onError
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -106,7 +127,7 @@ const Dashboard = () => {
                     return (
                       <div
                         key={registration.id}
-                        className="flex items-center gap-4 p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+                        className="flex items-center gap-4 p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group"
                         onClick={() => setSelectedEvent(event as unknown as EventData)}
                       >
                         <div
@@ -135,7 +156,38 @@ const Dashboard = () => {
                             Registered {formatDate(registration.registered_at)}
                           </p>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="shrink-0 opacity-70 hover:opacity-100 hover:bg-destructive/10 hover:text-destructive"
+                              onClick={(e) => e.stopPropagation()}
+                              title="Remove registration"
+                              disabled={unregisterMutation.isPending}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Remove registration?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                You will be unregistered from <strong>{event.name}</strong>. You can register again later if spots are available.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={() => handleUnregister(registration.event_id)}
+                              >
+                                Remove registration
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                        <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
                       </div>
                     );
                   })}
