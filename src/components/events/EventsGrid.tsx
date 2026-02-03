@@ -1,7 +1,8 @@
-import { useMemo } from "react";
-import { useTechnicalEvents, useNonTechnicalEvents } from "@/hooks/useEvents";
+import { useMemo, useState, useCallback } from "react";
+import { useTechnicalEvents, useNonTechnicalEvents, useEvents } from "@/hooks/useEvents";
 import { useMyRegistrations } from "@/hooks/useRegistrations";
-import { conflictsWithRegistered } from "@/lib/eventParticipation";
+import { conflictsWithRegistered, getParticipationForEvent } from "@/lib/eventParticipation";
+import type { EventData } from "@/hooks/useEvents";
 import EventCard from "./EventCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Cpu, Palette } from "lucide-react";
@@ -9,7 +10,9 @@ import { Cpu, Palette } from "lucide-react";
 const EventsGrid = () => {
   const { data: technicalEvents, isLoading: loadingTech } = useTechnicalEvents();
   const { data: nonTechnicalEvents, isLoading: loadingNonTech } = useNonTechnicalEvents();
+  const { data: allEvents = [] } = useEvents();
   const { data: myRegistrations = [] } = useMyRegistrations();
+  const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
 
   const registeredEventNames = useMemo(
     () => myRegistrations.map((r) => r.events?.name).filter((name): name is string => !!name),
@@ -20,6 +23,20 @@ const EventsGrid = () => {
     () => (eventName: string) => conflictsWithRegistered(eventName, registeredEventNames),
     [registeredEventNames]
   );
+
+  const { canParticipateIds, cannotParticipateIds } = useMemo(() => {
+    if (!selectedEvent || allEvents.length === 0) {
+      return { canParticipateIds: new Set<string>(), cannotParticipateIds: new Set<string>() };
+    }
+    const { can, cannot } = getParticipationForEvent(selectedEvent.name, allEvents);
+    return {
+      canParticipateIds: new Set(can.map((e) => e.id)),
+      cannotParticipateIds: new Set(cannot.map((e) => e.id)),
+    };
+  }, [selectedEvent, allEvents]);
+
+  const onModalOpen = useCallback((event: EventData) => setSelectedEvent(event), []);
+  const onModalClose = useCallback(() => setSelectedEvent(null), []);
 
   const isLoading = loadingTech || loadingNonTech;
 
@@ -75,6 +92,11 @@ const EventsGrid = () => {
               event={event}
               index={index}
               hasConflictWithRegistered={isEventConflicting(event.name)}
+              selectedEventId={selectedEvent?.id ?? null}
+              canParticipateIds={canParticipateIds}
+              cannotParticipateIds={cannotParticipateIds}
+              onModalOpen={onModalOpen}
+              onModalClose={onModalClose}
             />
           ))}
         </div>
@@ -98,6 +120,11 @@ const EventsGrid = () => {
               event={event}
               index={index}
               hasConflictWithRegistered={isEventConflicting(event.name)}
+              selectedEventId={selectedEvent?.id ?? null}
+              canParticipateIds={canParticipateIds}
+              cannotParticipateIds={cannotParticipateIds}
+              onModalOpen={onModalOpen}
+              onModalClose={onModalClose}
             />
           ))}
         </div>

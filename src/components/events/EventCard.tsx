@@ -11,6 +11,14 @@ interface EventCardProps {
   index?: number;
   /** True when user has already registered for a conflicting event */
   hasConflictWithRegistered?: boolean;
+  /** When an event modal is open, the id of that event */
+  selectedEventId?: string | null;
+  /** Event ids the user CAN participate in if they choose the selected event */
+  canParticipateIds?: Set<string>;
+  /** Event ids the user CANNOT participate in if they choose the selected event */
+  cannotParticipateIds?: Set<string>;
+  onModalOpen?: (event: EventData) => void;
+  onModalClose?: () => void;
 }
 
 // Dynamic icon component
@@ -19,26 +27,53 @@ const DynamicIcon = ({ name, className }: { name: string; className?: string }) 
   return <Icon className={className} />;
 };
 
-const EventCard = ({ event, index = 0, hasConflictWithRegistered = false }: EventCardProps) => {
+const EventCard = ({
+  event,
+  index = 0,
+  hasConflictWithRegistered = false,
+  selectedEventId = null,
+  canParticipateIds,
+  cannotParticipateIds,
+  onModalOpen,
+  onModalClose,
+}: EventCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const isTechnical = event.category === "technical";
   const accentColor = isTechnical ? "cyan" : "purple";
 
+  const isDisabledBySelection =
+    selectedEventId && selectedEventId !== event.id && cannotParticipateIds?.has(event.id);
+  const isHighlightedAsCan =
+    selectedEventId && selectedEventId !== event.id && canParticipateIds?.has(event.id);
+
+  const handleCardClick = () => {
+    if (isDisabledBySelection) return;
+    onModalOpen?.(event);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    onModalClose?.();
+  };
+
   const card = (
     <GlassPanel
       variant="hover"
       glow={isTechnical ? "cyan" : "purple"}
-        className={`
-          p-6 cursor-pointer card-hover group
+      className={`
+          p-6 card-hover group
           animate-slide-up opacity-0
           hover:border-${accentColor === "cyan" ? "primary" : "secondary"}/50
+          ${isDisabledBySelection ? "cursor-not-allowed opacity-60" : "cursor-pointer"}
+          ${isHighlightedAsCan ? (isTechnical ? "ring-2 ring-primary/50" : "ring-2 ring-secondary/50") + " ring-offset-2 ring-offset-background dark:ring-offset-background" : ""}
         `}
       style={{
         animationDelay: `${index * 100}ms`,
         animationFillMode: "forwards",
       }}
-      onClick={() => setIsModalOpen(true)}
+      onClick={handleCardClick}
     >
       {/* Category Badge + Conflict Badge */}
       <div className="flex justify-between items-start mb-4">
@@ -54,9 +89,17 @@ const EventCard = ({ event, index = 0, hasConflictWithRegistered = false }: Even
         >
           {isTechnical ? "Technical" : "Non-Technical"}
         </Badge>
-        {hasConflictWithRegistered && (
+        {(hasConflictWithRegistered || isDisabledBySelection) && (
           <Badge variant="outline" className="text-xs border-destructive/50 text-destructive bg-destructive/10">
             Conflict
+          </Badge>
+        )}
+        {isHighlightedAsCan && (
+          <Badge
+            variant="outline"
+            className={`text-xs ${isTechnical ? "border-primary/50 text-primary bg-primary/10" : "border-secondary/50 text-secondary bg-secondary/10"}`}
+          >
+            Can participate
           </Badge>
         )}
       </div>
@@ -115,11 +158,13 @@ const EventCard = ({ event, index = 0, hasConflictWithRegistered = false }: Even
 
   return (
     <>
-      {hasConflictWithRegistered ? (
+      {hasConflictWithRegistered || isDisabledBySelection ? (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="opacity-75 hover:opacity-90 transition-opacity">{card}</div>
+              <div className={hasConflictWithRegistered ? "opacity-75 hover:opacity-90 transition-opacity" : undefined}>
+                {card}
+              </div>
             </TooltipTrigger>
             <TooltipContent>
               <p>Event timing conflict. You can only participate in one event from this time slot.</p>
@@ -133,7 +178,7 @@ const EventCard = ({ event, index = 0, hasConflictWithRegistered = false }: Even
       <EventModal
         event={event}
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleModalClose}
       />
     </>
   );

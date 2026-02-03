@@ -93,4 +93,5 @@ export const EVENT_PARTICIPATION_RULES: Record<string, { can: string[]; cannot: 
 // Map DB/display name variants to rule key (normalized uppercase)
 export const EVENT_NAME_TO_RULE_KEY: Record<string, string> = {
   "AI PROMPT ENGINEERING": "AI PROMPT",
+  "AD ZAP": "AD-ZAP",
 };
