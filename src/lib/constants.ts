@@ -29,6 +29,9 @@ export const IC_SECRET_CODES: Record<string, string> = {
 
 export const ADMIN_EMAIL = 'admin@creation2k26.com';
 
+/** Maximum number of events a participant can register for */
+export const MAX_EVENTS_PER_PARTICIPANT = 2;
+
 // Lucide icon mapping for events
 export const EVENT_ICONS = {
   Brain: 'Brain',

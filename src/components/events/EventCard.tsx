@@ -167,7 +167,7 @@ const EventCard = ({
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Event timing conflict. You can only participate in one event from this time slot.</p>
+              <p>Can't register - time violates.</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

@@ -26,6 +26,7 @@ import {
   getParticipationForEvent,
   conflictsWithRegistered,
 } from "@/lib/eventParticipation";
+import { MAX_EVENTS_PER_PARTICIPANT } from "@/lib/constants";
 
 interface EventModalProps {
   event: EventData;
@@ -74,6 +75,8 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
     [myRegistrations, event.id]
   );
 
+  const atMaxEvents = (myRegistrations?.length ?? 0) >= MAX_EVENTS_PER_PARTICIPANT;
+
   const handleRegister = async () => {
     if (!user) {
       navigate("/auth?tab=signup");
@@ -81,10 +84,19 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
       return;
     }
 
+    if (atMaxEvents && !isAlreadyRegistered) {
+      toast({
+        title: "Maximum events reached",
+        description: `You can participate in only ${MAX_EVENTS_PER_PARTICIPANT} events.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (hasConflict) {
       toast({
-        title: "Event timing conflict",
-        description: "You can only participate in one event from this time slot. You have already registered for a conflicting event.",
+        title: "Can't register - time violates",
+        description: "This event conflicts with one you're already registered for.",
         variant: "destructive",
       });
       return;
@@ -140,7 +152,11 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
   // Parse rules into array
   const rulesArray = event.rules.split("\n").filter((rule) => rule.trim());
 
-  const registerDisabled = isRegistering || hasConflict || isAlreadyRegistered;
+  const registerDisabled =
+    isRegistering ||
+    hasConflict ||
+    isAlreadyRegistered ||
+    (atMaxEvents && !isAlreadyRegistered);
   const registerButton = (
     <NeonButton
       variant={isTechnical ? "cyan" : "purple"}
@@ -155,7 +171,12 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
       ) : hasConflict ? (
         <>
           <LucideIcons.AlertCircle className="w-4 h-4" />
-          Event conflict
+          Can't register - time violates
+        </>
+      ) : atMaxEvents && !isAlreadyRegistered ? (
+        <>
+          <LucideIcons.AlertCircle className="w-4 h-4" />
+          Max 2 events only
         </>
       ) : isAlreadyRegistered ? (
         <>
@@ -295,7 +316,12 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
             </div>
             {hasConflict && (
               <p className="text-xs text-destructive">
-                You have already registered for an event that conflicts with this one. Event timing conflict.
+                Can't register - time violates. You're already registered for an event in this time slot.
+              </p>
+            )}
+            {atMaxEvents && !isAlreadyRegistered && (
+              <p className="text-xs text-destructive">
+                You can participate in only {MAX_EVENTS_PER_PARTICIPANT} events. Unregister from one to add this event.
               </p>
             )}
           </div>
@@ -307,12 +333,16 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
             <NeonButton variant="ghost" onClick={onClose}>
               Close
             </NeonButton>
-            {hasConflict ? (
+            {hasConflict || (atMaxEvents && !isAlreadyRegistered) ? (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>{registerButton}</TooltipTrigger>
                   <TooltipContent>
-                    <p>Event timing conflict. You can only participate in one event from this time slot.</p>
+                    <p>
+                      {hasConflict
+                        ? "Can't register - time violates. This event conflicts with one you're already in."
+                        : `You can participate in only ${MAX_EVENTS_PER_PARTICIPANT} events.`}
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
