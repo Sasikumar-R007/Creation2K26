@@ -168,11 +168,11 @@
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-accent;
   }
 
-  /* Hero CREATION & 2K26 – Fleur De Leah script + iridescent gradient + 3D gloss */
+  /* Hero CREATION & 2K26 – readable display serif + iridescent gradient + 3D gloss */
   .hero-creation-text,
   .hero-year-text {
-    font-family: "Fleur De Leah", "Rouge Script", cursive;
-    font-weight: 400;
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 700;
     background: linear-gradient(
       105deg,
       #ff8c42 0%,
