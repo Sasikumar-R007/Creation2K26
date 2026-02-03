@@ -1,14 +1,27 @@
 -- =============================================
 -- CREATION 2K26 - Complete Database Schema
+-- (Safe to re-run: enums and tables are idempotent)
 -- =============================================
 
--- 1. Create Enums
-CREATE TYPE public.app_role AS ENUM ('participant', 'student_incharge', 'creation_admin');
-CREATE TYPE public.event_category AS ENUM ('technical', 'non_technical');
-CREATE TYPE public.message_type AS ENUM ('announcement', 'event_update', 'global');
+-- 1. Create Enums (skip if already exist)
+DO $$ BEGIN
+    CREATE TYPE public.app_role AS ENUM ('participant', 'student_incharge', 'creation_admin');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
+DO $$ BEGIN
+    CREATE TYPE public.event_category AS ENUM ('technical', 'non_technical');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
+DO $$ BEGIN
+    CREATE TYPE public.message_type AS ENUM ('announcement', 'event_update', 'global');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
 
 -- 2. Create Profiles Table
-CREATE TABLE public.profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     email TEXT NOT NULL,
@@ -20,7 +33,7 @@ CREATE TABLE public.profiles (
 );
 
 -- 3. Create User Roles Table (CRITICAL: Separate from profiles for security)
-CREATE TABLE public.user_roles (
+CREATE TABLE IF NOT EXISTS public.user_roles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     role app_role NOT NULL DEFAULT 'participant',
@@ -29,7 +42,7 @@ CREATE TABLE public.user_roles (
 );
 
 -- 4. Create Events Table
-CREATE TABLE public.events (
+CREATE TABLE IF NOT EXISTS public.events (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
     description TEXT NOT NULL,
@@ -41,7 +54,7 @@ CREATE TABLE public.events (
 );
 
 -- 5. Create Student Incharges Table
-CREATE TABLE public.student_incharges (
+CREATE TABLE IF NOT EXISTS public.student_incharges (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     event_id UUID REFERENCES public.events(id) ON DELETE CASCADE NOT NULL UNIQUE,
@@ -50,7 +63,7 @@ CREATE TABLE public.student_incharges (
 );
 
 -- 6. Create Event Registrations Table
-CREATE TABLE public.event_registrations (
+CREATE TABLE IF NOT EXISTS public.event_registrations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     event_id UUID REFERENCES public.events(id) ON DELETE CASCADE NOT NULL,
@@ -59,7 +72,7 @@ CREATE TABLE public.event_registrations (
 );
 
 -- 7. Create Messages Table
-CREATE TABLE public.messages (
+CREATE TABLE IF NOT EXISTS public.messages (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     sender_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     event_id UUID REFERENCES public.events(id) ON DELETE CASCADE,
@@ -70,7 +83,7 @@ CREATE TABLE public.messages (
 );
 
 -- 8. Create Winners Table
-CREATE TABLE public.winners (
+CREATE TABLE IF NOT EXISTS public.winners (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     event_id UUID REFERENCES public.events(id) ON DELETE CASCADE NOT NULL,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
@@ -164,6 +177,34 @@ ALTER TABLE public.student_incharges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.event_registrations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.winners ENABLE ROW LEVEL SECURITY;
+
+-- Drop policies if they exist (so migration is re-runnable)
+DROP POLICY IF EXISTS "Anyone can view profiles" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can view own role" ON public.user_roles;
+DROP POLICY IF EXISTS "Admins can view all roles" ON public.user_roles;
+DROP POLICY IF EXISTS "System can insert roles on signup" ON public.user_roles;
+DROP POLICY IF EXISTS "Admins can manage all roles" ON public.user_roles;
+DROP POLICY IF EXISTS "Anyone can view events" ON public.events;
+DROP POLICY IF EXISTS "Admins can manage events" ON public.events;
+DROP POLICY IF EXISTS "Anyone can view incharges" ON public.student_incharges;
+DROP POLICY IF EXISTS "Admins can manage incharges" ON public.student_incharges;
+DROP POLICY IF EXISTS "Users can view own registrations" ON public.event_registrations;
+DROP POLICY IF EXISTS "ICs can view registrations for their event" ON public.event_registrations;
+DROP POLICY IF EXISTS "Admins can view all registrations" ON public.event_registrations;
+DROP POLICY IF EXISTS "Users can register for events" ON public.event_registrations;
+DROP POLICY IF EXISTS "Users can unregister from events" ON public.event_registrations;
+DROP POLICY IF EXISTS "Users can view global messages" ON public.messages;
+DROP POLICY IF EXISTS "Users can view messages for their registered events" ON public.messages;
+DROP POLICY IF EXISTS "ICs can send messages to their event" ON public.messages;
+DROP POLICY IF EXISTS "Admins can send global messages" ON public.messages;
+DROP POLICY IF EXISTS "Admins can view all messages" ON public.messages;
+DROP POLICY IF EXISTS "ICs can view all messages for their event" ON public.messages;
+DROP POLICY IF EXISTS "Anyone can view winners" ON public.winners;
+DROP POLICY IF EXISTS "ICs can declare winners for their event" ON public.winners;
+DROP POLICY IF EXISTS "ICs can update winners for their event" ON public.winners;
+DROP POLICY IF EXISTS "Admins can manage all winners" ON public.winners;
 
 -- PROFILES POLICIES
 CREATE POLICY "Anyone can view profiles"
@@ -330,6 +371,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SET search_path = public;
 
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON public.profiles;
 CREATE TRIGGER update_profiles_updated_at
 BEFORE UPDATE ON public.profiles
 FOR EACH ROW
@@ -353,16 +395,18 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
 AFTER INSERT ON auth.users
 FOR EACH ROW
 EXECUTE FUNCTION public.handle_new_user();
 
 -- =============================================
--- SEED DATA: 10 EVENTS
+-- SEED DATA: 10 EVENTS (only if table is empty)
 -- =============================================
 
-INSERT INTO public.events (name, description, rules, category, icon_name, accent_color) VALUES
+INSERT INTO public.events (name, description, rules, category, icon_name, accent_color)
+SELECT * FROM (VALUES
 -- Technical Events (Cyan accent)
 ('Quiz', 'Test your knowledge across multiple domains including technology, science, and general awareness. Battle it out with the brightest minds!', 
  '• Team of 2 members\n• Three rounds: Prelims, Semi-finals, Finals\n• No electronic devices allowed\n• Time limit per question: 30 seconds\n• Decision of quiz master is final', 
@@ -403,7 +447,9 @@ INSERT INTO public.events (name, description, rules, category, icon_name, accent
 
 ('Movie Spoofing', 'Recreate iconic movie scenes with a hilarious twist. Entertainment at its finest!', 
  '• Team of 4-6 members\n• Scene assigned beforehand\n• Performance time: 5-8 minutes\n• Props and costumes allowed\n• Judged on creativity, humor, and teamwork', 
- 'non_technical', 'Film', '280 100% 65%');
+ 'non_technical', 'Film', '280 100% 65%')
+) AS v(name, description, rules, category, icon_name, accent_color)
+WHERE (SELECT COUNT(*) FROM public.events) = 0;
 
 -- Enable realtime for messages and registrations
 ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
