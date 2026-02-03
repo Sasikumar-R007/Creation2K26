@@ -1,6 +1,6 @@
 // CREATION 2K26 Constants
 
-export const EVENT_DATE = new Date('2026-03-15T09:00:00');
+export const EVENT_DATE = new Date('2026-02-25T09:00:00');
 
 export const VENUE = {
   name: 'Main Auditorium',
