@@ -44,3 +44,53 @@ export const EVENT_ICONS = {
 } as const;
 
 export type EventIconName = keyof typeof EVENT_ICONS;
+
+// Event participation conflict rules: one event per conflict group.
+// Keys are normalized event names (uppercase). Values list what you CAN and CANNOT participate in if you choose this event.
+export const EVENT_PARTICIPATION_RULES: Record<string, { can: string[]; cannot: string[] }> = {
+  QUIZ: {
+    can: ["WEB DESIGN", "IPL AUCTION", "AD-ZAP", "MOVIE SPOOFING"],
+    cannot: ["PERSONALITY CONTEST", "MEMORY MATRIX", "AI PROMPT", "PAPER PRESENTATION", "DEBUGGING"],
+  },
+  "PERSONALITY CONTEST": {
+    can: ["WEB DESIGN", "IPL AUCTION", "AD-ZAP", "MOVIE SPOOFING"],
+    cannot: ["QUIZ", "MEMORY MATRIX", "AI PROMPT", "PAPER PRESENTATION", "DEBUGGING"],
+  },
+  "MEMORY MATRIX": {
+    can: ["WEB DESIGN", "IPL AUCTION", "AD-ZAP", "MOVIE SPOOFING"],
+    cannot: ["QUIZ", "PERSONALITY CONTEST", "AI PROMPT", "PAPER PRESENTATION", "DEBUGGING"],
+  },
+  "AI PROMPT": {
+    can: ["WEB DESIGN", "IPL AUCTION", "AD-ZAP", "MOVIE SPOOFING"],
+    cannot: ["QUIZ", "PERSONALITY CONTEST", "MEMORY MATRIX", "PAPER PRESENTATION", "DEBUGGING"],
+  },
+  "PAPER PRESENTATION": {
+    can: ["WEB DESIGN", "IPL AUCTION", "AD-ZAP", "MOVIE SPOOFING"],
+    cannot: ["QUIZ", "PERSONALITY CONTEST", "MEMORY MATRIX", "AI PROMPT", "DEBUGGING"],
+  },
+  DEBUGGING: {
+    can: ["WEB DESIGN", "IPL AUCTION", "AD-ZAP", "MOVIE SPOOFING"],
+    cannot: ["QUIZ", "PERSONALITY CONTEST", "MEMORY MATRIX", "AI PROMPT", "PAPER PRESENTATION"],
+  },
+  "WEB DESIGN": {
+    can: ["QUIZ", "PERSONALITY CONTEST", "MEMORY MATRIX", "AI PROMPT", "PAPER PRESENTATION", "DEBUGGING"],
+    cannot: ["IPL AUCTION", "AD-ZAP", "MOVIE SPOOFING"],
+  },
+  "IPL AUCTION": {
+    can: ["QUIZ", "PERSONALITY CONTEST", "MEMORY MATRIX", "AI PROMPT", "PAPER PRESENTATION", "DEBUGGING"],
+    cannot: ["WEB DESIGN", "AD-ZAP", "MOVIE SPOOFING"],
+  },
+  "AD-ZAP": {
+    can: ["QUIZ", "PERSONALITY CONTEST", "MEMORY MATRIX", "AI PROMPT", "PAPER PRESENTATION", "DEBUGGING"],
+    cannot: ["WEB DESIGN", "IPL AUCTION", "MOVIE SPOOFING"],
+  },
+  "MOVIE SPOOFING": {
+    can: ["QUIZ", "PERSONALITY CONTEST", "MEMORY MATRIX", "AI PROMPT", "PAPER PRESENTATION", "DEBUGGING"],
+    cannot: ["WEB DESIGN", "IPL AUCTION", "AD-ZAP"],
+  },
+};
+
+// Map DB/display name variants to rule key (normalized uppercase)
+export const EVENT_NAME_TO_RULE_KEY: Record<string, string> = {
+  "AI PROMPT ENGINEERING": "AI PROMPT",
+};

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import * as LucideIcons from "lucide-react";
 import {
@@ -10,11 +10,22 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { NeonButton } from "@/components/ui/neon-button";
 import { Separator } from "@/components/ui/separator";
-import { EventData } from "@/hooks/useEvents";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { EventData, useEvents } from "@/hooks/useEvents";
+import { useMyRegistrations } from "@/hooks/useRegistrations";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  getParticipationForEvent,
+  conflictsWithRegistered,
+} from "@/lib/eventParticipation";
 
 interface EventModalProps {
   event: EventData;
@@ -35,12 +46,56 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
   const queryClient = useQueryClient();
   const [isRegistering, setIsRegistering] = useState(false);
 
+  const { data: allEvents = [] } = useEvents();
+  const { data: myRegistrations = [] } = useMyRegistrations();
+
   const isTechnical = event.category === "technical";
+
+  const { can: canParticipate, cannot: cannotParticipate } = useMemo(
+    () => getParticipationForEvent(event.name, allEvents),
+    [event.name, allEvents]
+  );
+
+  const registeredEventNames = useMemo(
+    () =>
+      (myRegistrations ?? [])
+        .map((r) => r.events?.name)
+        .filter((name): name is string => !!name),
+    [myRegistrations]
+  );
+
+  const hasConflict = useMemo(
+    () => conflictsWithRegistered(event.name, registeredEventNames),
+    [event.name, registeredEventNames]
+  );
+
+  const isAlreadyRegistered = useMemo(
+    () => myRegistrations?.some((r) => r.event_id === event.id),
+    [myRegistrations, event.id]
+  );
 
   const handleRegister = async () => {
     if (!user) {
       navigate("/auth?tab=signup");
       onClose();
+      return;
+    }
+
+    if (hasConflict) {
+      toast({
+        title: "Event timing conflict",
+        description: "You can only participate in one event from this time slot. You have already registered for a conflicting event.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isAlreadyRegistered) {
+      toast({
+        title: "Already Registered",
+        description: "You are already registered for this event.",
+        variant: "default",
+      });
       return;
     }
 
@@ -84,6 +139,37 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
 
   // Parse rules into array
   const rulesArray = event.rules.split("\n").filter((rule) => rule.trim());
+
+  const registerDisabled = isRegistering || hasConflict || isAlreadyRegistered;
+  const registerButton = (
+    <NeonButton
+      variant={isTechnical ? "cyan" : "purple"}
+      onClick={handleRegister}
+      disabled={registerDisabled}
+    >
+      {isRegistering ? (
+        <>
+          <LucideIcons.Loader2 className="w-4 h-4 animate-spin" />
+          Registering...
+        </>
+      ) : hasConflict ? (
+        <>
+          <LucideIcons.AlertCircle className="w-4 h-4" />
+          Event conflict
+        </>
+      ) : isAlreadyRegistered ? (
+        <>
+          <LucideIcons.CheckCircle2 className="w-4 h-4" />
+          Already registered
+        </>
+      ) : (
+        <>
+          <LucideIcons.UserPlus className="w-4 h-4" />
+          {user ? "Register for Event" : "Sign Up to Register"}
+        </>
+      )}
+    </NeonButton>
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -169,6 +255,51 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
             </>
           )}
 
+          {/* Participation: Can / Cannot */}
+          <Separator className="bg-border/50" />
+          <div className="space-y-4">
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              If you register for this event
+            </h4>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+                <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
+                  <LucideIcons.CheckCircle2 className="h-4 w-4" />
+                  You can also participate in
+                </p>
+                {canParticipate.length > 0 ? (
+                  <ul className="space-y-1 text-sm text-foreground">
+                    {canParticipate.map((e) => (
+                      <li key={e.id}>• {e.name}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No other events in this slot.</p>
+                )}
+              </div>
+              <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3">
+                <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-destructive">
+                  <LucideIcons.XCircle className="h-4 w-4" />
+                  You cannot participate in
+                </p>
+                {cannotParticipate.length > 0 ? (
+                  <ul className="space-y-1 text-sm text-muted-foreground">
+                    {cannotParticipate.map((e) => (
+                      <li key={e.id}>• {e.name}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No conflicts.</p>
+                )}
+              </div>
+            </div>
+            {hasConflict && (
+              <p className="text-xs text-destructive">
+                You have already registered for an event that conflicts with this one. Event timing conflict.
+              </p>
+            )}
+          </div>
+
           <Separator className="bg-border/50" />
 
           {/* Register Button */}
@@ -176,23 +307,18 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
             <NeonButton variant="ghost" onClick={onClose}>
               Close
             </NeonButton>
-            <NeonButton
-              variant={isTechnical ? "cyan" : "purple"}
-              onClick={handleRegister}
-              disabled={isRegistering}
-            >
-              {isRegistering ? (
-                <>
-                  <LucideIcons.Loader2 className="w-4 h-4 animate-spin" />
-                  Registering...
-                </>
-              ) : (
-                <>
-                  <LucideIcons.UserPlus className="w-4 h-4" />
-                  {user ? "Register for Event" : "Sign Up to Register"}
-                </>
-              )}
-            </NeonButton>
+            {hasConflict ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>{registerButton}</TooltipTrigger>
+                  <TooltipContent>
+                    <p>Event timing conflict. You can only participate in one event from this time slot.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              registerButton
+            )}
           </div>
         </div>
       </DialogContent>

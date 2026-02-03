@@ -1,4 +1,7 @@
+import { useMemo } from "react";
 import { useTechnicalEvents, useNonTechnicalEvents } from "@/hooks/useEvents";
+import { useMyRegistrations } from "@/hooks/useRegistrations";
+import { conflictsWithRegistered } from "@/lib/eventParticipation";
 import EventCard from "./EventCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Cpu, Palette } from "lucide-react";
@@ -6,6 +9,17 @@ import { Cpu, Palette } from "lucide-react";
 const EventsGrid = () => {
   const { data: technicalEvents, isLoading: loadingTech } = useTechnicalEvents();
   const { data: nonTechnicalEvents, isLoading: loadingNonTech } = useNonTechnicalEvents();
+  const { data: myRegistrations = [] } = useMyRegistrations();
+
+  const registeredEventNames = useMemo(
+    () => myRegistrations.map((r) => r.events?.name).filter((name): name is string => !!name),
+    [myRegistrations]
+  );
+
+  const isEventConflicting = useMemo(
+    () => (eventName: string) => conflictsWithRegistered(eventName, registeredEventNames),
+    [registeredEventNames]
+  );
 
   const isLoading = loadingTech || loadingNonTech;
 
@@ -56,7 +70,12 @@ const EventsGrid = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {technicalEvents?.map((event, index) => (
-            <EventCard key={event.id} event={event} index={index} />
+            <EventCard
+              key={event.id}
+              event={event}
+              index={index}
+              hasConflictWithRegistered={isEventConflicting(event.name)}
+            />
           ))}
         </div>
       </div>
@@ -74,7 +93,12 @@ const EventsGrid = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {nonTechnicalEvents?.map((event, index) => (
-            <EventCard key={event.id} event={event} index={index} />
+            <EventCard
+              key={event.id}
+              event={event}
+              index={index}
+              hasConflictWithRegistered={isEventConflicting(event.name)}
+            />
           ))}
         </div>
       </div>
