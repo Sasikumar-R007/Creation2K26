@@ -8,7 +8,7 @@ interface AuthContextType {
   user: AuthUser | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, name: string, department?: string, college?: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, name: string, department?: string, college?: string, whatsapp_phone?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: Error | null }>;
@@ -115,7 +115,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     password: string,
     name: string,
     department?: string,
-    college?: string
+    college?: string,
+    whatsapp_phone?: string
   ) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
@@ -129,6 +130,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             name,
             department,
             college,
+            whatsapp_phone,
           },
         },
       });

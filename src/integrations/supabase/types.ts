@@ -124,6 +124,7 @@ export type Database = {
           id: string
           name: string
           updated_at: string
+          whatsapp_phone: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -134,6 +135,7 @@ export type Database = {
           id: string
           name: string
           updated_at?: string
+          whatsapp_phone?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -144,6 +146,7 @@ export type Database = {
           id?: string
           name?: string
           updated_at?: string
+          whatsapp_phone?: string | null
         }
         Relationships: []
       }

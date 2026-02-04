@@ -10,6 +10,7 @@ export interface Profile {
   email: string;
   department: string | null;
   college: string | null;
+  whatsapp_phone: string | null;
   avatar_url: string | null;
   created_at: string;
   updated_at: string;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Sparkles, Mail, Lock, User, Building, GraduationCap, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Sparkles, Mail, Lock, User, Building, GraduationCap, Phone, Eye, EyeOff, Loader2 } from "lucide-react";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { NeonButton } from "@/components/ui/neon-button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,7 @@ const Auth = () => {
     name: "",
     email: "",
     password: "",
+    whatsapp_phone: "",
     department: "",
     college: "",
   });
@@ -107,7 +108,8 @@ const Auth = () => {
       signUpForm.password,
       signUpForm.name,
       signUpForm.department || undefined,
-      signUpForm.college || undefined
+      signUpForm.college || undefined,
+      signUpForm.whatsapp_phone || undefined
     );
     setIsSubmitting(false);
 
@@ -279,6 +281,22 @@ const Auth = () => {
                   </button>
                 </div>
                 {errors.password && <p className="text-destructive text-sm">{errors.password}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="signup-whatsapp">WhatsApp Phone Number</Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="signup-whatsapp"
+                    type="tel"
+                    placeholder="+91 98765 43210"
+                    className="pl-10 bg-muted/50"
+                    value={signUpForm.whatsapp_phone}
+                    onChange={(e) => setSignUpForm({ ...signUpForm, whatsapp_phone: e.target.value })}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">Include country code for WhatsApp</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
