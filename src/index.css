@@ -464,3 +464,72 @@
 .animate-delay-300 { animation-delay: 300ms; }
 .animate-delay-400 { animation-delay: 400ms; }
 .animate-delay-500 { animation-delay: 500ms; }
+
+/* ---------- Loading screen (Creation theme) ---------- */
+@keyframes loading-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes loading-flip-in {
+  0% {
+    opacity: 0;
+    transform: perspective(400px) rotateX(90deg);
+  }
+  40% {
+    opacity: 1;
+    transform: perspective(400px) rotateX(-8deg);
+  }
+  70% {
+    transform: perspective(400px) rotateX(4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(400px) rotateX(0deg);
+  }
+}
+
+@keyframes loading-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes loading-spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes loading-pulse-soft {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes loading-text-gradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.loading-screen-fade-in {
+  animation: loading-fade-in 0.55s ease forwards;
+}
+
+.loading-screen-flip-in {
+  animation: loading-flip-in 1s ease-out forwards;
+}
+
+.animate-loading-spin {
+  animation: loading-spin 1s linear infinite;
+}
+
+.animate-loading-spin-slow {
+  animation: loading-spin-slow 8s linear infinite;
+}
+
+.animate-pulse-soft {
+  animation: loading-pulse-soft 2s ease-in-out infinite;
+}
+
+.loading-screen-text-gradient {
+  background-size: 200% auto;
+  animation: loading-text-gradient 3s ease-in-out infinite;
+}
