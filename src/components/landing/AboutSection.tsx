@@ -30,23 +30,43 @@ const AboutSection = () => {
           </p>
         </div>
 
-        {/* General Instructions */}
-        <GlassPanel variant="hover" className="p-8 mb-16">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <FileText className="w-6 h-6 text-primary" />
+        {/* General Instructions - premium card */}
+        <GlassPanel variant="hover" glow="cyan" className="mb-16 overflow-hidden relative">
+          {/* Top gradient bar */}
+          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary/80 to-secondary/80" />
+          <div className="p-8 md:p-10 relative">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/20 flex items-center justify-center shrink-0 shadow-lg shadow-primary/10">
+                <FileText className="w-7 h-7 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-2xl md:text-3xl font-bold">
+                  <span className="gradient-text">General Instructions</span>
+                  <span className="text-foreground font-semibold"> of Creation 2K26</span>
+                </h3>
+                <span className="inline-block mt-2 text-xs font-semibold uppercase tracking-widest text-primary/90 bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+                  General Rules
+                </span>
+              </div>
             </div>
-            <h3 className="text-xl md:text-2xl font-bold">General Instructions of Creation 2K26</h3>
+
+            <div className="grid md:grid-cols-2 gap-3">
+              {generalRules.map((rule, index) => (
+                <div
+                  key={index}
+                  className="group flex items-start gap-4 p-4 rounded-xl bg-muted/20 hover:bg-muted/40 border border-transparent hover:border-primary/10 transition-all duration-200"
+                >
+                  <span
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary/30 to-secondary/30 text-sm font-bold text-primary border border-primary/20 group-hover:from-primary/40 group-hover:to-secondary/40 transition-colors"
+                    aria-hidden
+                  >
+                    {index + 1}
+                  </span>
+                  <p className="text-foreground/95 text-sm leading-relaxed pt-0.5">{rule}</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">General Rules</h4>
-          <ul className="space-y-3 text-foreground">
-            {generalRules.map((rule, index) => (
-              <li key={index} className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-2" />
-                <span>{rule}</span>
-              </li>
-            ))}
-          </ul>
         </GlassPanel>
 
         {/* Features */}
