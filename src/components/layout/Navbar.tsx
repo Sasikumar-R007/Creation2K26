@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, Sparkles, LogIn, LogOut, User, LayoutDashboard } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User, LayoutDashboard } from "lucide-react";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { NeonButton } from "@/components/ui/neon-button";
 import { Button } from "@/components/ui/button";
@@ -48,13 +48,11 @@ const Navbar = () => {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 group">
-              <div className="relative">
-                <Sparkles className="h-8 w-8 text-primary transition-all group-hover:scale-110" />
-                <div className="absolute inset-0 blur-lg bg-primary/30 group-hover:bg-primary/50 transition-all" />
-              </div>
-              <span className="text-xl font-bold gradient-text hidden sm:inline">
-                CREATION 2K26
-              </span>
+              <img
+                src="/2K26.png"
+                alt="Creation 2K26"
+                className="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105"
+              />
             </Link>
 
             {/* Desktop Navigation */}
