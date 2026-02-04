@@ -1,31 +1,17 @@
-import { Trophy, Users, Calendar, Lightbulb } from "lucide-react";
+import { FileText } from "lucide-react";
 import { GlassPanel } from "@/components/ui/glass-panel";
 
-const stats = [
-  {
-    icon: Trophy,
-    value: "10+",
-    label: "Events",
-    color: "primary",
-  },
-  {
-    icon: Users,
-    value: "500+",
-    label: "Expected Participants",
-    color: "secondary",
-  },
-  {
-    icon: Calendar,
-    value: "1",
-    label: "Day of Innovation",
-    color: "accent",
-  },
-  {
-    icon: Lightbulb,
-    value: "∞",
-    label: "Ideas to Explore",
-    color: "primary",
-  },
+const generalRules = [
+  "The competition is open to all UG students from Engineering and Arts and Science colleges.",
+  "Online registration opens from 5.2.2026. Limited spot registration will be entertained until 10:00 AM on the day of the event.",
+  "A registration fee of Rs. 250 per participant must be paid online during the registration.",
+  "Entry is restricted to college students only. Carrying a valid college ID card is compulsory for all participants.",
+  "The Overall Championship will be calculated department-wise and not college-wise.",
+  "Lunch and refreshments will be provided.",
+  "The decision of the judges will be final.",
+  "Participation certificates will be given to all participants.",
+  "Any team found violating the rules will not be considered for further proceedings.",
+  "Travelling allowance and accommodation will not be provided.",
 ];
 
 const AboutSection = () => {
@@ -44,33 +30,24 @@ const AboutSection = () => {
           </p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {stats.map((stat, index) => (
-            <GlassPanel
-              key={stat.label}
-              variant="hover"
-              className="p-6 text-center animate-slide-up opacity-0"
-              style={{
-                animationDelay: `${index * 100}ms`,
-                animationFillMode: "forwards",
-              }}
-            >
-              <div
-                className={`
-                  w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center
-                  ${stat.color === "primary" ? "bg-primary/10 text-primary" : ""}
-                  ${stat.color === "secondary" ? "bg-secondary/10 text-secondary" : ""}
-                  ${stat.color === "accent" ? "bg-accent/10 text-accent" : ""}
-                `}
-              >
-                <stat.icon className="w-7 h-7" />
-              </div>
-              <div className="text-3xl md:text-4xl font-bold mb-1">{stat.value}</div>
-              <div className="text-muted-foreground text-sm">{stat.label}</div>
-            </GlassPanel>
-          ))}
-        </div>
+        {/* General Instructions */}
+        <GlassPanel variant="hover" className="p-8 mb-16">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+              <FileText className="w-6 h-6 text-primary" />
+            </div>
+            <h3 className="text-xl md:text-2xl font-bold">General Instructions of Creation 2K26</h3>
+          </div>
+          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">General Rules</h4>
+          <ul className="space-y-3 text-foreground">
+            {generalRules.map((rule, index) => (
+              <li key={index} className="flex items-start gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-2" />
+                <span>{rule}</span>
+              </li>
+            ))}
+          </ul>
+        </GlassPanel>
 
         {/* Features */}
         <div className="grid md:grid-cols-2 gap-8">
