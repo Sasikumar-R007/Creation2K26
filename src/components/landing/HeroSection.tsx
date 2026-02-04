@@ -103,7 +103,7 @@ const HeroSection = () => {
           </div>
 
           {/* Main Title */}
-          <p className="text-sm md:text-base uppercase tracking-[0.35em] text-muted-foreground/90 mb-4 animate-fade-in" style={{ animationDelay: "80ms" }}>
+          <p className="hero-mind-marvel text-sm md:text-base uppercase tracking-[0.35em] mb-4 animate-fade-in" style={{ animationDelay: "80ms" }}>
             Make Mind Marvel
           </p>
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 animate-fade-in" style={{ animationDelay: "100ms" }}>
