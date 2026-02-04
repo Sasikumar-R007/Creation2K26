@@ -113,8 +113,8 @@ const HeroSection = () => {
 
           {/* Tagline */}
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 animate-fade-in" style={{ animationDelay: "200ms" }}>
-            Where <span className="text-primary font-semibold">Innovation</span> Meets{" "}
-            <span className="text-secondary font-semibold">Imagination</span>
+            <span className="text-primary font-semibold">BCA Department</span>,{" "}
+            <span className="text-secondary font-semibold">Bishop Heber College</span>
           </p>
 
           {/* Event Info */}
