@@ -410,14 +410,14 @@
   }
 }
 
-/* Countdown digit: gentle pop when value changes */
-@keyframes countdown-tick {
-  0% {
-    transform: scale(1.08);
-    opacity: 0.9;
+/* Countdown digit: slide from top to center when value changes */
+@keyframes countdown-slide-from-top {
+  from {
+    transform: translate(-50%, -150%);
+    opacity: 0.6;
   }
-  100% {
-    transform: scale(1);
+  to {
+    transform: translate(-50%, -50%);
     opacity: 1;
   }
 }
@@ -426,8 +426,8 @@
   animation: countdown-glow 3s ease-in-out infinite;
 }
 
-.countdown-digit {
-  animation: countdown-tick 0.4s ease-out;
+.countdown-slide-in {
+  animation: countdown-slide-from-top 0.35s ease-out forwards;
 }
 
 /* Animation Classes */

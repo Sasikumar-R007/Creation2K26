@@ -129,7 +129,7 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Countdown Timer - premium */}
+          {/* Countdown Timer - premium, digits slide top-to-bottom on change */}
           <div className="flex flex-wrap justify-center items-end gap-3 md:gap-6 mb-12 animate-fade-in" style={{ animationDelay: "400ms" }}>
             {[
               { value: timeLeft.days, label: "Days" },
@@ -147,12 +147,15 @@ const HeroSection = () => {
                   <div className="absolute inset-[1px] rounded-2xl bg-card/95 backdrop-blur border border-white/5" />
                   {/* Inner glow */}
                   <div className="absolute inset-0 rounded-2xl shadow-[inset_0_0_30px_hsl(var(--primary)_/_0.15)]" />
-                  <span
-                    key={`${item.label}-${item.value}`}
-                    className="relative text-3xl sm:text-4xl md:text-5xl font-bold tabular-nums text-transparent bg-clip-text bg-gradient-to-br from-primary via-primary to-secondary drop-shadow-[0_0_20px_hsl(var(--primary)_/_0.5)] countdown-digit"
-                  >
-                    {String(item.value).padStart(2, "0")}
-                  </span>
+                  {/* Viewport: digit slides from top to center when value changes */}
+                  <div className="relative w-full h-full overflow-hidden">
+                    <span
+                      key={`${item.label}-${item.value}`}
+                      className="countdown-slide-in absolute left-1/2 top-1/2 text-3xl sm:text-4xl md:text-5xl font-bold tabular-nums text-transparent bg-clip-text bg-gradient-to-br from-primary via-primary to-secondary drop-shadow-[0_0_20px_hsl(var(--primary)_/_0.5)]"
+                    >
+                      {String(item.value).padStart(2, "0")}
+                    </span>
+                  </div>
                 </div>
                 <span className="mt-2 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground/90">
                   {item.label}
