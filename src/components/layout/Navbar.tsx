@@ -46,13 +46,11 @@ const Navbar = () => {
       <GlassPanel className="mx-4 mt-4 rounded-2xl">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            {/* Logo */}
+            {/* Logo – same text style as hero (gradient, gloss) */}
             <Link to="/" className="flex items-center gap-2 group">
-              <img
-                src="/2K26.png"
-                alt="Creation 2K26"
-                className="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105"
-              />
+              <span className="hero-creation-text text-xl font-bold tracking-tight sm:text-2xl">
+                CREATION 2K26
+              </span>
             </Link>
 
             {/* Desktop Navigation */}
