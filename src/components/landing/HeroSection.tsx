@@ -129,21 +129,34 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Countdown Timer */}
-          <div className="flex justify-center gap-4 md:gap-8 mb-12 animate-fade-in" style={{ animationDelay: "400ms" }}>
+          {/* Countdown Timer - premium */}
+          <div className="flex flex-wrap justify-center items-end gap-3 md:gap-6 mb-12 animate-fade-in" style={{ animationDelay: "400ms" }}>
             {[
               { value: timeLeft.days, label: "Days" },
               { value: timeLeft.hours, label: "Hours" },
               { value: timeLeft.minutes, label: "Minutes" },
               { value: timeLeft.seconds, label: "Seconds" },
             ].map((item, index) => (
-              <div key={item.label} className="text-center">
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl bg-card/80 backdrop-blur border border-border/50 flex items-center justify-center mb-2 animate-glow-pulse" style={{ animationDelay: `${index * 200}ms` }}>
-                  <span className="text-2xl md:text-3xl font-bold text-primary">
+              <div key={item.label} className="flex flex-col items-center">
+                <div
+                  className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-2xl flex items-center justify-center overflow-hidden countdown-card group transition-transform duration-300 hover:scale-105"
+                  style={{ animationDelay: `${index * 80}ms` }}
+                >
+                  {/* Gradient border glow */}
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/40 via-primary/20 to-secondary/30 opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute inset-[1px] rounded-2xl bg-card/95 backdrop-blur border border-white/5" />
+                  {/* Inner glow */}
+                  <div className="absolute inset-0 rounded-2xl shadow-[inset_0_0_30px_hsl(var(--primary)_/_0.15)]" />
+                  <span
+                    key={`${item.label}-${item.value}`}
+                    className="relative text-3xl sm:text-4xl md:text-5xl font-bold tabular-nums text-transparent bg-clip-text bg-gradient-to-br from-primary via-primary to-secondary drop-shadow-[0_0_20px_hsl(var(--primary)_/_0.5)] countdown-digit"
+                  >
                     {String(item.value).padStart(2, "0")}
                   </span>
                 </div>
-                <span className="text-xs md:text-sm text-muted-foreground">{item.label}</span>
+                <span className="mt-2 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground/90">
+                  {item.label}
+                </span>
               </div>
             ))}
           </div>
