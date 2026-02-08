@@ -1,7 +1,7 @@
 import { UserPlus, MailCheck, CalendarCheck } from "lucide-react";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { NeonButton } from "@/components/ui/neon-button";
-import { useRegistrationModal } from "@/contexts/RegistrationModalContext";
+import { useNavigate } from "react-router-dom";
 
 const steps = [
   {
@@ -28,7 +28,7 @@ const steps = [
 ];
 
 const ContactSection = () => {
-  const { openRegistrationModal } = useRegistrationModal();
+  const navigate = useNavigate();
 
   return (
     <section id="contact" className="py-24 relative">
@@ -62,7 +62,7 @@ const ContactSection = () => {
         </div>
 
         <div className="text-center mt-12">
-          <NeonButton variant="cyan" size="lg" onClick={() => openRegistrationModal()}>
+          <NeonButton variant="cyan" size="lg" onClick={() => navigate("/register")}>
             <UserPlus className="w-5 h-5" />
             Register Now
           </NeonButton>

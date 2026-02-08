@@ -9,6 +9,7 @@ import { RegistrationModalProvider } from "@/contexts/RegistrationModalContext";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { RegistrationModal } from "@/components/RegistrationModal";
 import Index from "./pages/Index";
+import Register from "./pages/Register";
 import AdminLogin from "./pages/AdminLogin";
 import Dashboard from "./pages/Dashboard";
 import ICDashboard from "./pages/ICDashboard";
@@ -80,6 +81,7 @@ const AppContent = () => {
           <NavigationLoader>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/register" element={<Register />} />
               <Route path="/admin-login" element={<AdminLogin />} />
             <Route
               path="/dashboard"

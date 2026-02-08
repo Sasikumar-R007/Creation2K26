@@ -1,10 +1,8 @@
 import { Link } from "react-router-dom";
 import { Sparkles, Instagram, Linkedin, Twitter, Mail, MapPin, Calendar } from "lucide-react";
 import { VENUE, SOCIAL_LINKS, EVENT_DATE } from "@/lib/constants";
-import { useRegistrationModal } from "@/contexts/RegistrationModalContext";
 
 const Footer = () => {
-  const { openRegistrationModal } = useRegistrationModal();
   const formattedDate = EVENT_DATE.toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
@@ -42,13 +40,9 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <button
-                  type="button"
-                  onClick={() => openRegistrationModal()}
-                  className="text-muted-foreground hover:text-primary transition-colors text-sm"
-                >
+                <Link to="/register" className="text-muted-foreground hover:text-primary transition-colors text-sm">
                   Register
-                </button>
+                </Link>
               </li>
               <li>
                 <a href="/#contact" className="text-muted-foreground hover:text-primary transition-colors text-sm">

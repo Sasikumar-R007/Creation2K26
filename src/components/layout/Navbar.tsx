@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, LogOut, LayoutDashboard, Shield, User } from "lucide-react";
-import { useRegistrationModal } from "@/contexts/RegistrationModalContext";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { NeonButton } from "@/components/ui/neon-button";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,6 @@ import { useAuth } from "@/contexts/AuthContext";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, signOut, loading } = useAuth();
-  const { openRegistrationModal } = useRegistrationModal();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -106,7 +104,7 @@ const Navbar = () => {
                   </Link>
                   <NeonButton
                     size="sm"
-                    onClick={() => openRegistrationModal()}
+                    onClick={() => navigate("/register")}
                   >
                     Register Now
                   </NeonButton>
@@ -177,7 +175,7 @@ const Navbar = () => {
                       </Link>
                       <NeonButton
                         onClick={() => {
-                          openRegistrationModal();
+                          navigate("/register");
                           setIsOpen(false);
                         }}
                       >
