@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import * as LucideIcons from "lucide-react";
+import { useRegistrationModal } from "@/contexts/RegistrationModalContext";
 import {
   Dialog,
   DialogContent,
@@ -44,6 +45,7 @@ const DynamicIcon = ({ name, className }: { name: string; className?: string }) 
 const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { openRegistrationModal } = useRegistrationModal();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isRegistering, setIsRegistering] = useState(false);
@@ -131,8 +133,8 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
 
   const handleRegister = async () => {
     if (!user) {
-      navigate("/auth?tab=signup");
       onClose();
+      openRegistrationModal(event.id);
       return;
     }
 

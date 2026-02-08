@@ -26,7 +26,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
 
   if (!user) {
     // Redirect to auth page, but save the intended destination
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return <Navigate to="/admin-login" state={{ from: location }} replace />;
   }
 
   if (!allowedRoles.includes(user.role)) {

@@ -158,3 +158,19 @@ export const useAllRegistrations = () => {
     },
   });
 };
+
+/** All profiles (sign-ups). Use in admin only. */
+export const useAllProfiles = () => {
+  return useQuery({
+    queryKey: ["profiles", "all"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, name, email, department, college, whatsapp_phone, created_at")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+};

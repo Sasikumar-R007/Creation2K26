@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, LogIn, LogOut, User, LayoutDashboard } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard, Shield, User } from "lucide-react";
+import { useRegistrationModal } from "@/contexts/RegistrationModalContext";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { NeonButton } from "@/components/ui/neon-button";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, signOut, loading } = useAuth();
+  const { openRegistrationModal } = useRegistrationModal();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -18,7 +20,7 @@ const Navbar = () => {
   };
 
   const getDashboardLink = () => {
-    if (!user) return "/auth";
+    if (!user) return "/admin-login";
     switch (user.role) {
       case "creation_admin":
         return "/admin";
@@ -95,18 +97,16 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate("/auth")}
-                    className="gap-2"
+                  <Link
+                    to="/admin-login"
+                    className="text-sm text-muted-foreground hover:text-primary flex items-center gap-2"
                   >
-                    <LogIn className="h-4 w-4" />
-                    Sign In
-                  </Button>
+                    <Shield className="h-4 w-4" />
+                    Admin
+                  </Link>
                   <NeonButton
                     size="sm"
-                    onClick={() => navigate("/auth?tab=signup")}
+                    onClick={() => openRegistrationModal()}
                   >
                     Register Now
                   </NeonButton>
@@ -167,20 +167,17 @@ const Navbar = () => {
                     </>
                   ) : (
                     <>
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          navigate("/auth");
-                          setIsOpen(false);
-                        }}
-                        className="justify-start gap-2"
+                      <Link
+                        to="/admin-login"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary py-2"
                       >
-                        <LogIn className="h-4 w-4" />
-                        Sign In
-                      </Button>
+                        <Shield className="h-4 w-4" />
+                        Admin Sign In
+                      </Link>
                       <NeonButton
                         onClick={() => {
-                          navigate("/auth?tab=signup");
+                          openRegistrationModal();
                           setIsOpen(false);
                         }}
                       >

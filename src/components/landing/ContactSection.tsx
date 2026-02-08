@@ -1,34 +1,34 @@
 import { UserPlus, MailCheck, CalendarCheck } from "lucide-react";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { NeonButton } from "@/components/ui/neon-button";
-import { useNavigate } from "react-router-dom";
+import { useRegistrationModal } from "@/contexts/RegistrationModalContext";
 
 const steps = [
   {
     step: 1,
-    title: "Sign up",
-    description: "Click on the Sign Up button and create your account.",
+    title: "Register",
+    description: "Click Register Now and fill in your details to create an account.",
     icon: UserPlus,
     iconClass: "bg-primary/10 text-primary",
   },
   {
     step: 2,
-    title: "Verify & log in",
-    description: "Once your mail ID is verified, log in with your registered email ID.",
+    title: "Verify email",
+    description: "Check your email to verify your account (if required).",
     icon: MailCheck,
     iconClass: "bg-secondary/10 text-secondary",
   },
   {
     step: 3,
-    title: "Select events & stay updated",
-    description: "Select the event you want to participate in. All updates will be shown in the Event Updates page after logging in.",
+    title: "Select events",
+    description: "Choose events from the Events section. You can register for up to 2 events (subject to conflict rules).",
     icon: CalendarCheck,
     iconClass: "bg-accent/10 text-accent",
   },
 ];
 
 const ContactSection = () => {
-  const navigate = useNavigate();
+  const { openRegistrationModal } = useRegistrationModal();
 
   return (
     <section id="contact" className="py-24 relative">
@@ -62,9 +62,9 @@ const ContactSection = () => {
         </div>
 
         <div className="text-center mt-12">
-          <NeonButton variant="cyan" size="lg" onClick={() => navigate("/auth?tab=signup")}>
+          <NeonButton variant="cyan" size="lg" onClick={() => openRegistrationModal()}>
             <UserPlus className="w-5 h-5" />
-            Sign Up Now
+            Register Now
           </NeonButton>
         </div>
       </div>

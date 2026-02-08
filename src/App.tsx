@@ -5,9 +5,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { RegistrationModalProvider } from "@/contexts/RegistrationModalContext";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { RegistrationModal } from "@/components/RegistrationModal";
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
+import AdminLogin from "./pages/AdminLogin";
 import Dashboard from "./pages/Dashboard";
 import ICDashboard from "./pages/ICDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -69,14 +71,16 @@ const AppContent = () => {
   }
 
   return (
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <NavigationLoader>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
+    <RegistrationModalProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <RegistrationModal />
+          <NavigationLoader>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/admin-login" element={<AdminLogin />} />
             <Route
               path="/dashboard"
               element={
@@ -101,11 +105,12 @@ const AppContent = () => {
                 </ProtectedRoute>
               }
             />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </NavigationLoader>
-      </BrowserRouter>
-    </TooltipProvider>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </NavigationLoader>
+        </BrowserRouter>
+      </TooltipProvider>
+    </RegistrationModalProvider>
   );
 };
 

@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useRegistrationModal } from "@/contexts/RegistrationModalContext";
 import { Sparkles, Calendar, MapPin, ArrowDown } from "lucide-react";
 import { NeonButton } from "@/components/ui/neon-button";
 import { EVENT_DATE, VENUE } from "@/lib/constants";
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const { openRegistrationModal } = useRegistrationModal();
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -169,7 +171,7 @@ const HeroSection = () => {
             <NeonButton
               variant="cyan"
               size="xl"
-              onClick={() => navigate("/auth?tab=signup")}
+              onClick={() => openRegistrationModal()}
               className="animate-glow-pulse"
             >
               <Sparkles className="w-5 h-5" />
