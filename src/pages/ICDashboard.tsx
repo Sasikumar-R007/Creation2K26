@@ -13,6 +13,8 @@ import {
   Megaphone,
   Mail,
   Menu,
+  Filter,
+  X,
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -22,6 +24,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -30,6 +40,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ParticipantTile } from "@/components/dashboard/ParticipantTile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,6 +63,9 @@ const ICDashboard = () => {
   const [messageContent, setMessageContent] = useState("");
   const [activeMenu, setActiveMenu] = useState<ICMenuId>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [icRegSearch, setIcRegSearch] = useState("");
+  const [icRegDepartment, setIcRegDepartment] = useState<string>("all");
+  const [icRegCollege, setIcRegCollege] = useState<string>("all");
   const sendMessage = useSendMessage();
 
   // Get IC's assigned event
@@ -104,6 +118,25 @@ const ICDashboard = () => {
       minute: "2-digit",
     });
   };
+
+  const filteredIcRegistrations = (() => {
+    const list = registrations || [];
+    const q = icRegSearch.trim().toLowerCase();
+    return list.filter((reg: any) => {
+      const name = reg.profiles?.name ?? "";
+      const email = reg.profiles?.email ?? "";
+      if (q && !name.toLowerCase().includes(q) && !email.toLowerCase().includes(q)) return false;
+      if (icRegDepartment !== "all" && (reg.profiles?.department || "") !== icRegDepartment) return false;
+      if (icRegCollege !== "all" && (reg.profiles?.college || "") !== icRegCollege) return false;
+      return true;
+    });
+  })();
+  const icUniqueDepartments = Array.from(
+    new Set((registrations || []).map((r: any) => r.profiles?.department).filter(Boolean))
+  ).sort();
+  const icUniqueColleges = Array.from(
+    new Set((registrations || []).map((r: any) => r.profiles?.college).filter(Boolean))
+  ).sort();
 
   if (loadingIC) {
     return (
@@ -275,35 +308,71 @@ const ICDashboard = () => {
                     ))}
                   </div>
                 ) : registrations && registrations.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Email</TableHead>
-                          <TableHead>Department</TableHead>
-                          <TableHead>Registered</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {registrations.map((reg: any) => (
-                          <TableRow key={reg.id}>
-                            <TableCell className="font-medium">
-                              {reg.profiles?.name || "Unknown"}
-                            </TableCell>
-                            <TableCell className="text-muted-foreground">
-                              {reg.profiles?.email || "-"}
-                            </TableCell>
-                            <TableCell className="text-muted-foreground">
-                              {reg.profiles?.department || "-"}
-                            </TableCell>
-                            <TableCell className="text-muted-foreground">
-                              {formatDate(reg.registered_at)}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                  <div className="space-y-4">
+                    <div className="flex flex-wrap items-center gap-2 p-3 rounded-lg bg-muted/30 border border-border/50">
+                      <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <Input
+                        placeholder="Search name or email..."
+                        value={icRegSearch}
+                        onChange={(e) => setIcRegSearch(e.target.value)}
+                        className="max-w-[200px] h-9"
+                      />
+                      <Select value={icRegDepartment} onValueChange={setIcRegDepartment}>
+                        <SelectTrigger className="w-[160px] h-9">
+                          <SelectValue placeholder="Department" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Departments</SelectItem>
+                          {icUniqueDepartments.map((d) => (
+                            <SelectItem key={d} value={d}>
+                              {d}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Select value={icRegCollege} onValueChange={setIcRegCollege}>
+                        <SelectTrigger className="w-[160px] h-9">
+                          <SelectValue placeholder="College" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Colleges</SelectItem>
+                          {icUniqueColleges.map((c) => (
+                            <SelectItem key={c} value={c}>
+                              {c}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 text-muted-foreground"
+                        onClick={() => {
+                          setIcRegSearch("");
+                          setIcRegDepartment("all");
+                          setIcRegCollege("all");
+                        }}
+                      >
+                        <X className="w-4 h-4 mr-1" />
+                        Clear
+                      </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Showing {filteredIcRegistrations.length} of {registrations.length} participants
+                    </p>
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {filteredIcRegistrations.map((reg: any) => (
+                        <ParticipantTile
+                          key={reg.id}
+                          name={reg.profiles?.name ?? "Unknown"}
+                          email={reg.profiles?.email ?? ""}
+                          department={reg.profiles?.department}
+                          college={reg.profiles?.college}
+                          event1Label={event?.name}
+                          date={formatDate(reg.registered_at)}
+                        />
+                      ))}
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center py-8">

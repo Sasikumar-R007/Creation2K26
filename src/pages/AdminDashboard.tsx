@@ -17,6 +17,8 @@ import {
   List,
   Mail,
   Menu,
+  Filter,
+  X,
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -26,6 +28,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -34,6 +44,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ParticipantTile } from "@/components/dashboard/ParticipantTile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEvents } from "@/hooks/useEvents";
 import { useAllRegistrations, useAllProfiles, useGuestRegistrations } from "@/hooks/useRegistrations";
@@ -57,7 +68,13 @@ const AdminDashboard = () => {
   const [messageContent, setMessageContent] = useState("");
   const [activeMenu, setActiveMenu] = useState<AdminMenuId>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
+  // Event registration filters
+  const [regSearch, setRegSearch] = useState("");
+  const [regEvent1, setRegEvent1] = useState<string>("all");
+  const [regEvent2, setRegEvent2] = useState<string>("all");
+  const [regDepartment, setRegDepartment] = useState<string>("all");
+  const [regCollege, setRegCollege] = useState<string>("all");
+
   const { data: events, isLoading: loadingEvents } = useEvents();
   const { data: registrations, isLoading: loadingRegistrations } = useAllRegistrations();
   const { data: profiles, isLoading: loadingProfiles } = useAllProfiles();
@@ -102,6 +119,26 @@ const AdminDashboard = () => {
     acc[eventId] = (acc[eventId] || 0) + 1;
     return acc;
   }, {}) || {};
+
+  // Filter guest registrations
+  const filteredGuestRegistrations = (() => {
+    const list = guestRegistrations || [];
+    const q = regSearch.trim().toLowerCase();
+    return list.filter((g: any) => {
+      if (q && !(g.name?.toLowerCase().includes(q) || g.email?.toLowerCase().includes(q))) return false;
+      if (regEvent1 !== "all" && g.event_1_id !== regEvent1) return false;
+      if (regEvent2 !== "all" && g.event_2_id !== regEvent2) return false;
+      if (regDepartment !== "all" && (g.department || "") !== regDepartment) return false;
+      if (regCollege !== "all" && (g.college || "") !== regCollege) return false;
+      return true;
+    });
+  })();
+  const uniqueDepartments = Array.from(
+    new Set((guestRegistrations || []).map((g: any) => g.department).filter(Boolean))
+  ).sort();
+  const uniqueColleges = Array.from(
+    new Set((guestRegistrations || []).map((g: any) => g.college).filter(Boolean))
+  ).sort();
 
   const renderSidebarNav = () => (
     <nav className="flex flex-col gap-1 p-2">
@@ -271,64 +308,114 @@ const AdminDashboard = () => {
                 {activeMenu === "guest-registrations" && (
                   <>
                     {loadingGuestRegistrations ? (
-                    <div className="flex justify-center py-8">
-                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                    </div>
-                  ) : guestRegistrations && guestRegistrations.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Event 1</TableHead>
-                            <TableHead>Event 2</TableHead>
-                            <TableHead>Department</TableHead>
-                            <TableHead>College</TableHead>
-                            <TableHead>Registered</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {guestRegistrations.slice(0, 50).map((g: any) => (
-                            <TableRow key={g.id}>
-                              <TableCell className="font-medium">{g.name || "-"}</TableCell>
-                              <TableCell className="text-muted-foreground">{g.email || "-"}</TableCell>
-                              <TableCell>
-                                <Badge className="bg-primary/20 text-primary">
-                                  {g.event_1?.name || "-"}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                {g.event_2?.name ? (
-                                  <Badge className="bg-secondary/20 text-secondary">
-                                    {g.event_2.name}
-                                  </Badge>
-                                ) : (
-                                  "-"
-                                )}
-                              </TableCell>
-                              <TableCell>{g.department || "-"}</TableCell>
-                              <TableCell>{g.college || "-"}</TableCell>
-                              <TableCell className="text-muted-foreground">
-                                {formatDate(g.created_at)}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                      {guestRegistrations.length > 50 && (
-                        <p className="text-center text-sm text-muted-foreground mt-4">
-                          Showing 50 of {guestRegistrations.length} registrations
+                      <div className="flex justify-center py-8">
+                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                      </div>
+                    ) : guestRegistrations && guestRegistrations.length > 0 ? (
+                      <div className="space-y-4">
+                        {/* Advanced filters */}
+                        <div className="flex flex-wrap items-center gap-2 p-3 rounded-lg bg-muted/30 border border-border/50">
+                          <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
+                          <Input
+                            placeholder="Search name or email..."
+                            value={regSearch}
+                            onChange={(e) => setRegSearch(e.target.value)}
+                            className="max-w-[200px] h-9"
+                          />
+                          <Select value={regEvent1} onValueChange={setRegEvent1}>
+                            <SelectTrigger className="w-[180px] h-9">
+                              <SelectValue placeholder="Event 1" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Event 1</SelectItem>
+                              {events?.map((e) => (
+                                <SelectItem key={e.id} value={e.id}>
+                                  {e.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Select value={regEvent2} onValueChange={setRegEvent2}>
+                            <SelectTrigger className="w-[180px] h-9">
+                              <SelectValue placeholder="Event 2" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Event 2</SelectItem>
+                              {events?.map((e) => (
+                                <SelectItem key={e.id} value={e.id}>
+                                  {e.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Select value={regDepartment} onValueChange={setRegDepartment}>
+                            <SelectTrigger className="w-[140px] h-9">
+                              <SelectValue placeholder="Department" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Departments</SelectItem>
+                              {uniqueDepartments.map((d) => (
+                                <SelectItem key={d} value={d}>
+                                  {d}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Select value={regCollege} onValueChange={setRegCollege}>
+                            <SelectTrigger className="w-[140px] h-9">
+                              <SelectValue placeholder="College" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Colleges</SelectItem>
+                              {uniqueColleges.map((c) => (
+                                <SelectItem key={c} value={c}>
+                                  {c}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-9 text-muted-foreground"
+                            onClick={() => {
+                              setRegSearch("");
+                              setRegEvent1("all");
+                              setRegEvent2("all");
+                              setRegDepartment("all");
+                              setRegCollege("all");
+                            }}
+                          >
+                            <X className="w-4 h-4 mr-1" />
+                            Clear
+                          </Button>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Showing {filteredGuestRegistrations.length} of {guestRegistrations.length} registrations
                         </p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">No event registrations yet</p>
-                      <p className="text-sm text-muted-foreground mt-1">Submissions from the Register page will appear here.</p>
-                    </div>
-                  )}
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                          {filteredGuestRegistrations.map((g: any) => (
+                            <ParticipantTile
+                              key={g.id}
+                              name={g.name}
+                              email={g.email}
+                              department={g.department}
+                              college={g.college}
+                              event1Label={g.event_1?.name}
+                              event2Label={g.event_2?.name}
+                              date={formatDate(g.created_at)}
+                              whatsapp={g.whatsapp_phone}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground">No event registrations yet</p>
+                        <p className="text-sm text-muted-foreground mt-1">Submissions from the Register page will appear here.</p>
+                      </div>
+                    )}
                   </>
                 )}
 
