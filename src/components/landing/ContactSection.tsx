@@ -1,4 +1,4 @@
-import { UserPlus, MailCheck, CalendarCheck } from "lucide-react";
+import { UserPlus, ListChecks, Send } from "lucide-react";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { NeonButton } from "@/components/ui/neon-button";
 import { useNavigate } from "react-router-dom";
@@ -6,23 +6,23 @@ import { useNavigate } from "react-router-dom";
 const steps = [
   {
     step: 1,
-    title: "Register",
-    description: "Click Register Now and fill in your details to create an account.",
+    title: "Go to registration",
+    description: "Click Register Now to open the event registration page. No account or sign-in needed.",
     icon: UserPlus,
     iconClass: "bg-primary/10 text-primary",
   },
   {
     step: 2,
-    title: "Verify email",
-    description: "Check your email to verify your account (if required).",
-    icon: MailCheck,
+    title: "Fill details & pick events",
+    description: "Enter your name, email, and college details. Select Event 1 and Event 2 from the dropdowns. Options that clash in time show TIME CONFLICT and cannot be selected—you can register for up to 2 events.",
+    icon: ListChecks,
     iconClass: "bg-secondary/10 text-secondary",
   },
   {
     step: 3,
-    title: "Select events",
-    description: "Choose events from the Events section. You can register for up to 2 events (subject to conflict rules).",
-    icon: CalendarCheck,
+    title: "Submit",
+    description: "Hit Submit registration. Your choices are saved and visible to the admin. That’s it—no email verification or login required.",
+    icon: Send,
     iconClass: "bg-accent/10 text-accent",
   },
 ];
@@ -38,7 +38,7 @@ const ContactSection = () => {
             How to <span className="gradient-text">Register</span>
           </h2>
           <p className="text-muted-foreground text-lg">
-            Follow these simple steps to register for CREATION 2K26 and participate in events.
+            Follow these steps to register for up to two events. No account or sign-in required.
           </p>
         </div>
 
