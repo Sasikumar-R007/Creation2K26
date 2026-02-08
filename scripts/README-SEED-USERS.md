@@ -11,7 +11,7 @@ This script creates one **Creation Admin** and **10 Student Event Incharges** in
 
 | Role | Email | Password |
 |------|--------|----------|
-| **Admin** | `Creation_Admin@creation2k26.com` | `Creationadmin@123` |
+| **Admin** | `Creation_admin@creation2k26.com` | `Creation@123` |
 | **Quiz IC** | `Quiz_admin@creation2k26.com` | `Studentincharge@123` |
 | **Paper Presentation IC** | `Paper_Presentation_admin@creation2k26.com` | `Studentincharge@123` |
 | **Debugging IC** | `Debugging_admin@creation2k26.com` | `Studentincharge@123` |
@@ -49,7 +49,7 @@ If a user already exists (e.g. re-running the script), the script updates their 
 
 ## After Running
 
-- **Admin:** Log in at `/auth` with `Creation_Admin@creation2k26.com` / `Creationadmin@123` → redirects to `/admin`.
+- **Admin:** Log in at `/admin-login` with `Creation_admin@creation2k26.com` / `Creation@123` → redirects to `/admin`.
 - **Event ICs:** Log in with any `*_admin@creation2k26.com` / `Studentincharge@123` → redirects to `/ic-dashboard` for their event.
 
 **Security:** Change these passwords in production (e.g. via Supabase Dashboard → Authentication → Users).

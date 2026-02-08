@@ -94,7 +94,7 @@ const AdminLogin = () => {
               <Input
                 id="admin-email"
                 type="email"
-                placeholder="admin@creation2k26.com"
+                placeholder="Creation_admin@creation2k26.com"
                 className="pl-10 bg-muted/50"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}

@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/table";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEvents } from "@/hooks/useEvents";
-import { useAllRegistrations, useAllProfiles } from "@/hooks/useRegistrations";
+import { useAllRegistrations, useAllProfiles, useGuestRegistrations } from "@/hooks/useRegistrations";
 import { useAllMessages, useSendMessage } from "@/hooks/useMessages";
 
 const AdminDashboard = () => {
@@ -40,6 +40,7 @@ const AdminDashboard = () => {
   const { data: events, isLoading: loadingEvents } = useEvents();
   const { data: registrations, isLoading: loadingRegistrations } = useAllRegistrations();
   const { data: profiles, isLoading: loadingProfiles } = useAllProfiles();
+  const { data: guestRegistrations, isLoading: loadingGuestRegistrations } = useGuestRegistrations();
   const { data: messages, isLoading: loadingMessages } = useAllMessages();
   const sendMessage = useSendMessage();
 
@@ -136,11 +137,12 @@ const AdminDashboard = () => {
           {/* Main Content */}
           <div className="lg:col-span-2">
             <GlassPanel className="p-6">
-              <Tabs defaultValue="events">
+              <Tabs defaultValue="guest-registrations">
                 <TabsList className="mb-6">
                   <TabsTrigger value="events">Events Overview</TabsTrigger>
+                  <TabsTrigger value="guest-registrations">Event Registrations</TabsTrigger>
                   <TabsTrigger value="signups">All Sign-ups</TabsTrigger>
-                  <TabsTrigger value="registrations">Event Registrations</TabsTrigger>
+                  <TabsTrigger value="registrations">Auth Event Reg.</TabsTrigger>
                   <TabsTrigger value="messages">All Messages</TabsTrigger>
                 </TabsList>
 
@@ -200,6 +202,68 @@ const AdminDashboard = () => {
                           ))}
                         </div>
                       </div>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="guest-registrations">
+                  {loadingGuestRegistrations ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    </div>
+                  ) : guestRegistrations && guestRegistrations.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Event 1</TableHead>
+                            <TableHead>Event 2</TableHead>
+                            <TableHead>Department</TableHead>
+                            <TableHead>College</TableHead>
+                            <TableHead>Registered</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {guestRegistrations.slice(0, 50).map((g: any) => (
+                            <TableRow key={g.id}>
+                              <TableCell className="font-medium">{g.name || "-"}</TableCell>
+                              <TableCell className="text-muted-foreground">{g.email || "-"}</TableCell>
+                              <TableCell>
+                                <Badge className="bg-primary/20 text-primary">
+                                  {g.event_1?.name || "-"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                {g.event_2?.name ? (
+                                  <Badge className="bg-secondary/20 text-secondary">
+                                    {g.event_2.name}
+                                  </Badge>
+                                ) : (
+                                  "-"
+                                )}
+                              </TableCell>
+                              <TableCell>{g.department || "-"}</TableCell>
+                              <TableCell>{g.college || "-"}</TableCell>
+                              <TableCell className="text-muted-foreground">
+                                {formatDate(g.created_at)}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                      {guestRegistrations.length > 50 && (
+                        <p className="text-center text-sm text-muted-foreground mt-4">
+                          Showing 50 of {guestRegistrations.length} registrations
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">No event registrations yet</p>
+                      <p className="text-sm text-muted-foreground mt-1">Submissions from the Register page will appear here.</p>
                     </div>
                   )}
                 </TabsContent>

@@ -5,7 +5,7 @@
  * Run: SUPABASE_URL=<url> SUPABASE_SERVICE_ROLE_KEY=<key> node scripts/seed-admin-ic-users.mjs
  *
  * Credentials created:
- * - Admin: Creation_Admin@creation2k26.com / Creationadmin@123
+ * - Admin: Creation_admin@creation2k26.com / Creation@123
  * - 10 ICs: <EventName>_admin@creation2k26.com / Studentincharge@123 (one per event)
  */
 
@@ -32,8 +32,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   },
 });
 
-const ADMIN_EMAIL = "Creation_Admin@creation2k26.com";
-const ADMIN_PASSWORD = "Creationadmin@123";
+const ADMIN_EMAIL = "Creation_admin@creation2k26.com";
+const ADMIN_PASSWORD = "Creation@123";
 const IC_PASSWORD = "Studentincharge@123";
 
 // Event name (as in DB) -> email local part for IC
@@ -132,7 +132,7 @@ async function main() {
   }
 
   console.log("\nDone. Summary:");
-  console.log("  Admin:", ADMIN_EMAIL, "/", ADMIN_PASSWORD);
+  console.log("  Admin login:", ADMIN_EMAIL, "/", ADMIN_PASSWORD);
   console.log(
     "  10 ICs: <EventName>_admin@creation2k26.com /",
     IC_PASSWORD
