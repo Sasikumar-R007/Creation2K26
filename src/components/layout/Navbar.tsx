@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, LogOut, LayoutDashboard, Shield, User } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard, User } from "lucide-react";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { NeonButton } from "@/components/ui/neon-button";
 import { Button } from "@/components/ui/button";
@@ -94,21 +94,12 @@ const Navbar = () => {
                   </NeonButton>
                 </>
               ) : (
-                <>
-                  <Link
-                    to="/admin-login"
-                    className="text-sm text-muted-foreground hover:text-primary flex items-center gap-2"
-                  >
-                    <Shield className="h-4 w-4" />
-                    Admin
-                  </Link>
-                  <NeonButton
-                    size="sm"
-                    onClick={() => navigate("/register")}
-                  >
-                    Register Now
-                  </NeonButton>
-                </>
+                <NeonButton
+                  size="sm"
+                  onClick={() => navigate("/register")}
+                >
+                  Register Now
+                </NeonButton>
               )}
             </div>
 
@@ -164,24 +155,14 @@ const Navbar = () => {
                       </Button>
                     </>
                   ) : (
-                    <>
-                      <Link
-                        to="/admin-login"
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary py-2"
-                      >
-                        <Shield className="h-4 w-4" />
-                        Admin Sign In
-                      </Link>
-                      <NeonButton
-                        onClick={() => {
-                          navigate("/register");
-                          setIsOpen(false);
-                        }}
-                      >
-                        Register Now
-                      </NeonButton>
-                    </>
+                    <NeonButton
+                      onClick={() => {
+                        navigate("/register");
+                        setIsOpen(false);
+                      }}
+                    >
+                      Register Now
+                    </NeonButton>
                   )}
                 </div>
               </div>
