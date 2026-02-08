@@ -561,6 +561,7 @@ const AdminDashboard = () => {
             </GlassPanel>
           </div>
         </div>
+        </div>
       </main>
 
       <Footer />
