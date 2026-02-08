@@ -87,6 +87,23 @@ export interface WinnerWithDetails extends Winner {
   events?: Event;
 }
 
+export interface GuestRegistration {
+  id: string;
+  name: string;
+  email: string;
+  whatsapp_phone: string | null;
+  department: string | null;
+  college: string | null;
+  event_1_id: string;
+  event_2_id: string | null;
+  created_at: string;
+}
+
+export interface GuestRegistrationWithEvents extends GuestRegistration {
+  event_1?: Event;
+  event_2?: Event | null;
+}
+
 // Auth context types
 export interface AuthUser {
   id: string;

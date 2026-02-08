@@ -1,14 +1,11 @@
-import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import {
   Mail,
-  Lock,
   User,
   Building,
   GraduationCap,
   Phone,
-  Eye,
-  EyeOff,
   Loader2,
   Sparkles,
   CheckCircle2,
@@ -16,6 +13,7 @@ import {
   MapPin,
   BookOpen,
   ArrowLeft,
+  CalendarDays,
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -23,29 +21,35 @@ import { GlassPanel } from "@/components/ui/glass-panel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NeonButton } from "@/components/ui/neon-button";
-import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   EVENT_DATE,
   VENUE,
   MAX_EVENTS_PER_PARTICIPANT,
 } from "@/lib/constants";
 import { useEvents } from "@/hooks/useEvents";
+import { useSubmitGuestRegistration } from "@/hooks/useRegistrations";
+import { eventsConflict } from "@/lib/eventParticipation";
+import { EventData } from "@/hooks/useEvents";
 import { z } from "zod";
 
 const emailSchema = z.string().email("Please enter a valid email address");
-const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 const nameSchema = z.string().min(2, "Name must be at least 2 characters");
 
 const initialForm = {
   name: "",
   email: "",
-  password: "",
   whatsapp_phone: "",
   department: "",
   college: "",
+  event_1_id: "",
+  event_2_id: "",
 };
 
 const conflictGroups = [
@@ -59,20 +63,13 @@ const conflictGroups = [
   },
 ];
 
-export default function Register() {
-  const [searchParams] = useSearchParams();
-  const eventIdFromQuery = searchParams.get("event") ?? null;
-  const { data: events = [] } = useEvents();
-  const eventFromQuery = eventIdFromQuery
-    ? events.find((e) => e.id === eventIdFromQuery)
-    : null;
+const EMPTY_VALUE = "__none__";
 
-  const { signUp, signIn } = useAuth();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+export default function Register() {
+  const { data: events = [] } = useEvents();
+  const submitRegistration = useSubmitGuestRegistration();
 
   const [form, setForm] = useState(initialForm);
-  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -83,10 +80,38 @@ export default function Register() {
     day: "numeric",
   });
 
+  const event1 = useMemo(
+    () => events.find((e) => e.id === form.event_1_id),
+    [events, form.event_1_id]
+  );
+  const event2 = useMemo(
+    () => (form.event_2_id ? events.find((e) => e.id === form.event_2_id) : null),
+    [events, form.event_2_id]
+  );
+
+  /** Events that conflict with Event 1 (for Event 2 dropdown: show but disable with TIME CONFLICT) */
+  const conflictsWithEvent1 = useMemo(() => {
+    if (!event1) return new Set<string>();
+    const set = new Set<string>();
+    events.forEach((ev) => {
+      if (ev.id !== event1.id && eventsConflict(event1.name, ev.name)) set.add(ev.id);
+    });
+    return set;
+  }, [event1, events]);
+
+  /** Events that conflict with Event 2 (for Event 1 dropdown: show but disable with TIME CONFLICT) */
+  const conflictsWithEvent2 = useMemo(() => {
+    if (!event2) return new Set<string>();
+    const set = new Set<string>();
+    events.forEach((ev) => {
+      if (ev.id !== event2.id && eventsConflict(event2.name, ev.name)) set.add(ev.id);
+    });
+    return set;
+  }, [event2, events]);
+
   const validateField = (field: string, value: string) => {
     try {
       if (field === "email") emailSchema.parse(value);
-      else if (field === "password") passwordSchema.parse(value);
       else if (field === "name") nameSchema.parse(value);
       setErrors((prev) => ({ ...prev, [field]: "" }));
       return true;
@@ -104,91 +129,25 @@ export default function Register() {
 
     const nameValid = validateField("name", form.name);
     const emailValid = validateField("email", form.email);
-    const passwordValid = validateField("password", form.password);
-    if (!nameValid || !emailValid || !passwordValid) return;
+    if (!nameValid || !emailValid) return;
+
+    if (!form.event_1_id) {
+      setErrors((prev) => ({ ...prev, event_1_id: "Please select Event 1." }));
+      return;
+    }
 
     setIsSubmitting(true);
     try {
-      const { error: signUpError } = await signUp(
-        form.email,
-        form.password,
-        form.name,
-        form.department || undefined,
-        form.college || undefined,
-        form.whatsapp_phone || undefined
-      );
-
-      if (signUpError) {
-        if (
-          signUpError.message?.includes("already registered") ||
-          signUpError.message?.includes("already been registered")
-        ) {
-          toast({
-            title: "Already registered",
-            description: "This email is already registered. Use Admin Sign In if you are staff.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Registration failed",
-            description: signUpError.message || "Please try again.",
-            variant: "destructive",
-          });
-        }
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (eventIdFromQuery) {
-        const { error: signInError } = await signIn(form.email, form.password);
-        if (signInError) {
-          toast({
-            title: "Account created",
-            description: "Check your email to confirm. You can register for events after confirming.",
-          });
-          setForm(initialForm);
-          setIsSubmitting(false);
-          return;
-        }
-        const {
-          data: { user: newUser },
-        } = await supabase.auth.getUser();
-        if (newUser) {
-          const { error: regError } = await supabase
-            .from("event_registrations")
-            .insert({ user_id: newUser.id, event_id: eventIdFromQuery });
-          if (!regError) {
-            queryClient.invalidateQueries({ queryKey: ["registrations"] });
-            toast({
-              title: "Registration successful! 🎉",
-              description: `You're registered for ${eventFromQuery?.name ?? "the event"}. Check your email to confirm your account.`,
-            });
-          } else {
-            toast({
-              title: "Account created",
-              description: "Check your email to confirm. You can register for events from the dashboard.",
-            });
-          }
-        } else {
-          toast({
-            title: "Account created",
-            description: "Check your email to confirm your account.",
-          });
-        }
-      } else {
-        toast({
-          title: "Registration received! 🎉",
-          description: "Check your email to confirm your account. Your details are saved.",
-        });
-      }
-
-      setForm(initialForm);
-    } catch (err: any) {
-      toast({
-        title: "Something went wrong",
-        description: err?.message || "Please try again.",
-        variant: "destructive",
+      await submitRegistration.mutateAsync({
+        name: form.name,
+        email: form.email,
+        whatsapp_phone: form.whatsapp_phone || undefined,
+        department: form.department || undefined,
+        college: form.college || undefined,
+        event_1_id: form.event_1_id,
+        event_2_id: form.event_2_id || null,
       });
+      setForm(initialForm);
     } finally {
       setIsSubmitting(false);
     }
@@ -196,7 +155,6 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-background dark">
-      {/* Background gradient and subtle grid */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden>
         <div className="absolute inset-0 bg-gradient-to-br from-background via-[hsl(260,25%,6%)] to-background opacity-100" />
         <div
@@ -235,7 +193,7 @@ export default function Register() {
                 </h1>
               </div>
               <p className="text-muted-foreground text-lg">
-                BCA Department, Bishop Heber College. Register once and participate in up to two events.
+                BCA Department, Bishop Heber College. Register for up to two events.
               </p>
             </div>
 
@@ -247,15 +205,11 @@ export default function Register() {
               <ul className="space-y-3 text-sm text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                  <span>You can register for a <strong className="text-foreground">maximum of {MAX_EVENTS_PER_PARTICIPANT} events</strong> in total.</span>
+                  <span>You can register for a <strong className="text-foreground">maximum of {MAX_EVENTS_PER_PARTICIPANT} events</strong>.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                  <span>Within each conflict group below, you may choose <strong className="text-foreground">only one event</strong>. Picking one blocks the others in that group.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                  <span>After registering, you can sign in and manage your events from the dashboard.</span>
+                  <span>Within each conflict group below, you may choose <strong className="text-foreground">only one event</strong>. Conflicting options will show <strong className="text-destructive">TIME CONFLICT</strong> and cannot be selected.</span>
                 </li>
               </ul>
             </GlassPanel>
@@ -296,29 +250,96 @@ export default function Register() {
             </GlassPanel>
           </div>
 
-          {/* Right: Form */}
+          {/* Right: Registration form (events + contact) */}
           <GlassPanel className="p-6 md:p-8 border-primary/20" glow="cyan">
             <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              <h2 className="text-xl font-bold">Create your account</h2>
+              <CalendarDays className="w-5 h-5 text-primary" />
+              <h2 className="text-xl font-bold">Event registration</h2>
             </div>
-            {eventFromQuery && (
-              <p className="text-sm text-primary mb-6">
-                You're registering for: <strong>{eventFromQuery.name}</strong>
-              </p>
-            )}
-            {!eventFromQuery && eventIdFromQuery && (
-              <p className="text-sm text-muted-foreground mb-6">
-                After creating your account you can register for events from the dashboard.
-              </p>
-            )}
-            {!eventIdFromQuery && (
-              <p className="text-sm text-muted-foreground mb-6">
-                Fill in your details to participate in CREATION 2K26 events.
-              </p>
-            )}
+            <p className="text-sm text-muted-foreground mb-6">
+              Choose up to two events. Options that conflict with your first choice will show <span className="text-destructive font-medium">TIME CONFLICT</span> and cannot be selected.
+            </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label>Event 1 *</Label>
+                <Select
+                  value={form.event_1_id || EMPTY_VALUE}
+                  onValueChange={(v) => {
+                    setForm((f) => ({
+                      ...f,
+                      event_1_id: v === EMPTY_VALUE ? "" : v,
+                      event_2_id: v === EMPTY_VALUE ? "" : f.event_2_id,
+                    }));
+                  }}
+                >
+                  <SelectTrigger className="w-full bg-muted/50 border-primary/20">
+                    <SelectValue placeholder="Select first event" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={EMPTY_VALUE} className="hidden" />
+                    {events.map((ev) => {
+                      const conflictWith2 = event2 && eventsConflict(ev.name, event2.name);
+                      return (
+                        <SelectItem
+                          key={ev.id}
+                          value={ev.id}
+                          disabled={conflictWith2}
+                          className={conflictWith2 ? "opacity-80 cursor-not-allowed" : ""}
+                        >
+                          {ev.name}
+                          {conflictWith2 ? (
+                            <span className="text-destructive font-medium ml-1">— TIME CONFLICT</span>
+                          ) : null}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+                {errors.event_1_id && <p className="text-destructive text-sm">{errors.event_1_id}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Event 2 (optional)</Label>
+                <Select
+                  value={form.event_2_id || EMPTY_VALUE}
+                  onValueChange={(v) =>
+                    setForm((f) => ({ ...f, event_2_id: v === EMPTY_VALUE ? "" : v }))
+                  }
+                >
+                  <SelectTrigger className="w-full bg-muted/50 border-primary/20">
+                    <SelectValue placeholder="Select second event" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={EMPTY_VALUE}>None</SelectItem>
+                    {events.map((ev) => {
+                      const conflictWith1 = event1 && eventsConflict(ev.name, event1.name);
+                      const isEvent1 = ev.id === form.event_1_id;
+                      const disabled = conflictWith1 || isEvent1;
+                      return (
+                        <SelectItem
+                          key={ev.id}
+                          value={ev.id}
+                          disabled={disabled}
+                          className={disabled ? "opacity-80 cursor-not-allowed" : ""}
+                        >
+                          {ev.name}
+                          {isEvent1 ? (
+                            <span className="text-muted-foreground ml-1">(same as Event 1)</span>
+                          ) : conflictWith1 ? (
+                            <span className="text-destructive font-medium ml-1">— TIME CONFLICT</span>
+                          ) : null}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <hr className="border-border my-6" />
+
+              <p className="text-sm font-medium text-muted-foreground">Your details</p>
+
               <div className="space-y-2">
                 <Label htmlFor="page-reg-name">Full Name *</Label>
                 <div className="relative">
@@ -349,29 +370,6 @@ export default function Register() {
                   />
                 </div>
                 {errors.email && <p className="text-destructive text-sm">{errors.email}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="page-reg-password">Password *</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="page-reg-password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    className="pl-10 pr-10 bg-muted/50 border-primary/20 focus:border-primary/50"
-                    value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                {errors.password && <p className="text-destructive text-sm">{errors.password}</p>}
               </div>
 
               <div className="space-y-2">
@@ -425,10 +423,10 @@ export default function Register() {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Creating account...
+                    Submitting...
                   </>
                 ) : (
-                  "Create account"
+                  "Submit registration"
                 )}
               </NeonButton>
             </form>

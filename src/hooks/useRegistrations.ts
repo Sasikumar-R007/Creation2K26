@@ -174,3 +174,58 @@ export const useAllProfiles = () => {
     },
   });
 };
+
+/** Guest event registrations (no auth). For admin only. */
+export const useGuestRegistrations = () => {
+  return useQuery({
+    queryKey: ["guest_registrations"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("guest_registrations")
+        .select(`
+          *,
+          event_1:event_1_id (id, name, category),
+          event_2:event_2_id (id, name, category)
+        `)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+};
+
+/** Submit guest registration (event registration form, no account). */
+export const useSubmitGuestRegistration = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (payload: {
+      name: string;
+      email: string;
+      whatsapp_phone?: string;
+      department?: string;
+      college?: string;
+      event_1_id: string;
+      event_2_id?: string | null;
+    }) => {
+      const { error } = await supabase.from("guest_registrations").insert(payload);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["guest_registrations"] });
+      toast({
+        title: "Registration submitted! 🎉",
+        description: "Your event registration has been received.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Registration failed",
+        description: error.message || "Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+};
