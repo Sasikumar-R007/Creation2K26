@@ -1,17 +1,40 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, Calendar, MapPin, ArrowDown } from "lucide-react";
 import { NeonButton } from "@/components/ui/neon-button";
 import { EVENT_DATE, VENUE } from "@/lib/constants";
 
+const PARTICLE_COUNT = 28;
+const PARTICLE_COLORS = [
+  "hsl(var(--primary) / 0.35)",
+  "hsl(var(--secondary) / 0.3)",
+  "rgba(255, 107, 157, 0.25)",
+  "rgba(0, 188, 212, 0.2)",
+];
+
 const HeroSection = () => {
   const navigate = useNavigate();
+  const [mouse, setMouse] = useState({ x: 50, y: 50 });
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
     minutes: 0,
     seconds: 0,
   });
+
+  const particles = useMemo(
+    () =>
+      Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        size: 4 + Math.random() * 8,
+        delay: Math.random() * 4,
+        duration: 6 + Math.random() * 6,
+        color: PARTICLE_COLORS[i % PARTICLE_COLORS.length],
+      })),
+    []
+  );
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -39,8 +62,46 @@ const HeroSection = () => {
     day: "numeric",
   });
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setMouse({ x, y });
+  };
+
   return (
-    <section className="min-h-screen flex items-center justify-center relative overflow-hidden pt-24 pb-16">
+    <section
+      className="min-h-screen flex items-center justify-center relative overflow-hidden pt-24 pb-16"
+      onMouseMove={handleMouseMove}
+    >
+      {/* Mouse-follow spotlight */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-30 transition-opacity duration-300"
+        aria-hidden
+        style={{
+          background: `radial-gradient(circle 40vmax at ${mouse.x}% ${mouse.y}%, hsl(var(--primary) / 0.12) 0%, transparent 50%)`,
+        }}
+      />
+
+      {/* Floating particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
+        {particles.map((p) => (
+          <div
+            key={p.id}
+            className="absolute rounded-full hero-particle-float"
+            style={{
+              left: `${p.left}%`,
+              top: `${p.top}%`,
+              width: p.size,
+              height: p.size,
+              background: p.color,
+              animationDelay: `${p.delay}s`,
+              animationDuration: `${p.duration}s`,
+            }}
+          />
+        ))}
+      </div>
+
       {/* Background Effects - wave colors */}
       <div className="absolute inset-0 overflow-hidden bg-background">
         {/* Animated iridescent wave gradient base */}
@@ -106,9 +167,29 @@ const HeroSection = () => {
           <p className="hero-mind-marvel text-sm md:text-base uppercase tracking-[0.35em] mb-4 animate-fade-in" style={{ animationDelay: "80ms" }}>
             Make Mind Marvel
           </p>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 animate-fade-in" style={{ animationDelay: "100ms" }}>
-            <span className="hero-creation-text block">CREATION</span>
-            <span className="hero-year-text block mt-2 text-4xl md:text-6xl lg:text-7xl tracking-tight">2K26</span>
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6" style={{ animationDelay: "100ms" }}>
+            <span className="hero-creation-text block">
+              {"CREATION".split("").map((char, i) => (
+                <span
+                  key={`c-${i}`}
+                  className="hero-letter inline-block"
+                  style={{ animationDelay: `${100 + i * 45}ms` }}
+                >
+                  {char}
+                </span>
+              ))}
+            </span>
+            <span className="hero-year-text block mt-2 text-4xl md:text-6xl lg:text-7xl tracking-tight">
+              {"2K26".split("").map((char, i) => (
+                <span
+                  key={`y-${i}`}
+                  className="hero-letter inline-block"
+                  style={{ animationDelay: `${100 + 9 * 45 + i * 50}ms` }}
+                >
+                  {char}
+                </span>
+              ))}
+            </span>
           </h1>
 
           {/* Tagline */}
@@ -117,13 +198,13 @@ const HeroSection = () => {
             <span className="text-secondary font-semibold">Bishop Heber College</span>
           </p>
 
-          {/* Event Info */}
+          {/* Event Info - floating pills */}
           <div className="flex flex-wrap justify-center gap-6 mb-12 animate-fade-in" style={{ animationDelay: "300ms" }}>
-            <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="hero-pill-float flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/20 text-muted-foreground">
               <Calendar className="w-5 h-5 text-primary" />
               <span>{formattedDate}</span>
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="hero-pill-float flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/5 border border-secondary/20 text-muted-foreground" style={{ animationDelay: "0.5s" }}>
               <MapPin className="w-5 h-5 text-secondary" />
               <span>{VENUE.name}, {VENUE.college}</span>
             </div>
@@ -191,6 +272,18 @@ const HeroSection = () => {
               <ArrowDown className="w-5 h-5" />
             </a>
           </div>
+        </div>
+      </div>
+
+      {/* Marquee strip */}
+      <div className="absolute bottom-0 left-0 right-0 py-3 overflow-hidden border-t border-white/5 bg-background/50 backdrop-blur-sm">
+        <div className="hero-marquee-track flex gap-12 whitespace-nowrap text-xs uppercase tracking-[0.25em] text-muted-foreground/70">
+          <span className="flex gap-12 shrink-0">
+            CREATION 2K26 · Register Now · 10 Events · BCA Department · Bishop Heber College ·
+          </span>
+          <span className="flex gap-12 shrink-0">
+            CREATION 2K26 · Register Now · 10 Events · BCA Department · Bishop Heber College ·
+          </span>
         </div>
       </div>
     </section>
