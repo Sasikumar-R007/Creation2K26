@@ -167,29 +167,9 @@ const HeroSection = () => {
           <p className="hero-mind-marvel text-sm md:text-base uppercase tracking-[0.35em] mb-4 animate-fade-in" style={{ animationDelay: "80ms" }}>
             Make Mind Marvel
           </p>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6" style={{ animationDelay: "100ms" }}>
-            <span className="hero-creation-text block">
-              {"CREATION".split("").map((char, i) => (
-                <span
-                  key={`c-${i}`}
-                  className="hero-letter inline-block"
-                  style={{ animationDelay: `${100 + i * 45}ms` }}
-                >
-                  {char}
-                </span>
-              ))}
-            </span>
-            <span className="hero-year-text block mt-2 text-4xl md:text-6xl lg:text-7xl tracking-tight">
-              {"2K26".split("").map((char, i) => (
-                <span
-                  key={`y-${i}`}
-                  className="hero-letter inline-block"
-                  style={{ animationDelay: `${100 + 9 * 45 + i * 50}ms` }}
-                >
-                  {char}
-                </span>
-              ))}
-            </span>
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 animate-fade-in" style={{ animationDelay: "100ms" }}>
+            <span className="hero-creation-text block">CREATION</span>
+            <span className="hero-year-text block mt-2 text-4xl md:text-6xl lg:text-7xl tracking-tight">2K26</span>
           </h1>
 
           {/* Tagline */}
