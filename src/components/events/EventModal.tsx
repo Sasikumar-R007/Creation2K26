@@ -252,7 +252,7 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
           <div className="flex items-start gap-4">
             <div
               className={`
-                w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden
+                w-24 h-24 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden p-1
                 ${isTechnical 
                   ? "bg-primary/10 text-primary" 
                   : "bg-secondary/10 text-secondary"
@@ -260,9 +260,9 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
               `}
             >
               {logo ? (
-                <img src={logo} alt="" className="w-10 h-10 object-contain" />
+                <img src={logo} alt="" className="w-full h-full object-contain" />
               ) : (
-                <DynamicIcon name={event.icon_name} className="w-8 h-8" />
+                <DynamicIcon name={event.icon_name} className="w-10 h-10" />
               )}
             </div>
             <div className="flex-1">

@@ -109,8 +109,8 @@ const EventCard = ({
         {/* Logo or Icon */}
         <div 
           className={`
-            w-16 h-16 rounded-2xl flex items-center justify-center mb-4 overflow-hidden
-            transition-all duration-300 group-hover:scale-110
+            w-24 h-24 rounded-2xl flex items-center justify-center mb-4 overflow-hidden p-1
+            transition-all duration-300 group-hover:scale-105
             ${isTechnical 
               ? "bg-primary/10 text-primary group-hover:bg-primary/20" 
               : "bg-secondary/10 text-secondary group-hover:bg-secondary/20"
@@ -118,9 +118,9 @@ const EventCard = ({
           `}
         >
           {logo ? (
-            <img src={logo} alt="" className="w-10 h-10 object-contain" />
+            <img src={logo} alt="" className="w-full h-full object-contain" />
           ) : (
-            <DynamicIcon name={event.icon_name} className="w-8 h-8" />
+            <DynamicIcon name={event.icon_name} className="w-10 h-10" />
           )}
         </div>
 
