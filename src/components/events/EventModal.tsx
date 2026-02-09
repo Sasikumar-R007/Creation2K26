@@ -27,7 +27,7 @@ import {
   conflictsWithRegistered,
   getConflictingRegisteredEvents,
 } from "@/lib/eventParticipation";
-import { MAX_EVENTS_PER_PARTICIPANT } from "@/lib/constants";
+import { MAX_EVENTS_PER_PARTICIPANT, getEventDisplay } from "@/lib/constants";
 
 interface EventModalProps {
   event: EventData;
@@ -53,6 +53,7 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
   const { data: myRegistrations = [] } = useMyRegistrations();
 
   const isTechnical = event.category === "technical";
+  const { displayName, logo } = getEventDisplay(event.name);
 
   const { can: canParticipate, cannot: cannotParticipate } = useMemo(
     () => getParticipationForEvent(event.name, allEvents),
@@ -251,14 +252,18 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
           <div className="flex items-start gap-4">
             <div
               className={`
-                w-16 h-16 rounded-2xl flex items-center justify-center shrink-0
+                w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden
                 ${isTechnical 
                   ? "bg-primary/10 text-primary" 
                   : "bg-secondary/10 text-secondary"
                 }
               `}
             >
-              <DynamicIcon name={event.icon_name} className="w-8 h-8" />
+              {logo ? (
+                <img src={logo} alt="" className="w-10 h-10 object-contain" />
+              ) : (
+                <DynamicIcon name={event.icon_name} className="w-8 h-8" />
+              )}
             </div>
             <div className="flex-1">
               <Badge
@@ -274,8 +279,9 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
                 {isTechnical ? "Technical" : "Non-Technical"}
               </Badge>
               <DialogTitle className="text-2xl font-bold">
-                {event.name}
+                {displayName}
               </DialogTitle>
+              <p className="text-sm text-muted-foreground">{event.name}</p>
             </div>
           </div>
         </DialogHeader>

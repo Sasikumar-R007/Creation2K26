@@ -98,3 +98,33 @@ export const EVENT_NAME_TO_RULE_KEY: Record<string, string> = {
   "AI PROMPT ENGINEERING": "AI PROMPT",
   "AD ZAP": "AD-ZAP",
 };
+
+/** Event display names and logo paths for cards. Key = normalized event name (uppercase). */
+export const EVENT_DISPLAY: Record<
+  string,
+  { displayName: string; logo: string }
+> = {
+  "AI PROMPT ENGINEERING": { displayName: "Un Prompt", logo: "/UN PROMPT.jpeg" },
+  DEBUGGING: { displayName: "Quantum Fix", logo: "/Quantum Fix.jpeg" },
+  "PAPER PRESENTATION": { displayName: "Inno Script", logo: "/Inno Script.jpeg" },
+  QUIZ: { displayName: "Techno Quest", logo: "/Techno Quest.jpeg" },
+  "WEB DESIGN": { displayName: "Web Forge", logo: "/Web Forge.jpeg" },
+  "AD ZAP": { displayName: "Ad Zap", logo: "/Ad Mad.jpeg" },
+  "AD-ZAP": { displayName: "Ad Zap", logo: "/Ad Mad.jpeg" },
+  "IPL AUCTION": { displayName: "Hammer Time", logo: "/Hammer Time.jpeg" },
+  "MEMORY MATRIX": { displayName: "Brain Blitz", logo: "/Brain Blitz.jpeg" },
+  "MOVIE SPOOF": { displayName: "Mockumentary", logo: "/Mockumentary.jpeg" },
+  "MOVIE SPOOFING": { displayName: "Mockumentary", logo: "/Mockumentary.jpeg" },
+  "PERSONALITY CONTEST": { displayName: "Persona League", logo: "/Persona League.jpeg" },
+};
+
+/** Get display name and logo for an event by its DB name. */
+export function getEventDisplay(eventName: string): {
+  displayName: string;
+  logo: string | null;
+} {
+  const key = eventName.trim().toUpperCase();
+  const entry = EVENT_DISPLAY[key];
+  if (entry) return { displayName: entry.displayName, logo: entry.logo };
+  return { displayName: eventName, logo: null };
+}

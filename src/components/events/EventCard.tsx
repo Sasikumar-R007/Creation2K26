@@ -4,6 +4,7 @@ import { GlassPanel } from "@/components/ui/glass-panel";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { EventData } from "@/hooks/useEvents";
+import { getEventDisplay } from "@/lib/constants";
 import EventModal from "./EventModal";
 
 interface EventCardProps {
@@ -41,6 +42,7 @@ const EventCard = ({
 
   const isTechnical = event.category === "technical";
   const accentColor = isTechnical ? "cyan" : "purple";
+  const { displayName, logo } = getEventDisplay(event.name);
 
   const isDisabledBySelection =
     selectedEventId && selectedEventId !== event.id && cannotParticipateIds?.has(event.id);
@@ -104,10 +106,10 @@ const EventCard = ({
         )}
       </div>
 
-        {/* Icon */}
+        {/* Logo or Icon */}
         <div 
           className={`
-            w-16 h-16 rounded-2xl flex items-center justify-center mb-4
+            w-16 h-16 rounded-2xl flex items-center justify-center mb-4 overflow-hidden
             transition-all duration-300 group-hover:scale-110
             ${isTechnical 
               ? "bg-primary/10 text-primary group-hover:bg-primary/20" 
@@ -115,19 +117,24 @@ const EventCard = ({
             }
           `}
         >
-          <DynamicIcon name={event.icon_name} className="w-8 h-8" />
+          {logo ? (
+            <img src={logo} alt="" className="w-10 h-10 object-contain" />
+          ) : (
+            <DynamicIcon name={event.icon_name} className="w-8 h-8" />
+          )}
         </div>
 
-        {/* Title */}
+        {/* Title: display name as heading, original name as subheading */}
         <h3 className={`
-          text-xl font-bold mb-2 transition-colors
+          text-xl font-bold mb-0.5 transition-colors
           ${isTechnical 
             ? "group-hover:text-primary" 
             : "group-hover:text-secondary"
           }
         `}>
-          {event.name}
+          {displayName}
         </h3>
+        <p className="text-xs text-muted-foreground mb-2">{event.name}</p>
 
         {/* Description Preview */}
         <p className="text-muted-foreground text-sm line-clamp-2 mb-4">
