@@ -78,6 +78,14 @@ const conflictGroups = [
 
 const EMPTY_VALUE = "__none__";
 
+const PAYMENT_QR_MAP: Record<number, { amount: number; image: string }> = {
+  1: { amount: 250, image: "/250.png" },
+  2: { amount: 500, image: "/500.png" },
+  3: { amount: 750, image: "/750.png" },
+  4: { amount: 1000, image: "/1000.png" },
+  5: { amount: 1250, image: "/1250.png" },
+};
+
 export default function Register() {
   const { data: events = [] } = useEvents();
   const submitRegistration = useSubmitGuestRegistration();
@@ -633,6 +641,27 @@ export default function Register() {
                 </TabsContent>
 
                 <TabsContent value="payment" className="space-y-4 mt-4">
+                  {(() => {
+                    const participants = Math.max(1, Math.min(5, totalTeamMembersNeeded));
+                    const qr = PAYMENT_QR_MAP[participants];
+                    return (
+                      <div className="rounded-lg border border-primary/20 bg-muted/10 p-6 flex flex-col items-center">
+                        <p className="text-sm font-medium text-foreground mb-1">
+                          {participants} {participants === 1 ? "participant" : "participants"} — ₹{qr.amount}
+                        </p>
+                        <p className="text-xs text-muted-foreground mb-4">
+                          Scan the QR code to complete payment
+                        </p>
+                        <div className="flex justify-center">
+                          <img
+                            src={qr.image}
+                            alt={`Payment QR - ₹${qr.amount}`}
+                            className="w-48 h-48 object-contain rounded-lg border border-border/50"
+                          />
+                        </div>
+                      </div>
+                    );
+                  })()}
                   <p className="text-sm text-muted-foreground">
                     Upload a screenshot of your payment confirmation.
                   </p>
