@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
   Mail,
@@ -14,6 +14,10 @@ import {
   BookOpen,
   ArrowLeft,
   CalendarDays,
+  Users,
+  CreditCard,
+  Upload,
+  ImageIcon,
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -28,19 +32,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   EVENT_DATE,
   VENUE,
   MAX_EVENTS_PER_PARTICIPANT,
+  getEventTeamSize,
 } from "@/lib/constants";
 import { useEvents } from "@/hooks/useEvents";
 import { useSubmitGuestRegistration } from "@/hooks/useRegistrations";
 import { eventsConflict } from "@/lib/eventParticipation";
-import { EventData } from "@/hooks/useEvents";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const nameSchema = z.string().min(2, "Name must be at least 2 characters");
+
+export type TeamMember = { name: string; email: string; whatsapp_phone: string };
 
 const initialForm = {
   name: "",
@@ -50,6 +59,10 @@ const initialForm = {
   college: "",
   event_1_id: "",
   event_2_id: "",
+  event_1_team_size: 1,
+  event_2_team_size: 1,
+  team_members: [] as TeamMember[],
+  payment_screenshot: null as File | null,
 };
 
 const conflictGroups = [
@@ -70,8 +83,10 @@ export default function Register() {
   const submitRegistration = useSubmitGuestRegistration();
 
   const [form, setForm] = useState(initialForm);
+  const [activeTab, setActiveTab] = useState("registration");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const { toast } = useToast();
 
   const formattedDate = EVENT_DATE.toLocaleDateString("en-US", {
     weekday: "long",
@@ -109,6 +124,29 @@ export default function Register() {
     return set;
   }, [event2, events]);
 
+  const maxTeamSize1 = event1 ? getEventTeamSize(event1.name) : 1;
+  const maxTeamSize2 = event2 ? getEventTeamSize(event2.name) : 1;
+
+  const totalTeamMembersNeeded = useMemo(() => {
+    const n1 = form.event_1_team_size || 1;
+    const n2 = form.event_2_id ? (form.event_2_team_size || 1) : 0;
+    return Math.max(n1, n2);
+  }, [form.event_1_team_size, form.event_2_team_size, form.event_2_id]);
+
+  const additionalTeamMembersCount = Math.max(0, totalTeamMembersNeeded - 1);
+
+  const syncTeamMembers = useCallback((teamSize1: number, teamSize2: number, hasEvent2: boolean) => {
+    const total = Math.max(teamSize1, hasEvent2 ? teamSize2 : 0);
+    const count = Math.max(0, total - 1);
+    setForm((f) => {
+      const current = f.team_members;
+      const next: TeamMember[] = Array.from({ length: count }, (_, i) =>
+        current[i] ?? { name: "", email: "", whatsapp_phone: "" }
+      );
+      return { ...f, team_members: next };
+    });
+  }, []);
+
   const validateField = (field: string, value: string) => {
     try {
       if (field === "email") emailSchema.parse(value);
@@ -136,8 +174,37 @@ export default function Register() {
       return;
     }
 
+    if (!form.payment_screenshot) {
+      setErrors((prev) => ({ ...prev, payment_screenshot: "Please upload your payment screenshot." }));
+      setActiveTab("payment");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
+      let paymentUrl: string | null = null;
+      if (form.payment_screenshot) {
+        const ext = form.payment_screenshot.name.split(".").pop() || "png";
+        const path = `${crypto.randomUUID()}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from("payment-screenshots")
+          .upload(path, form.payment_screenshot, {
+            cacheControl: "3600",
+            upsert: false,
+          });
+        if (uploadError) {
+          toast({
+            title: "Upload failed",
+            description: uploadError.message || "Could not upload payment screenshot.",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+        const { data: urlData } = supabase.storage.from("payment-screenshots").getPublicUrl(path);
+        paymentUrl = urlData.publicUrl;
+      }
+
       await submitRegistration.mutateAsync({
         name: form.name,
         email: form.email,
@@ -146,6 +213,10 @@ export default function Register() {
         college: form.college || undefined,
         event_1_id: form.event_1_id,
         event_2_id: form.event_2_id || null,
+        event_1_team_size: form.event_1_team_size,
+        event_2_team_size: form.event_2_id ? form.event_2_team_size : null,
+        team_members: form.team_members,
+        payment_screenshot_url: paymentUrl,
       });
       setForm(initialForm);
     } finally {
@@ -261,86 +332,167 @@ export default function Register() {
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label>Event 1 *</Label>
-                <Select
-                  value={form.event_1_id || EMPTY_VALUE}
-                  onValueChange={(v) => {
-                    setForm((f) => ({
-                      ...f,
-                      event_1_id: v === EMPTY_VALUE ? "" : v,
-                      event_2_id: v === EMPTY_VALUE ? "" : f.event_2_id,
-                    }));
-                  }}
-                >
-                  <SelectTrigger className="w-full bg-muted/50 border-primary/20">
-                    <SelectValue placeholder="Select first event" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={EMPTY_VALUE} className="hidden" />
-                    {events.map((ev) => {
-                      const conflictWith2 = event2 && eventsConflict(ev.name, event2.name);
-                      return (
-                        <SelectItem
-                          key={ev.id}
-                          value={ev.id}
-                          disabled={conflictWith2}
-                          className={conflictWith2 ? "opacity-80 cursor-not-allowed" : ""}
-                        >
-                          {ev.name}
-                          {conflictWith2 ? (
-                            <span className="text-destructive font-medium ml-1">— TIME CONFLICT</span>
-                          ) : null}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-                {errors.event_1_id && <p className="text-destructive text-sm">{errors.event_1_id}</p>}
-              </div>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-3 bg-muted/50 border border-primary/20">
+                  <TabsTrigger value="registration" className="flex items-center gap-2">
+                    <CalendarDays className="w-4 h-4" />
+                    Registration
+                  </TabsTrigger>
+                  <TabsTrigger value="team" className="flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Team Details
+                  </TabsTrigger>
+                  <TabsTrigger value="payment" className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4" />
+                    Payment
+                  </TabsTrigger>
+                </TabsList>
 
-              <div className="space-y-2">
-                <Label>Event 2 (optional)</Label>
-                <Select
-                  value={form.event_2_id || EMPTY_VALUE}
-                  onValueChange={(v) =>
-                    setForm((f) => ({ ...f, event_2_id: v === EMPTY_VALUE ? "" : v }))
-                  }
-                >
-                  <SelectTrigger className="w-full bg-muted/50 border-primary/20">
-                    <SelectValue placeholder="Select second event" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={EMPTY_VALUE}>None</SelectItem>
-                    {events.map((ev) => {
-                      const conflictWith1 = event1 && eventsConflict(ev.name, event1.name);
-                      const isEvent1 = ev.id === form.event_1_id;
-                      const disabled = conflictWith1 || isEvent1;
-                      return (
-                        <SelectItem
-                          key={ev.id}
-                          value={ev.id}
-                          disabled={disabled}
-                          className={disabled ? "opacity-80 cursor-not-allowed" : ""}
-                        >
-                          {ev.name}
-                          {isEvent1 ? (
-                            <span className="text-muted-foreground ml-1">(same as Event 1)</span>
-                          ) : conflictWith1 ? (
-                            <span className="text-destructive font-medium ml-1">— TIME CONFLICT</span>
-                          ) : null}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
+                <TabsContent value="registration" className="space-y-4 mt-4">
+                  <div className="space-y-2">
+                    <Label>Event 1 *</Label>
+                    <Select
+                      value={form.event_1_id || EMPTY_VALUE}
+                      onValueChange={(v) => {
+                        const evId = v === EMPTY_VALUE ? "" : v;
+                        const ev = events.find((e) => e.id === evId);
+                        const maxSize = ev ? getEventTeamSize(ev.name) : 1;
+                        const newTeamSize1 = Math.min(form.event_1_team_size, maxSize) || 1;
+                        setForm((f) => ({
+                          ...f,
+                          event_1_id: evId,
+                          event_2_id: evId === "" ? "" : f.event_2_id,
+                          event_1_team_size: newTeamSize1,
+                        }));
+                        if (evId) syncTeamMembers(newTeamSize1, form.event_2_team_size, !!form.event_2_id);
+                      }}
+                    >
+                      <SelectTrigger className="w-full bg-muted/50 border-primary/20">
+                        <SelectValue placeholder="Select first event" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={EMPTY_VALUE} className="hidden" />
+                        {events.map((ev) => {
+                          const conflictWith2 = event2 && eventsConflict(ev.name, event2.name);
+                          return (
+                            <SelectItem
+                              key={ev.id}
+                              value={ev.id}
+                              disabled={conflictWith2}
+                              className={conflictWith2 ? "opacity-80 cursor-not-allowed" : ""}
+                            >
+                              {ev.name}
+                              {conflictWith2 ? (
+                                <span className="text-destructive font-medium ml-1">— TIME CONFLICT</span>
+                              ) : null}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                    {errors.event_1_id && <p className="text-destructive text-sm">{errors.event_1_id}</p>}
+                  </div>
 
-              <hr className="border-border my-6" />
+                  {form.event_1_id && (
+                    <div className="space-y-2">
+                      <Label>Number of Participants — Event 1</Label>
+                      <Select
+                        value={String(form.event_1_team_size)}
+                        onValueChange={(v) => {
+                          const n = parseInt(v, 10);
+                          setForm((f) => ({ ...f, event_1_team_size: n }));
+                          syncTeamMembers(n, form.event_2_team_size, !!form.event_2_id);
+                        }}
+                      >
+                        <SelectTrigger className="w-full bg-muted/50 border-primary/20">
+                          <SelectValue placeholder="SELECT NUMBER OF TEAM MEMBERS" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: maxTeamSize1 }, (_, i) => i + 1).map((n) => (
+                            <SelectItem key={n} value={String(n)}>
+                              {n} {n === 1 ? "member" : "members"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
 
-              <p className="text-sm font-medium text-muted-foreground">Your details</p>
+                  <div className="space-y-2">
+                    <Label>Event 2 (optional)</Label>
+                    <Select
+                      value={form.event_2_id || EMPTY_VALUE}
+                      onValueChange={(v) => {
+                        const evId = v === EMPTY_VALUE ? "" : v;
+                        const ev = evId ? events.find((e) => e.id === evId) : null;
+                        const maxSize = ev ? getEventTeamSize(ev.name) : 1;
+                        setForm((f) => ({
+                          ...f,
+                          event_2_id: evId,
+                          event_2_team_size: evId ? (Math.min(f.event_2_team_size, maxSize) || 1) : 1,
+                        }));
+                        syncTeamMembers(form.event_1_team_size, evId ? (Math.min(form.event_2_team_size, maxSize) || 1) : 0, !!evId);
+                      }}
+                    >
+                      <SelectTrigger className="w-full bg-muted/50 border-primary/20">
+                        <SelectValue placeholder="Select second event" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={EMPTY_VALUE}>None</SelectItem>
+                        {events.map((ev) => {
+                          const conflictWith1 = event1 && eventsConflict(ev.name, event1.name);
+                          const isEvent1 = ev.id === form.event_1_id;
+                          const disabled = conflictWith1 || isEvent1;
+                          return (
+                            <SelectItem
+                              key={ev.id}
+                              value={ev.id}
+                              disabled={disabled}
+                              className={disabled ? "opacity-80 cursor-not-allowed" : ""}
+                            >
+                              {ev.name}
+                              {isEvent1 ? (
+                                <span className="text-muted-foreground ml-1">(same as Event 1)</span>
+                              ) : conflictWith1 ? (
+                                <span className="text-destructive font-medium ml-1">— TIME CONFLICT</span>
+                              ) : null}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              <div className="space-y-2">
+                  {form.event_2_id && (
+                    <div className="space-y-2">
+                      <Label>Number of Participants — Event 2</Label>
+                      <Select
+                        value={String(form.event_2_team_size)}
+                        onValueChange={(v) => {
+                          const n = parseInt(v, 10);
+                          setForm((f) => ({ ...f, event_2_team_size: n }));
+                          syncTeamMembers(form.event_1_team_size, n, true);
+                        }}
+                      >
+                        <SelectTrigger className="w-full bg-muted/50 border-primary/20">
+                          <SelectValue placeholder="SELECT NUMBER OF TEAM MEMBERS" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: maxTeamSize2 }, (_, i) => i + 1).map((n) => (
+                            <SelectItem key={n} value={String(n)}>
+                              {n} {n === 1 ? "member" : "members"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  <hr className="border-border my-6" />
+
+                  <p className="text-sm font-medium text-muted-foreground">Your details</p>
+
+                  <div className="space-y-2">
                 <Label htmlFor="page-reg-name">Full Name *</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -418,6 +570,109 @@ export default function Register() {
                   </div>
                 </div>
               </div>
+                </TabsContent>
+
+                <TabsContent value="team" className="space-y-4 mt-4">
+                  <p className="text-sm text-muted-foreground">
+                    {additionalTeamMembersCount === 0
+                      ? "This event does not require additional team member details (solo or you are the only participant)."
+                      : `Enter details for ${additionalTeamMembersCount} team member(s). You (the primary registrant) are already counted.`}
+                  </p>
+                  {form.team_members.map((member, idx) => (
+                    <div key={idx} className="rounded-lg border border-border/50 p-4 space-y-3 bg-muted/20">
+                      <h4 className="text-sm font-medium text-primary">Team member {idx + 1}</h4>
+                      <div className="space-y-2">
+                        <Label>Full Name *</Label>
+                        <Input
+                          placeholder="Full name"
+                          className="bg-muted/50 border-primary/20"
+                          value={member.name}
+                          onChange={(e) =>
+                            setForm((f) => {
+                              const next = [...f.team_members];
+                              next[idx] = { ...next[idx], name: e.target.value };
+                              return { ...f, team_members: next };
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Email *</Label>
+                        <Input
+                          type="email"
+                          placeholder="email@example.com"
+                          className="bg-muted/50 border-primary/20"
+                          value={member.email}
+                          onChange={(e) =>
+                            setForm((f) => {
+                              const next = [...f.team_members];
+                              next[idx] = { ...next[idx], email: e.target.value };
+                              return { ...f, team_members: next };
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>WhatsApp Phone</Label>
+                        <Input
+                          type="tel"
+                          placeholder="+91 98765 43210"
+                          className="bg-muted/50 border-primary/20"
+                          value={member.whatsapp_phone}
+                          onChange={(e) =>
+                            setForm((f) => {
+                              const next = [...f.team_members];
+                              next[idx] = { ...next[idx], whatsapp_phone: e.target.value };
+                              return { ...f, team_members: next };
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </TabsContent>
+
+                <TabsContent value="payment" className="space-y-4 mt-4">
+                  <p className="text-sm text-muted-foreground">
+                    Upload a screenshot of your payment confirmation.
+                  </p>
+                  <div className="space-y-2">
+                    <Label htmlFor="payment-upload">Payment screenshot *</Label>
+                    <div className="flex flex-col gap-3">
+                      <label
+                        htmlFor="payment-upload"
+                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-primary/30 rounded-lg cursor-pointer bg-muted/30 hover:bg-muted/50 transition-colors"
+                      >
+                        {form.payment_screenshot ? (
+                          <div className="flex flex-col items-center gap-2 p-2">
+                            <ImageIcon className="w-10 h-10 text-primary" />
+                            <span className="text-sm font-medium">{form.payment_screenshot.name}</span>
+                            <span className="text-xs text-muted-foreground">Click to change</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center gap-2 p-2">
+                            <Upload className="w-10 h-10 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">Click to upload (PNG, JPG, WebP)</span>
+                          </div>
+                        )}
+                        <input
+                          id="payment-upload"
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) setForm((f) => ({ ...f, payment_screenshot: file }));
+                          }}
+                        />
+                      </label>
+                    </div>
+                    {errors.payment_screenshot && (
+                      <p className="text-destructive text-sm">{errors.payment_screenshot}</p>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
 
               <NeonButton type="submit" className="w-full mt-6" size="lg" disabled={isSubmitting}>
                 {isSubmitting ? (

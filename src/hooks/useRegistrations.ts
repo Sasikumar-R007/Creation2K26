@@ -195,6 +195,8 @@ export const useGuestRegistrations = () => {
   });
 };
 
+export type TeamMemberPayload = { name: string; email: string; whatsapp_phone?: string };
+
 /** Submit guest registration (event registration form, no account). */
 export const useSubmitGuestRegistration = () => {
   const queryClient = useQueryClient();
@@ -209,8 +211,24 @@ export const useSubmitGuestRegistration = () => {
       college?: string;
       event_1_id: string;
       event_2_id?: string | null;
+      event_1_team_size?: number;
+      event_2_team_size?: number | null;
+      team_members?: TeamMemberPayload[];
+      payment_screenshot_url?: string | null;
     }) => {
-      const { error } = await supabase.from("guest_registrations").insert(payload);
+      const { error } = await supabase.from("guest_registrations").insert({
+        name: payload.name,
+        email: payload.email,
+        whatsapp_phone: payload.whatsapp_phone,
+        department: payload.department,
+        college: payload.college,
+        event_1_id: payload.event_1_id,
+        event_2_id: payload.event_2_id ?? null,
+        event_1_team_size: payload.event_1_team_size ?? null,
+        event_2_team_size: payload.event_2_team_size ?? null,
+        team_members: payload.team_members ?? null,
+        payment_screenshot_url: payload.payment_screenshot_url ?? null,
+      });
       if (error) throw error;
     },
     onSuccess: () => {

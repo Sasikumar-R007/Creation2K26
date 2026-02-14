@@ -118,6 +118,24 @@ export const EVENT_DISPLAY: Record<
   "PERSONALITY CONTEST": { displayName: "Persona League", logo: "/Persona League.jpeg" },
 };
 
+/** Event name to max team size. Events not listed default to 1 (solo). */
+export const EVENT_TEAM_SIZES: Record<string, number> = {
+  "AD ZAP": 5,
+  "AD-ZAP": 5,
+  "MOVIE SPOOFING": 5,
+  "MOVIE SPOOF": 5,
+  "PAPER PRESENTATION": 2,
+  "IPL AUCTION": 2,
+  "MEMORY MATRIX": 2,
+  QUIZ: 2,
+};
+
+/** Get max team size for an event by name. */
+export function getEventTeamSize(eventName: string): number {
+  const key = eventName.trim().toUpperCase();
+  return EVENT_TEAM_SIZES[key] ?? 1;
+}
+
 /** Get display name and logo for an event by its DB name. */
 export function getEventDisplay(eventName: string): {
   displayName: string;
