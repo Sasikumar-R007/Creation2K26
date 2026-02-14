@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Mail,
@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
   EVENT_DATE,
   VENUE,
@@ -61,9 +61,16 @@ const initialForm = {
   event_2_id: "",
   event_1_team_size: 1,
   event_2_team_size: 1,
-  team_members: [] as TeamMember[],
+  event_1_team_members: [] as TeamMember[],
+  event_2_team_members: [] as TeamMember[],
   payment_screenshot: null as File | null,
 };
+
+const STEPS = [
+  { id: "registration", label: "Registration", number: 1 },
+  { id: "team", label: "Team Details", number: 2 },
+  { id: "payment", label: "Payment", number: 3 },
+] as const;
 
 const conflictGroups = [
   {
@@ -141,19 +148,42 @@ export default function Register() {
     return Math.max(n1, n2);
   }, [form.event_1_team_size, form.event_2_team_size, form.event_2_id]);
 
-  const additionalTeamMembersCount = Math.max(0, totalTeamMembersNeeded - 1);
+  const event1AdditionalCount = Math.max(0, (form.event_1_team_size || 1) - 1);
+  const event2AdditionalCount = form.event_2_id
+    ? Math.max(0, (form.event_2_team_size || 1) - 1)
+    : 0;
 
-  const syncTeamMembers = useCallback((teamSize1: number, teamSize2: number, hasEvent2: boolean) => {
-    const total = Math.max(teamSize1, hasEvent2 ? teamSize2 : 0);
-    const count = Math.max(0, total - 1);
+  const syncEvent1TeamMembers = useCallback((count: number) => {
     setForm((f) => {
-      const current = f.team_members;
+      const current = f.event_1_team_members;
       const next: TeamMember[] = Array.from({ length: count }, (_, i) =>
         current[i] ?? { name: "", email: "", whatsapp_phone: "" }
       );
-      return { ...f, team_members: next };
+      return { ...f, event_1_team_members: next };
     });
   }, []);
+
+  const syncEvent2TeamMembers = useCallback((count: number) => {
+    setForm((f) => {
+      const current = f.event_2_team_members;
+      const next: TeamMember[] = Array.from({ length: count }, (_, i) =>
+        current[i] ?? { name: "", email: "", whatsapp_phone: "" }
+      );
+      return { ...f, event_2_team_members: next };
+    });
+  }, []);
+
+  useEffect(() => {
+    if (form.event_1_team_members.length !== event1AdditionalCount) {
+      syncEvent1TeamMembers(event1AdditionalCount);
+    }
+  }, [event1AdditionalCount, syncEvent1TeamMembers]);
+
+  useEffect(() => {
+    if (form.event_2_team_members.length !== event2AdditionalCount) {
+      syncEvent2TeamMembers(event2AdditionalCount);
+    }
+  }, [event2AdditionalCount, syncEvent2TeamMembers]);
 
   const validateField = (field: string, value: string) => {
     try {
@@ -223,7 +253,10 @@ export default function Register() {
         event_2_id: form.event_2_id || null,
         event_1_team_size: form.event_1_team_size,
         event_2_team_size: form.event_2_id ? form.event_2_team_size : null,
-        team_members: form.team_members,
+        team_members: {
+          event_1: form.event_1_team_members,
+          event_2: form.event_2_team_members,
+        },
         payment_screenshot_url: paymentUrl,
       });
       setForm(initialForm);
@@ -252,111 +285,100 @@ export default function Register() {
 
       <Navbar />
 
-      <main className="relative container mx-auto px-4 pt-28 pb-20">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-8"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Home
-        </Link>
+      <main className="relative min-h-[calc(100vh-4rem)] w-full px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+        <div className="max-w-4xl mx-auto">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-6"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Home
+          </Link>
 
-        <div className="grid lg:grid-cols-[1fr_1.1fr] gap-10 lg:gap-14 items-start max-w-6xl mx-auto">
-          {/* Left: Rules */}
-          <div className="space-y-8">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-6 h-6 text-primary" />
-                <h1 className="text-2xl md:text-3xl font-bold">
-                  <span className="gradient-text">CREATION 2K26</span>
-                </h1>
-              </div>
-              <p className="text-muted-foreground text-lg">
-                BCA Department, Bishop Heber College. Register for up to two events.
-              </p>
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-6 h-6 text-primary" />
+              <h1 className="text-2xl sm:text-3xl font-bold">
+                <span className="gradient-text">CREATION 2K26</span>
+              </h1>
             </div>
-
-            <GlassPanel className="p-6 border-primary/20" glow="cyan">
-              <h2 className="flex items-center gap-2 font-semibold text-lg mb-4 text-primary">
-                <BookOpen className="w-5 h-5" />
-                Participation rules
-              </h2>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                  <span>You can register for a <strong className="text-foreground">maximum of {MAX_EVENTS_PER_PARTICIPANT} events</strong>.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                  <span>Within each conflict group below, you may choose <strong className="text-foreground">only one event</strong>. Conflicting options will show <strong className="text-destructive">TIME CONFLICT</strong> and cannot be selected.</span>
-                </li>
-              </ul>
-            </GlassPanel>
-
-            <GlassPanel className="p-6 border-secondary/20" glow="purple">
-              <h2 className="font-semibold text-lg mb-4 text-secondary">Conflict groups</h2>
-              <div className="space-y-4">
-                {conflictGroups.map((group, i) => (
-                  <div key={i}>
-                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2">
-                      {group.title}
-                    </p>
-                    <p className="text-sm text-foreground/90">
-                      {group.events.join(", ")}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </GlassPanel>
-
-            <GlassPanel className="p-6">
-              <div className="flex items-start gap-3 text-sm">
-                <Calendar className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium text-foreground">Date</p>
-                  <p className="text-muted-foreground">{formattedDate}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 text-sm mt-4">
-                <MapPin className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium text-foreground">Venue</p>
-                  <p className="text-muted-foreground">
-                    {VENUE.name}, {VENUE.college}
-                  </p>
-                </div>
-              </div>
-            </GlassPanel>
+            <p className="text-muted-foreground">
+              BCA Department, Bishop Heber College. Register for up to two events.
+            </p>
           </div>
 
-          {/* Right: Registration form (events + contact) */}
-          <GlassPanel className="p-6 md:p-8 border-primary/20" glow="cyan">
+          {/* Step progress indicator */}
+          <div className="mb-8 sm:mb-10">
+            <div className="flex items-center justify-between w-full">
+              {STEPS.map((step, index) => {
+                const isActive = activeTab === step.id;
+                const stepIndex = STEPS.findIndex((s) => s.id === activeTab);
+                const isCompleted = index < stepIndex;
+                return (
+                  <div key={step.id} className="flex flex-1 items-center">
+                    <div className="flex flex-col items-center flex-1">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab(step.id)}
+                        className={`
+                          w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-sm font-semibold
+                          transition-colors touch-manipulation
+                          ${isActive
+                            ? "bg-primary text-primary-foreground ring-2 ring-primary/30"
+                            : isCompleted
+                              ? "bg-primary/80 text-primary-foreground"
+                              : "bg-muted/80 text-muted-foreground border border-border"
+                          }
+                        `}
+                      >
+                        {isCompleted ? <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" /> : step.number}
+                      </button>
+                      <span
+                        className={`mt-2 text-xs sm:text-sm font-medium text-center max-w-[80px] ${
+                          isActive ? "text-foreground" : "text-muted-foreground"
+                        }`}
+                      >
+                        {step.label}
+                      </span>
+                    </div>
+                    {index < STEPS.length - 1 && (
+                      <div
+                        className={`flex-1 h-0.5 mx-1 sm:mx-2 border-t-2 border-dashed ${
+                          index < stepIndex ? "border-primary" : "border-muted-foreground/30"
+                        }`}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Full-width registration form */}
+          <GlassPanel className="p-6 sm:p-8 lg:p-10 border-primary/20 w-full min-h-[400px]" glow="cyan">
             <div className="flex items-center gap-2 mb-2">
-              <CalendarDays className="w-5 h-5 text-primary" />
-              <h2 className="text-xl font-bold">Event registration</h2>
+              <CalendarDays className="w-5 h-5 text-primary shrink-0" />
+              <h2 className="text-lg sm:text-xl font-bold">Event registration</h2>
             </div>
             <p className="text-sm text-muted-foreground mb-6">
               Choose up to two events. Options that conflict with your first choice will show <span className="text-destructive font-medium">TIME CONFLICT</span> and cannot be selected.
             </p>
+            <details className="mb-6 rounded-lg border border-primary/20 bg-muted/10 p-4">
+              <summary className="cursor-pointer text-sm font-medium text-foreground">View participation rules & conflict groups</summary>
+              <div className="mt-4 space-y-3 text-sm text-muted-foreground">
+                <p>• Maximum of {MAX_EVENTS_PER_PARTICIPANT} events. Within each conflict group, choose only one.</p>
+                <p><strong className="text-foreground">Group A:</strong> {conflictGroups[0].events.join(", ")}</p>
+                <p><strong className="text-foreground">Group B:</strong> {conflictGroups[1].events.join(", ")}</p>
+                <p className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  {formattedDate} · {VENUE.name}
+                </p>
+              </div>
+            </details>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-3 bg-muted/50 border border-primary/20">
-                  <TabsTrigger value="registration" className="flex items-center gap-2">
-                    <CalendarDays className="w-4 h-4" />
-                    Registration
-                  </TabsTrigger>
-                  <TabsTrigger value="team" className="flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    Team Details
-                  </TabsTrigger>
-                  <TabsTrigger value="payment" className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4" />
-                    Payment
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="registration" className="space-y-4 mt-4">
+                <TabsContent value="registration" className="space-y-4 mt-0">
                   <div className="space-y-2">
                     <Label>Event 1 *</Label>
                     <Select
@@ -372,7 +394,6 @@ export default function Register() {
                           event_2_id: evId === "" ? "" : f.event_2_id,
                           event_1_team_size: newTeamSize1,
                         }));
-                        if (evId) syncTeamMembers(newTeamSize1, form.event_2_team_size, !!form.event_2_id);
                       }}
                     >
                       <SelectTrigger className="w-full bg-muted/50 border-primary/20">
@@ -409,7 +430,6 @@ export default function Register() {
                         onValueChange={(v) => {
                           const n = parseInt(v, 10);
                           setForm((f) => ({ ...f, event_1_team_size: n }));
-                          syncTeamMembers(n, form.event_2_team_size, !!form.event_2_id);
                         }}
                       >
                         <SelectTrigger className="w-full bg-muted/50 border-primary/20">
@@ -438,8 +458,8 @@ export default function Register() {
                           ...f,
                           event_2_id: evId,
                           event_2_team_size: evId ? (Math.min(f.event_2_team_size, maxSize) || 1) : 1,
+                          event_2_team_members: evId ? f.event_2_team_members : [],
                         }));
-                        syncTeamMembers(form.event_1_team_size, evId ? (Math.min(form.event_2_team_size, maxSize) || 1) : 0, !!evId);
                       }}
                     >
                       <SelectTrigger className="w-full bg-muted/50 border-primary/20">
@@ -479,7 +499,6 @@ export default function Register() {
                         onValueChange={(v) => {
                           const n = parseInt(v, 10);
                           setForm((f) => ({ ...f, event_2_team_size: n }));
-                          syncTeamMembers(form.event_1_team_size, n, true);
                         }}
                       >
                         <SelectTrigger className="w-full bg-muted/50 border-primary/20">
@@ -580,67 +599,152 @@ export default function Register() {
               </div>
                 </TabsContent>
 
-                <TabsContent value="team" className="space-y-4 mt-4">
-                  <p className="text-sm text-muted-foreground">
-                    {additionalTeamMembersCount === 0
-                      ? "This event does not require additional team member details (solo or you are the only participant)."
-                      : `Enter details for ${additionalTeamMembersCount} team member(s). You (the primary registrant) are already counted.`}
-                  </p>
-                  {form.team_members.map((member, idx) => (
-                    <div key={idx} className="rounded-lg border border-border/50 p-4 space-y-3 bg-muted/20">
-                      <h4 className="text-sm font-medium text-primary">Team member {idx + 1}</h4>
-                      <div className="space-y-2">
-                        <Label>Full Name *</Label>
-                        <Input
-                          placeholder="Full name"
-                          className="bg-muted/50 border-primary/20"
-                          value={member.name}
-                          onChange={(e) =>
-                            setForm((f) => {
-                              const next = [...f.team_members];
-                              next[idx] = { ...next[idx], name: e.target.value };
-                              return { ...f, team_members: next };
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Email *</Label>
-                        <Input
-                          type="email"
-                          placeholder="email@example.com"
-                          className="bg-muted/50 border-primary/20"
-                          value={member.email}
-                          onChange={(e) =>
-                            setForm((f) => {
-                              const next = [...f.team_members];
-                              next[idx] = { ...next[idx], email: e.target.value };
-                              return { ...f, team_members: next };
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>WhatsApp Phone</Label>
-                        <Input
-                          type="tel"
-                          placeholder="+91 98765 43210"
-                          className="bg-muted/50 border-primary/20"
-                          value={member.whatsapp_phone}
-                          onChange={(e) =>
-                            setForm((f) => {
-                              const next = [...f.team_members];
-                              next[idx] = { ...next[idx], whatsapp_phone: e.target.value };
-                              return { ...f, team_members: next };
-                            })
-                          }
-                        />
-                      </div>
+                <TabsContent value="team" className="space-y-6 mt-0">
+                  {event1AdditionalCount === 0 && event2AdditionalCount === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4">
+                      No additional team members required. You (the primary registrant) are the only participant for both events.
+                    </p>
+                  ) : (
+                    <div className="space-y-8">
+                      {event1AdditionalCount > 0 && (
+                        <div>
+                          <h3 className="text-base font-semibold text-primary mb-3 flex items-center gap-2">
+                            <Users className="w-4 h-4" />
+                            Event 1 — {event1?.name} ({form.event_1_team_size} {form.event_1_team_size === 1 ? "participant" : "participants"})
+                          </h3>
+                          <p className="text-sm text-muted-foreground mb-4">
+                            Add {event1AdditionalCount} team member(s) for Event 1. You (the primary registrant) are already counted.
+                          </p>
+                          <div className="space-y-4">
+                            {form.event_1_team_members.map((member, idx) => (
+                              <div key={idx} className="rounded-lg border border-border/50 p-4 space-y-3 bg-muted/20">
+                                <h4 className="text-sm font-medium text-foreground">Team member {idx + 1}</h4>
+                                <div className="grid gap-3 sm:grid-cols-1">
+                                  <div className="space-y-2">
+                                    <Label>Full Name *</Label>
+                                    <Input
+                                      placeholder="Full name"
+                                      className="bg-muted/50 border-primary/20"
+                                      value={member.name}
+                                      onChange={(e) =>
+                                        setForm((f) => {
+                                          const next = [...f.event_1_team_members];
+                                          next[idx] = { ...next[idx], name: e.target.value };
+                                          return { ...f, event_1_team_members: next };
+                                        })
+                                      }
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label>Email *</Label>
+                                    <Input
+                                      type="email"
+                                      placeholder="email@example.com"
+                                      className="bg-muted/50 border-primary/20"
+                                      value={member.email}
+                                      onChange={(e) =>
+                                        setForm((f) => {
+                                          const next = [...f.event_1_team_members];
+                                          next[idx] = { ...next[idx], email: e.target.value };
+                                          return { ...f, event_1_team_members: next };
+                                        })
+                                      }
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label>WhatsApp Phone</Label>
+                                    <Input
+                                      type="tel"
+                                      placeholder="+91 98765 43210"
+                                      className="bg-muted/50 border-primary/20"
+                                      value={member.whatsapp_phone}
+                                      onChange={(e) =>
+                                        setForm((f) => {
+                                          const next = [...f.event_1_team_members];
+                                          next[idx] = { ...next[idx], whatsapp_phone: e.target.value };
+                                          return { ...f, event_1_team_members: next };
+                                        })
+                                      }
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {event2AdditionalCount > 0 && (
+                        <div>
+                          <h3 className="text-base font-semibold text-secondary mb-3 flex items-center gap-2">
+                            <Users className="w-4 h-4" />
+                            Event 2 — {event2?.name} ({form.event_2_team_size} {form.event_2_team_size === 1 ? "participant" : "participants"})
+                          </h3>
+                          <p className="text-sm text-muted-foreground mb-4">
+                            Add {event2AdditionalCount} team member(s) for Event 2. You (the primary registrant) are already counted.
+                          </p>
+                          <div className="space-y-4">
+                            {form.event_2_team_members.map((member, idx) => (
+                              <div key={idx} className="rounded-lg border border-border/50 p-4 space-y-3 bg-muted/20">
+                                <h4 className="text-sm font-medium text-foreground">Team member {idx + 1}</h4>
+                                <div className="grid gap-3 sm:grid-cols-1">
+                                  <div className="space-y-2">
+                                    <Label>Full Name *</Label>
+                                    <Input
+                                      placeholder="Full name"
+                                      className="bg-muted/50 border-primary/20"
+                                      value={member.name}
+                                      onChange={(e) =>
+                                        setForm((f) => {
+                                          const next = [...f.event_2_team_members];
+                                          next[idx] = { ...next[idx], name: e.target.value };
+                                          return { ...f, event_2_team_members: next };
+                                        })
+                                      }
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label>Email *</Label>
+                                    <Input
+                                      type="email"
+                                      placeholder="email@example.com"
+                                      className="bg-muted/50 border-primary/20"
+                                      value={member.email}
+                                      onChange={(e) =>
+                                        setForm((f) => {
+                                          const next = [...f.event_2_team_members];
+                                          next[idx] = { ...next[idx], email: e.target.value };
+                                          return { ...f, event_2_team_members: next };
+                                        })
+                                      }
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label>WhatsApp Phone</Label>
+                                    <Input
+                                      type="tel"
+                                      placeholder="+91 98765 43210"
+                                      className="bg-muted/50 border-primary/20"
+                                      value={member.whatsapp_phone}
+                                      onChange={(e) =>
+                                        setForm((f) => {
+                                          const next = [...f.event_2_team_members];
+                                          next[idx] = { ...next[idx], whatsapp_phone: e.target.value };
+                                          return { ...f, event_2_team_members: next };
+                                        })
+                                      }
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  ))}
+                  )}
                 </TabsContent>
 
-                <TabsContent value="payment" className="space-y-4 mt-4">
+                <TabsContent value="payment" className="space-y-4 mt-0">
                   {(() => {
                     const participants = Math.max(1, Math.min(5, totalTeamMembersNeeded));
                     const qr = PAYMENT_QR_MAP[participants];
@@ -656,7 +760,7 @@ export default function Register() {
                           <img
                             src={qr.image}
                             alt={`Payment QR - ₹${qr.amount}`}
-                            className="w-48 h-48 object-contain rounded-lg border border-border/50"
+                            className="w-44 h-44 sm:w-52 sm:h-52 object-contain rounded-lg border border-border/50"
                           />
                         </div>
                       </div>

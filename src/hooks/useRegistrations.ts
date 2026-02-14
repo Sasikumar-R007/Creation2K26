@@ -213,7 +213,7 @@ export const useSubmitGuestRegistration = () => {
       event_2_id?: string | null;
       event_1_team_size?: number;
       event_2_team_size?: number | null;
-      team_members?: TeamMemberPayload[];
+      team_members?: { event_1: TeamMemberPayload[]; event_2: TeamMemberPayload[] };
       payment_screenshot_url?: string | null;
     }) => {
       const { error } = await supabase.from("guest_registrations").insert({
