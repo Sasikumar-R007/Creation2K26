@@ -48,6 +48,9 @@ import { z } from "zod";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const nameSchema = z.string().min(2, "Name must be at least 2 characters");
+const phoneSchema = z.string().min(10, "Please enter a valid phone number (at least 10 digits)");
+const departmentSchema = z.string().min(1, "Department is required");
+const collegeSchema = z.string().min(1, "College is required");
 
 export type TeamMember = { name: string; email: string; whatsapp_phone: string };
 
@@ -189,6 +192,9 @@ export default function Register() {
     try {
       if (field === "email") emailSchema.parse(value);
       else if (field === "name") nameSchema.parse(value);
+      else if (field === "whatsapp_phone") phoneSchema.parse(value);
+      else if (field === "department") departmentSchema.parse(value);
+      else if (field === "college") collegeSchema.parse(value);
       setErrors((prev) => ({ ...prev, [field]: "" }));
       return true;
     } catch (err) {
@@ -199,16 +205,35 @@ export default function Register() {
     }
   };
 
+  const validateTeamMembers = (members: TeamMember[]): boolean => {
+    for (const m of members) {
+      if (!nameSchema.safeParse(m.name).success) return false;
+      if (!emailSchema.safeParse(m.email).success) return false;
+      if (!phoneSchema.safeParse(m.whatsapp_phone).success) return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
 
     const nameValid = validateField("name", form.name);
     const emailValid = validateField("email", form.email);
-    if (!nameValid || !emailValid) return;
+    const phoneValid = validateField("whatsapp_phone", form.whatsapp_phone);
+    const departmentValid = validateField("department", form.department);
+    const collegeValid = validateField("college", form.college);
+    if (!nameValid || !emailValid || !phoneValid || !departmentValid || !collegeValid) return;
 
     if (!form.event_1_id) {
       setErrors((prev) => ({ ...prev, event_1_id: "Please select Event 1." }));
+      return;
+    }
+
+    const allTeamMembers = [...form.event_1_team_members, ...form.event_2_team_members];
+    if (allTeamMembers.length > 0 && !validateTeamMembers(allTeamMembers)) {
+      setErrors((prev) => ({ ...prev, team_members: "Please fill in all required fields for each team member (name, email, phone)." }));
+      setActiveTab("team");
       return;
     }
 
@@ -530,6 +555,7 @@ export default function Register() {
                     className="pl-10 bg-muted/50 border-primary/20 focus:border-primary/50"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    required
                   />
                 </div>
                 {errors.name && <p className="text-destructive text-sm">{errors.name}</p>}
@@ -546,13 +572,14 @@ export default function Register() {
                     className="pl-10 bg-muted/50 border-primary/20 focus:border-primary/50"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    required
                   />
                 </div>
                 {errors.email && <p className="text-destructive text-sm">{errors.email}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="page-reg-whatsapp">WhatsApp Phone Number</Label>
+                <Label htmlFor="page-reg-whatsapp">WhatsApp Phone Number *</Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
@@ -562,14 +589,16 @@ export default function Register() {
                     className="pl-10 bg-muted/50 border-primary/20 focus:border-primary/50"
                     value={form.whatsapp_phone}
                     onChange={(e) => setForm({ ...form, whatsapp_phone: e.target.value })}
+                    required
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">Include country code</p>
+                {errors.whatsapp_phone && <p className="text-destructive text-sm">{errors.whatsapp_phone}</p>}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="page-reg-department">Department</Label>
+                  <Label htmlFor="page-reg-department">Department *</Label>
                   <div className="relative">
                     <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
@@ -579,11 +608,13 @@ export default function Register() {
                       className="pl-10 bg-muted/50 border-primary/20 focus:border-primary/50"
                       value={form.department}
                       onChange={(e) => setForm({ ...form, department: e.target.value })}
+                      required
                     />
                   </div>
+                  {errors.department && <p className="text-destructive text-sm">{errors.department}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="page-reg-college">College</Label>
+                  <Label htmlFor="page-reg-college">College *</Label>
                   <div className="relative">
                     <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
@@ -593,13 +624,18 @@ export default function Register() {
                       className="pl-10 bg-muted/50 border-primary/20 focus:border-primary/50"
                       value={form.college}
                       onChange={(e) => setForm({ ...form, college: e.target.value })}
+                      required
                     />
                   </div>
+                  {errors.college && <p className="text-destructive text-sm">{errors.college}</p>}
                 </div>
               </div>
                 </TabsContent>
 
                 <TabsContent value="team" className="space-y-6 mt-0">
+                  {errors.team_members && (
+                    <p className="text-destructive text-sm rounded-lg border border-destructive/30 bg-destructive/10 p-3">{errors.team_members}</p>
+                  )}
                   {event1AdditionalCount === 0 && event2AdditionalCount === 0 ? (
                     <p className="text-sm text-muted-foreground py-4">
                       No additional team members required. You (the primary registrant) are the only participant for both events.
@@ -633,6 +669,7 @@ export default function Register() {
                                           return { ...f, event_1_team_members: next };
                                         })
                                       }
+                                      required
                                     />
                                   </div>
                                   <div className="space-y-2">
@@ -649,10 +686,11 @@ export default function Register() {
                                           return { ...f, event_1_team_members: next };
                                         })
                                       }
+                                      required
                                     />
                                   </div>
                                   <div className="space-y-2">
-                                    <Label>WhatsApp Phone</Label>
+                                    <Label>WhatsApp Phone *</Label>
                                     <Input
                                       type="tel"
                                       placeholder="+91 98765 43210"
@@ -665,6 +703,7 @@ export default function Register() {
                                           return { ...f, event_1_team_members: next };
                                         })
                                       }
+                                      required
                                     />
                                   </div>
                                 </div>
@@ -700,6 +739,7 @@ export default function Register() {
                                           return { ...f, event_2_team_members: next };
                                         })
                                       }
+                                      required
                                     />
                                   </div>
                                   <div className="space-y-2">
@@ -716,10 +756,11 @@ export default function Register() {
                                           return { ...f, event_2_team_members: next };
                                         })
                                       }
+                                      required
                                     />
                                   </div>
                                   <div className="space-y-2">
-                                    <Label>WhatsApp Phone</Label>
+                                    <Label>WhatsApp Phone *</Label>
                                     <Input
                                       type="tel"
                                       placeholder="+91 98765 43210"
@@ -732,6 +773,7 @@ export default function Register() {
                                           return { ...f, event_2_team_members: next };
                                         })
                                       }
+                                      required
                                     />
                                   </div>
                                 </div>
