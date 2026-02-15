@@ -1,43 +1,8 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, Instagram, Mail, MapPin, Calendar, Lock } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Instagram, Mail, MapPin, Calendar } from "lucide-react";
 import { VENUE, SOCIAL_LINKS, EVENT_DATE } from "@/lib/constants";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-
-const ADMIN_PIN = "1805";
 
 const Footer = () => {
-  const navigate = useNavigate();
-  const [pinDialogOpen, setPinDialogOpen] = useState(false);
-  const [pinValue, setPinValue] = useState("");
-  const [pinError, setPinError] = useState("");
-
-  const handleSparkleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setPinDialogOpen(true);
-    setPinValue("");
-    setPinError("");
-  };
-
-  const handlePinSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setPinError("");
-    if (pinValue.trim() === ADMIN_PIN) {
-      setPinDialogOpen(false);
-      setPinValue("");
-      navigate("/admin-login");
-    } else {
-      setPinError("Incorrect PIN. Try again.");
-    }
-  };
 
   const formattedDate = EVENT_DATE.toLocaleDateString("en-US", {
     weekday: "long",
@@ -53,16 +18,12 @@ const Footer = () => {
           {/* Brand */}
           <div className="md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <button
-                type="button"
-                onClick={handleSparkleClick}
-                className="p-1 rounded-lg hover:bg-primary/20 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
-                aria-label="Admin access"
-              >
-                <Sparkles className="h-8 w-8 text-primary" />
-              </button>
               <Link to="/" className="flex items-center gap-2">
-                <span className="text-xl font-bold gradient-text">CREATION 2K26</span>
+                <img 
+                  src="/Logo 7.png" 
+                  alt="CREATION 2K26" 
+                  className="h-10 w-auto object-contain"
+                />
               </Link>
             </div>
             <p className="text-muted-foreground text-sm">
@@ -137,41 +98,6 @@ const Footer = () => {
             </div>
           </div>
         </div>
-
-        {/* PIN dialog for admin access */}
-        <Dialog open={pinDialogOpen} onOpenChange={(open) => { setPinDialogOpen(open); setPinError(""); setPinValue(""); }}>
-          <DialogContent className="sm:max-w-sm">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Lock className="h-5 w-5 text-primary" />
-                Enter PIN
-              </DialogTitle>
-            </DialogHeader>
-            <p className="text-sm text-muted-foreground mb-4">
-              Enter the PIN to access the admin sign-in page.
-            </p>
-            <form onSubmit={handlePinSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="admin-pin">PIN</Label>
-                <Input
-                  id="admin-pin"
-                  type="password"
-                  inputMode="numeric"
-                  autoComplete="off"
-                  placeholder="••••"
-                  value={pinValue}
-                  onChange={(e) => setPinValue(e.target.value)}
-                  className="font-mono tracking-widest"
-                  maxLength={6}
-                />
-                {pinError && <p className="text-sm text-destructive">{pinError}</p>}
-              </div>
-              <Button type="submit" className="w-full">
-                Continue to Sign In
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
 
         {/* Bottom Bar */}
         <div className="border-t border-border/50 mt-8 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">

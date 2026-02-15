@@ -641,7 +641,15 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-background dark">
+    <div className="min-h-screen bg-background dark relative">
+      {/* Techy Frame Animations */}
+      <div className="techy-frame techy-frame-1" />
+      <div className="techy-frame techy-frame-2" />
+      <div className="techy-frame techy-frame-3" />
+      <div className="techy-frame techy-frame-4" />
+      <div className="techy-frame techy-frame-5" />
+      <div className="techy-frame techy-frame-6" />
+      
       <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden>
         <div className="absolute inset-0 bg-gradient-to-br from-background via-[hsl(260,25%,6%)] to-background opacity-100" />
         <div
@@ -670,16 +678,39 @@ export default function Register() {
             Back to Home
           </Link>
 
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-6 h-6 text-primary" />
-              <h1 className="text-2xl sm:text-3xl font-bold">
-                <span className="gradient-text">CREATION 2K26</span>
-              </h1>
+          {/* Redesigned Header Section */}
+          <div className="mb-10 relative">
+            <div className="relative border-2 border-primary/30 bg-background/80 backdrop-blur-sm rounded-lg p-6 sm:p-8 overflow-hidden">
+              {/* Techy corner accents */}
+              <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-primary/50" />
+              <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-primary/50" />
+              <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-primary/50" />
+              <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-primary/50" />
+              
+              {/* Grid pattern overlay */}
+              <div 
+                className="absolute inset-0 opacity-5"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(hsl(var(--primary)) 1px, transparent 1px),
+                    linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)
+                  `,
+                  backgroundSize: "20px 20px",
+                }}
+              />
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-1 h-8 bg-gradient-to-b from-primary via-secondary to-accent rounded-full" />
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">
+                    <span className="gradient-text">CREATION 2K26</span>
+                  </h1>
+                </div>
+                <p className="text-muted-foreground text-sm sm:text-base ml-4">
+                  BCA Department, Bishop Heber College. Register for up to two events.
+                </p>
+              </div>
             </div>
-            <p className="text-muted-foreground">
-              BCA Department, Bishop Heber College. Register for up to two events.
-            </p>
           </div>
 
           {/* Step progress indicator */}
@@ -787,21 +818,22 @@ export default function Register() {
                             <SelectItem value="empty" disabled>No events available. Please contact support.</SelectItem>
                           ) : (
                             events.map((ev) => {
-                            const conflictWith2 = event2 && eventsConflict(ev.name, event2.name);
-                            return (
-                              <SelectItem
-                                key={ev.id}
-                                value={ev.id}
-                                disabled={conflictWith2}
-                                className={conflictWith2 ? "opacity-80 cursor-not-allowed" : ""}
-                              >
-                                {ev.name}
-                                {conflictWith2 ? (
-                                  <span className="text-destructive font-medium ml-1">— TIME CONFLICT</span>
-                                ) : null}
-                              </SelectItem>
-                            );
-                          })}
+                              const conflictWith2 = event2 && eventsConflict(ev.name, event2.name);
+                              return (
+                                <SelectItem
+                                  key={ev.id}
+                                  value={ev.id}
+                                  disabled={conflictWith2}
+                                  className={conflictWith2 ? "opacity-80 cursor-not-allowed" : ""}
+                                >
+                                  {ev.name}
+                                  {conflictWith2 ? (
+                                    <span className="text-destructive font-medium ml-1">— TIME CONFLICT</span>
+                                  ) : null}
+                                </SelectItem>
+                              );
+                            })
+                          )}
                         </SelectContent>
                       </Select>
                       {errors.event_1_id && <p className="text-destructive text-sm">{errors.event_1_id}</p>}

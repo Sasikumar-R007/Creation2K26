@@ -7,7 +7,15 @@ import EventsGrid from "@/components/events/EventsGrid";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background dark">
+    <div className="min-h-screen bg-background dark relative">
+      {/* Techy Frame Animations */}
+      <div className="techy-frame techy-frame-1" />
+      <div className="techy-frame techy-frame-2" />
+      <div className="techy-frame techy-frame-3" />
+      <div className="techy-frame techy-frame-4" />
+      <div className="techy-frame techy-frame-5" />
+      <div className="techy-frame techy-frame-6" />
+      
       <Navbar />
       
       {/* Hero Section */}

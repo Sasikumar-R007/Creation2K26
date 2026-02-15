@@ -4,13 +4,21 @@ import type { Database } from './types';
 
 // Support environment variables for easy deployment
 // Fallback to hardcoded values for backward compatibility
+// IMPORTANT: Make sure VITE_SUPABASE_URL matches your actual Supabase project
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://tovokkcouwwymarnftcu.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvdm9ra2NvdXd3eW1hcm5mdGN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMjE5NjcsImV4cCI6MjA4NjY5Nzk2N30.CVN8RbHF1GA5Kvo3JlkZWjIryuCuGURwm6PV_auZOGs";
 
 // Debug: Log which Supabase URL is being used
-if (import.meta.env.DEV) {
-  console.log("✅ Supabase URL:", SUPABASE_URL);
-  console.log("✅ Using NEW Supabase project: tovokkcouwwymarnftcu");
+console.log("🔍 Supabase Configuration:");
+console.log("  URL:", SUPABASE_URL);
+console.log("  From env:", import.meta.env.VITE_SUPABASE_URL ? "Yes" : "No (using fallback)");
+console.log("  Key present:", SUPABASE_PUBLISHABLE_KEY ? "Yes" : "No");
+
+// Validate URL matches the key
+if (SUPABASE_URL.includes("hqkrexlemuhgwbblbbkn")) {
+  console.error("❌ ERROR: Using OLD Supabase project URL! This will cause 401 errors.");
+  console.error("   Expected: tovokkcouwwymarnftcu");
+  console.error("   Found: hqkrexlemuhgwbblbbkn");
 }
 
 // Import the supabase client like this:

@@ -10,7 +10,7 @@ const neonButtonVariants = cva(
       variant: {
         cyan: [
           "bg-primary text-primary-foreground",
-          "hover:shadow-[0_0_25px_hsl(var(--neon-cyan)/0.7),0_0_50px_hsl(var(--neon-cyan)/0.4),inset_0_0_15px_hsl(var(--neon-cyan)/0.2)]",
+          "hover:shadow-[0_0_15px_hsl(var(--neon-cyan)/0.4),0_0_25px_hsl(var(--neon-cyan)/0.25),inset_0_0_10px_hsl(var(--neon-cyan)/0.15)]",
           "hover:scale-105 hover:-translate-y-0.5",
           "active:scale-102 active:translate-y-0",
           "before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700",

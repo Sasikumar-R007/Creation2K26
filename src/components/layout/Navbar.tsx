@@ -62,7 +62,7 @@ const Navbar = () => {
                   key={link.href}
                   href={link.href}
                   className={`text-base font-medium transition-colors hover:text-primary ${
-                    isActive(link.href) ? "text-blue-500 font-semibold" : "text-muted-foreground"
+                    isActive(link.href) ? "text-primary font-semibold" : "text-muted-foreground/50"
                   }`}
                 >
                   {link.label}
@@ -125,7 +125,7 @@ const Navbar = () => {
                     href={link.href}
                     onClick={() => setIsOpen(false)}
                     className={`text-sm font-medium py-2 text-center transition-colors hover:text-primary ${
-                      isActive(link.href) ? "text-blue-500 font-semibold" : "text-muted-foreground"
+                      isActive(link.href) ? "text-primary font-semibold" : "text-muted-foreground/50"
                     }`}
                   >
                     {link.label}

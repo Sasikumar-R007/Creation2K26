@@ -359,7 +359,7 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Countdown Timer - glassmorphism design */}
+          {/* Countdown Timer - Techy Design */}
           <div className="flex flex-wrap justify-center items-end gap-3 md:gap-5 mb-12 animate-fade-in" style={{ animationDelay: "400ms" }}>
             {[
               { value: timeLeft.days, label: "DAYS" },
@@ -369,22 +369,41 @@ const HeroSection = () => {
             ].map((item, index) => (
               <div key={item.label} className="flex flex-col items-center">
                 <div
-                  className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg flex items-center justify-center overflow-hidden"
+                  className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded border-2 border-primary/40 bg-background/80 backdrop-blur-sm overflow-hidden techy-timer"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  {/* Glassmorphism effect */}
-                  <div className="absolute inset-0 rounded-lg bg-card/30 backdrop-blur-xl border border-primary/30 shadow-lg" />
+                  {/* Techy corner accents */}
+                  <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-primary/60" />
+                  <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-primary/60" />
+                  <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-primary/60" />
+                  <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-primary/60" />
+                  
+                  {/* Grid pattern overlay */}
+                  <div 
+                    className="absolute inset-0 opacity-10"
+                    style={{
+                      backgroundImage: `
+                        linear-gradient(hsl(var(--primary)) 1px, transparent 1px),
+                        linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)
+                      `,
+                      backgroundSize: "8px 8px",
+                    }}
+                  />
+                  
                   {/* Number */}
-                  <div className="relative w-full h-full flex items-center justify-center">
+                  <div className="relative w-full h-full flex items-center justify-center z-10">
                     <span
                       key={`${item.label}-${item.value}`}
-                      className="text-2xl sm:text-3xl md:text-4xl font-bold tabular-nums text-primary"
+                      className="text-2xl sm:text-3xl md:text-4xl font-mono font-bold tabular-nums text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)]"
                     >
                       {String(item.value).padStart(2, "0")}
                     </span>
                   </div>
+                  
+                  {/* Subtle scanline effect */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent animate-pulse" />
                 </div>
-                <span className="mt-2 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                <span className="mt-2 text-[10px] sm:text-xs font-mono font-semibold uppercase tracking-[0.3em] text-muted-foreground">
                   {item.label}
                 </span>
               </div>
