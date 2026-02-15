@@ -134,7 +134,7 @@ const RegistrationSuccessModal = ({ form, events, event1, event2, registrationId
       const html2pdf = (await import("html2pdf.js")).default;
       const opt = {
         margin: [10, 10, 10, 10],
-        filename: `CREATION_2K26_Registration_${registrationId || "form"}.pdf`,
+        filename: `CN2K26_Registration_${registrationId || "form"}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, logging: false },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
@@ -169,71 +169,70 @@ const RegistrationSuccessModal = ({ form, events, event1, event2, registrationId
         </DialogDescription>
       </DialogHeader>
 
-      <div id="registration-form" className="bg-white text-black p-8 space-y-6" style={{ fontFamily: "Arial, sans-serif" }}>
+      <div id="registration-form" className="bg-white text-black p-8 space-y-6" style={{ fontFamily: "'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif" }}>
         {/* Header with Logo */}
         <div className="flex flex-col items-center border-b-2 border-gray-800 pb-4 mb-6">
-          <img src="/Logo 7.png" alt="CREATION 2K26" className="h-24 w-auto mb-4" />
-          <h1 className="text-3xl font-bold text-center">CREATION 2K26</h1>
-          <p className="text-lg text-center mt-2">BCA Department, Bishop Heber College</p>
-          <p className="text-sm text-center mt-1">Trichy - 620 017, Tamil Nadu</p>
+          <img src="/form logo.png" alt="CREATION 2K26" className="h-28 w-auto mb-3" />
+          <p className="text-base text-center font-medium text-gray-700 mt-2">BCA Department, Bishop Heber College</p>
+          <p className="text-sm text-center mt-1 text-gray-600">Trichy - 620 017, Tamil Nadu</p>
         </div>
 
         {/* Registration ID */}
         {registrationId && (
-          <div className="bg-primary/10 p-4 rounded-lg border-2 border-primary mb-6">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-lg border border-blue-200 mb-6">
             <p className="text-center">
-              <span className="font-semibold">Registration ID: </span>
-              <span className="font-bold text-xl text-primary">{registrationId}</span>
+              <span className="font-medium text-sm text-gray-700">Registration ID: </span>
+              <span className="font-bold text-lg text-blue-600 tracking-wider">{registrationId}</span>
             </p>
           </div>
         )}
 
         {/* Personal Details */}
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2">Personal Details</h2>
+          <h2 className="text-xl font-bold border-b-2 border-gray-300 pb-2 text-gray-800">Personal Details</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="font-semibold text-sm text-gray-600">Full Name</p>
-              <p className="text-base">{form.name}</p>
+              <p className="font-semibold text-xs text-gray-500 uppercase tracking-wide mb-1">Full Name</p>
+              <p className="text-base text-gray-800 font-medium">{form.name}</p>
             </div>
             <div>
-              <p className="font-semibold text-sm text-gray-600">Email</p>
-              <p className="text-base">{form.email}</p>
+              <p className="font-semibold text-xs text-gray-500 uppercase tracking-wide mb-1">Email</p>
+              <p className="text-base text-gray-800 font-medium">{form.email}</p>
             </div>
             <div>
-              <p className="font-semibold text-sm text-gray-600">WhatsApp Phone</p>
-              <p className="text-base">{form.whatsapp_phone}</p>
+              <p className="font-semibold text-xs text-gray-500 uppercase tracking-wide mb-1">WhatsApp Phone</p>
+              <p className="text-base text-gray-800 font-medium">{form.whatsapp_phone}</p>
             </div>
             <div>
-              <p className="font-semibold text-sm text-gray-600">Department</p>
-              <p className="text-base">{form.department}</p>
+              <p className="font-semibold text-xs text-gray-500 uppercase tracking-wide mb-1">Department</p>
+              <p className="text-base text-gray-800 font-medium">{form.department}</p>
             </div>
             <div className="col-span-2">
-              <p className="font-semibold text-sm text-gray-600">College</p>
-              <p className="text-base">{form.college}</p>
+              <p className="font-semibold text-xs text-gray-500 uppercase tracking-wide mb-1">College</p>
+              <p className="text-base text-gray-800 font-medium">{form.college}</p>
             </div>
           </div>
         </div>
 
         {/* Event Details */}
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2">Event Details</h2>
+          <h2 className="text-xl font-bold border-b-2 border-gray-300 pb-2 text-gray-800">Event Details</h2>
           
           <div className="space-y-3">
-            <div className="border-l-4 border-primary pl-4">
-              <p className="font-semibold text-lg">Event 1: {event1?.name || "N/A"}</p>
-              <p className="text-sm text-gray-600">Number of Participants: {form.event_1_team_size}</p>
+            <div className="border-l-4 border-blue-500 pl-4 bg-blue-50/50 py-2 rounded-r">
+              <p className="font-semibold text-base text-gray-800">Event 1: {event1?.name || "N/A"}</p>
+              <p className="text-sm text-gray-600 mt-1">Number of Participants: <span className="font-medium">{form.event_1_team_size}</span></p>
               {form.event_1_team_size > 1 && form.event_1_team_name && (
-                <p className="text-sm text-gray-600">Team Name: {form.event_1_team_name}</p>
+                <p className="text-sm text-gray-600 mt-1">Team Name: <span className="font-medium">{form.event_1_team_name}</span></p>
               )}
             </div>
 
             {form.event_2_id && event2 && (
-              <div className="border-l-4 border-secondary pl-4">
-                <p className="font-semibold text-lg">Event 2: {event2.name}</p>
-                <p className="text-sm text-gray-600">Number of Participants: {form.event_2_team_size}</p>
+              <div className="border-l-4 border-indigo-500 pl-4 bg-indigo-50/50 py-2 rounded-r">
+                <p className="font-semibold text-base text-gray-800">Event 2: {event2.name}</p>
+                <p className="text-sm text-gray-600 mt-1">Number of Participants: <span className="font-medium">{form.event_2_team_size}</span></p>
                 {form.event_2_team_size > 1 && form.event_2_team_name && (
-                  <p className="text-sm text-gray-600">Team Name: {form.event_2_team_name}</p>
+                  <p className="text-sm text-gray-600 mt-1">Team Name: <span className="font-medium">{form.event_2_team_name}</span></p>
                 )}
               </div>
             )}
@@ -243,28 +242,48 @@ const RegistrationSuccessModal = ({ form, events, event1, event2, registrationId
 
         {/* Payment Details */}
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2">Payment Details</h2>
+          <h2 className="text-xl font-bold border-b-2 border-gray-300 pb-2 text-gray-800">Payment Details</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="font-semibold text-sm text-gray-600">UPI Transaction ID</p>
-              <p className="text-base">{form.upi_transaction_id || "N/A"}</p>
+              <p className="font-semibold text-xs text-gray-500 uppercase tracking-wide mb-1">UPI Transaction ID</p>
+              <p className="text-base text-gray-800 font-medium">{form.upi_transaction_id || "N/A"}</p>
             </div>
             <div>
-              <p className="font-semibold text-sm text-gray-600">Payment Status</p>
-              <p className="text-base text-green-600 font-semibold">Confirmed</p>
+              <p className="font-semibold text-xs text-gray-500 uppercase tracking-wide mb-1">Payment Status</p>
+              <p className="text-base text-green-600 font-semibold">✓ Confirmed</p>
             </div>
           </div>
         </div>
 
         {/* Registration Date */}
         <div className="space-y-2 border-t-2 border-gray-300 pt-4">
-          <p className="font-semibold text-sm text-gray-600">Registration Date & Time</p>
-          <p className="text-base">{registrationDate}</p>
+          <p className="font-semibold text-xs text-gray-500 uppercase tracking-wide mb-1">Registration Date & Time</p>
+          <p className="text-base text-gray-800 font-medium">{registrationDate}</p>
+        </div>
+
+        {/* WhatsApp Group Link */}
+        <div className="border-t-2 border-gray-300 pt-4 mt-4">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+            <p className="text-sm font-semibold text-gray-800 mb-2">📱 Stay Connected!</p>
+            <p className="text-xs text-gray-600 mb-3">
+              Join our WhatsApp group for important updates, event schedules, and announcements.
+            </p>
+            <a
+              href="https://chat.whatsapp.com/LuCiaJ1znph5KAWrT0gsMJ?mode=gi_t"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
+              style={{ textDecoration: "none" }}
+            >
+              <MessageCircle className="w-4 h-4" />
+              Join WhatsApp Group
+            </a>
+          </div>
         </div>
 
         {/* Footer */}
         <div className="border-t-2 border-gray-300 pt-4 mt-6 text-center">
-          <p className="text-sm text-gray-600">This is an official registration confirmation document.</p>
+          <p className="text-sm text-gray-600 font-medium">This is an official registration confirmation document.</p>
           <p className="text-xs text-gray-500 mt-2">Please keep this document safe for your records.</p>
         </div>
       </div>
@@ -419,7 +438,12 @@ export default function Register() {
 
 
   const validatePaymentStep = () => {
-    // Payment screenshot is optional - registration can proceed without it
+    // Payment screenshot is now REQUIRED
+    if (!form.payment_screenshot) {
+      setErrors((prev) => ({ ...prev, payment_screenshot: "Payment screenshot is required. Please upload your payment confirmation." }));
+      return false;
+    }
+    
     // UPI Transaction ID validation - required for payment tracking
     if (!form.upi_transaction_id.trim()) {
       setErrors((prev) => ({ ...prev, upi_transaction_id: "Please enter your UPI Transaction ID." }));
@@ -452,42 +476,34 @@ export default function Register() {
     setShowPaymentConfirm(false);
     setIsSubmitting(true);
     try {
+      // Payment screenshot is now REQUIRED
+      if (!form.payment_screenshot) {
+        throw new Error("Payment screenshot is required. Please upload your payment confirmation.");
+      }
+
       let paymentUrl: string | null = null;
-      if (form.payment_screenshot) {
-        try {
-          // Try to upload the screenshot (bucket should already exist - created manually in Supabase)
-          const ext = form.payment_screenshot.name.split(".").pop() || "png";
-          const path = `${crypto.randomUUID()}.${ext}`;
-          
-          const { error: uploadError } = await supabase.storage
-            .from("payment-screenshots")
-            .upload(path, form.payment_screenshot, {
-              cacheControl: "3600",
-              upsert: false,
-            });
-          
-          if (uploadError) {
-            console.warn("Screenshot upload failed:", uploadError);
-            // Show warning but continue with registration
-            toast({
-              title: "Screenshot upload failed",
-              description: "Your registration will be submitted, but the payment screenshot could not be uploaded. Please contact support with your payment details.",
-              variant: "default",
-            });
-            // Continue with registration without screenshot URL
-          } else {
-            const { data: urlData } = supabase.storage.from("payment-screenshots").getPublicUrl(path);
-            paymentUrl = urlData.publicUrl;
-          }
-        } catch (uploadErr: any) {
-          console.warn("Upload error:", uploadErr);
-          // Continue with registration even if upload fails
-          toast({
-            title: "Screenshot upload failed",
-            description: "Your registration will be submitted, but the payment screenshot could not be uploaded. Please contact support with your payment details.",
-            variant: "default",
+      try {
+        // Upload the screenshot (bucket should already exist - created manually in Supabase)
+        const ext = form.payment_screenshot.name.split(".").pop() || "png";
+        const path = `${crypto.randomUUID()}.${ext}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from("payment-screenshots")
+          .upload(path, form.payment_screenshot, {
+            cacheControl: "3600",
+            upsert: false,
           });
+        
+        if (uploadError) {
+          console.error("Screenshot upload failed:", uploadError);
+          throw new Error("Failed to upload payment screenshot. Please try again or contact support.");
         }
+        
+        const { data: urlData } = supabase.storage.from("payment-screenshots").getPublicUrl(path);
+        paymentUrl = urlData.publicUrl;
+      } catch (uploadErr: any) {
+        console.error("Upload error:", uploadErr);
+        throw new Error(uploadErr.message || "Failed to upload payment screenshot. Please try again.");
       }
 
       // Build insert object conditionally to avoid schema cache errors
@@ -519,7 +535,8 @@ export default function Register() {
       }
 
       // Try to insert - handle errors gracefully
-      let result = await supabase.from("guest_registrations").insert(insertData).select("id").single();
+      // Select both id and registration_id (registration_id is auto-generated by trigger)
+      let result = await supabase.from("guest_registrations").insert(insertData).select("id, registration_id").single();
       
       // If error is about missing column (schema cache issue), retry without optional fields
       if (result.error && (
@@ -550,7 +567,7 @@ export default function Register() {
         }
         
         // Retry with minimal fields (no upi_transaction_id, no team names)
-        result = await supabase.from("guest_registrations").insert(insertDataMinimal).select("id").single();
+        result = await supabase.from("guest_registrations").insert(insertDataMinimal).select("id, registration_id").single();
         
         if (result.error) {
           // If still failing, show detailed error
@@ -588,7 +605,9 @@ export default function Register() {
       
       const { data } = result;
 
-      setRegistrationId(data.id);
+      // Use registration_id if available, otherwise fallback to id
+      const displayId = data.registration_id || data.id;
+      setRegistrationId(displayId);
       setShowSuccessModal(true);
     } catch (error: any) {
       toast({
@@ -1069,7 +1088,7 @@ export default function Register() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="payment-upload">Payment Screenshot (Optional)</Label>
+                    <Label htmlFor="payment-upload">Payment Screenshot <span className="text-destructive">*</span></Label>
                     <div className="flex flex-col gap-3">
                       <label
                         htmlFor="payment-upload"
@@ -1086,7 +1105,7 @@ export default function Register() {
                             <Upload className="w-10 h-10 text-muted-foreground" />
                             <span className="text-sm text-muted-foreground">Click to upload (PNG, JPG, WebP)</span>
                             <span className="text-xs text-muted-foreground">Max file size: 2MB</span>
-                            <span className="text-xs text-muted-foreground">Optional - registration can proceed without it</span>
+                            <span className="text-xs text-destructive font-medium">Required - Please upload your payment confirmation</span>
                           </div>
                         )}
                         <input
@@ -1094,6 +1113,7 @@ export default function Register() {
                           type="file"
                           accept="image/png,image/jpeg,image/webp"
                           className="hidden"
+                          required
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
@@ -1108,6 +1128,8 @@ export default function Register() {
                                 return;
                               }
                               setForm((f) => ({ ...f, payment_screenshot: file }));
+                              // Clear error if file is selected
+                              setErrors((prev) => ({ ...prev, payment_screenshot: "" }));
                             }
                           }}
                         />
