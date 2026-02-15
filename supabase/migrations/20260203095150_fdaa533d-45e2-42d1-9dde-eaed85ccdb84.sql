@@ -410,44 +410,44 @@ SELECT * FROM (VALUES
 -- Technical Events (Cyan accent)
 ('Quiz', 'Test your knowledge across multiple domains including technology, science, and general awareness. Battle it out with the brightest minds!', 
  '• Team of 2 members\n• Three rounds: Prelims, Semi-finals, Finals\n• No electronic devices allowed\n• Time limit per question: 30 seconds\n• Decision of quiz master is final', 
- 'technical', 'Brain', '185 100% 50%'),
+ 'technical'::event_category, 'Brain', '185 100% 50%'),
 
 ('Paper Presentation', 'Present your innovative research and ideas to a panel of expert judges. Showcase your technical prowess and communication skills!', 
  '• Team of 1-3 members\n• Presentation time: 8-10 minutes\n• Q&A session: 5 minutes\n• Topics: AI/ML, IoT, Cybersecurity, Cloud Computing\n• PPT must be submitted 24 hours prior', 
- 'technical', 'FileText', '185 100% 50%'),
+ 'technical'::event_category, 'FileText', '185 100% 50%'),
 
 ('Debugging', 'Find and fix bugs in code snippets across multiple programming languages. Race against time to prove your debugging skills!', 
  '• Individual participation\n• Languages: C, Python, Java, JavaScript\n• Time limit: 45 minutes\n• 10 bugs to find and fix\n• Partial marking available', 
- 'technical', 'Bug', '185 100% 50%'),
+ 'technical'::event_category, 'Bug', '185 100% 50%'),
 
 ('Web Design', 'Create stunning, responsive websites from scratch. Let your creativity flow through code and design!', 
  '• Individual or team of 2\n• Time limit: 2 hours\n• Theme revealed on spot\n• Use of frameworks allowed\n• Judged on creativity, responsiveness, and code quality', 
- 'technical', 'Globe', '185 100% 50%'),
+ 'technical'::event_category, 'Globe', '185 100% 50%'),
 
 ('AI Prompt Engineering', 'Master the art of crafting effective prompts for AI systems. Unleash the power of language models!', 
  '• Individual participation\n• Multiple AI challenges\n• Time limit: 1 hour\n• Judged on output quality and creativity\n• No prior prompt templates allowed', 
- 'technical', 'Sparkles', '185 100% 50%'),
+ 'technical'::event_category, 'Sparkles', '185 100% 50%'),
 
 -- Non-Technical Events (Purple accent)
 ('Ad Zap', 'Create compelling advertisements for fictional products. Show off your marketing genius and creative flair!', 
  '• Team of 2-4 members\n• Product revealed on spot\n• Preparation time: 30 minutes\n• Performance time: 3-5 minutes\n• Props allowed', 
- 'non_technical', 'Megaphone', '280 100% 65%'),
+ 'non_technical'::event_category, 'Megaphone', '280 100% 65%'),
 
 ('Personality Contest', 'Showcase your personality, talent, and confidence. The stage is yours to shine!', 
  '• Individual participation\n• Three rounds: Introduction, Talent, Q&A\n• Dress code: Formal/Semi-formal\n• Talent round: 2-3 minutes\n• Judged on confidence, presentation, and overall personality', 
- 'non_technical', 'Crown', '280 100% 65%'),
+ 'non_technical'::event_category, 'Crown', '280 100% 65%'),
 
 ('Memory Matrix', 'Test your memory power with challenging pattern recognition and recall tasks. How sharp is your mind?', 
  '• Individual participation\n• Multiple rounds with increasing difficulty\n• Categories: Numbers, Words, Patterns, Sequences\n• No writing materials allowed\n• Fastest correct answer wins tiebreakers', 
- 'non_technical', 'Grid3X3', '280 100% 65%'),
+ 'non_technical'::event_category, 'Grid3X3', '280 100% 65%'),
 
 ('IPL Auction', 'Build your dream cricket team with a virtual budget. Strategy and cricket knowledge combine!', 
  '• Team of 3-4 members\n• Virtual budget: ₹100 crores\n• Player pool provided\n• Strategy planning: 15 minutes\n• Best balanced team wins', 
- 'non_technical', 'CircleDollarSign', '280 100% 65%'),
+ 'non_technical'::event_category, 'CircleDollarSign', '280 100% 65%'),
 
 ('Movie Spoofing', 'Recreate iconic movie scenes with a hilarious twist. Entertainment at its finest!', 
  '• Team of 4-6 members\n• Scene assigned beforehand\n• Performance time: 5-8 minutes\n• Props and costumes allowed\n• Judged on creativity, humor, and teamwork', 
- 'non_technical', 'Film', '280 100% 65%')
+ 'non_technical'::event_category, 'Film', '280 100% 65%')
 ) AS v(name, description, rules, category, icon_name, accent_color)
 WHERE (SELECT COUNT(*) FROM public.events) = 0;
 

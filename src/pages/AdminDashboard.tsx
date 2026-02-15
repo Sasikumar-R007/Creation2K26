@@ -405,6 +405,10 @@ const AdminDashboard = () => {
                               event2Label={g.event_2?.name}
                               date={formatDate(g.created_at)}
                               whatsapp={g.whatsapp_phone}
+                              event1TeamName={g.event_1_team_name}
+                              event2TeamName={g.event_2_team_name}
+                              upiTransactionId={g.upi_transaction_id}
+                              registrationId={g.id}
                             />
                           ))}
                         </div>

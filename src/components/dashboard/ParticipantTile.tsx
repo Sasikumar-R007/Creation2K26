@@ -12,6 +12,10 @@ export interface ParticipantTileProps {
   event2Label?: string | null;
   date: string;
   whatsapp?: string | null;
+  event1TeamName?: string | null;
+  event2TeamName?: string | null;
+  upiTransactionId?: string | null;
+  registrationId?: string | null;
   className?: string;
 }
 
@@ -24,6 +28,10 @@ export function ParticipantTile({
   event2Label,
   date,
   whatsapp,
+  event1TeamName,
+  event2TeamName,
+  upiTransactionId,
+  registrationId,
   className,
 }: ParticipantTileProps) {
   return (
@@ -76,6 +84,26 @@ export function ParticipantTile({
         )}
         {whatsapp != null && whatsapp !== "" && (
           <p className="text-xs text-muted-foreground">WhatsApp: {whatsapp}</p>
+        )}
+        {event1TeamName && (
+          <p className="text-xs text-muted-foreground">
+            <span className="font-medium">Team (E1):</span> {event1TeamName}
+          </p>
+        )}
+        {event2TeamName && (
+          <p className="text-xs text-muted-foreground">
+            <span className="font-medium">Team (E2):</span> {event2TeamName}
+          </p>
+        )}
+        {upiTransactionId && (
+          <p className="text-xs text-muted-foreground">
+            <span className="font-medium">UPI ID:</span> {upiTransactionId}
+          </p>
+        )}
+        {registrationId && (
+          <p className="text-xs text-primary font-mono">
+            <span className="font-medium">Reg ID:</span> {registrationId.substring(0, 8)}...
+          </p>
         )}
         <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1 border-t border-border/50">
           <Calendar className="w-3.5 h-3.5 shrink-0" />

@@ -18,6 +18,8 @@ import {
   CreditCard,
   Upload,
   ImageIcon,
+  Download,
+  MessageCircle,
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -33,6 +35,24 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   EVENT_DATE,
   VENUE,
@@ -64,15 +84,17 @@ const initialForm = {
   event_2_id: "",
   event_1_team_size: 1,
   event_2_team_size: 1,
+  event_1_team_name: "",
+  event_2_team_name: "",
   event_1_team_members: [] as TeamMember[],
   event_2_team_members: [] as TeamMember[],
   payment_screenshot: null as File | null,
+  upi_transaction_id: "",
 };
 
 const STEPS = [
   { id: "registration", label: "Registration", number: 1 },
-  { id: "team", label: "Team Details", number: 2 },
-  { id: "payment", label: "Payment", number: 3 },
+  { id: "payment", label: "Payment", number: 2 },
 ] as const;
 
 const conflictGroups = [
@@ -88,12 +110,206 @@ const conflictGroups = [
 
 const EMPTY_VALUE = "__none__";
 
-const PAYMENT_QR_MAP: Record<number, { amount: number; image: string }> = {
-  1: { amount: 250, image: "/250.png" },
-  2: { amount: 500, image: "/500.png" },
-  3: { amount: 750, image: "/750.png" },
-  4: { amount: 1000, image: "/1000.png" },
-  5: { amount: 1250, image: "/1250.png" },
+// Single user registration - fixed amount
+const PAYMENT_AMOUNT = 250;
+const PAYMENT_QR_IMAGE = "/250.png";
+
+interface RegistrationSuccessModalProps {
+  form: typeof initialForm;
+  events: any[];
+  event1: any;
+  event2: any;
+  registrationId: string | null;
+  onClose: () => void;
+}
+
+const RegistrationSuccessModal = ({ form, events, event1, event2, registrationId, onClose }: RegistrationSuccessModalProps) => {
+  const { toast } = useToast();
+  
+  const downloadPDF = async () => {
+    const element = document.getElementById("registration-form");
+    if (!element) return;
+
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `CREATION_2K26_Registration_${registrationId || "form"}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      };
+
+      html2pdf().set(opt).from(element).save();
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast({
+        title: "PDF Generation Failed",
+        description: "Please try again or contact support.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const registrationDate = new Date().toLocaleString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return (
+    <div className="space-y-6">
+      <DialogHeader>
+        <DialogTitle className="text-2xl text-center">Registration Successful! 🎉</DialogTitle>
+        <DialogDescription className="text-center">
+          Your registration has been confirmed. Please download your registration form.
+        </DialogDescription>
+      </DialogHeader>
+
+      <div id="registration-form" className="bg-white text-black p-8 space-y-6" style={{ fontFamily: "Arial, sans-serif" }}>
+        {/* Header with Logo */}
+        <div className="flex flex-col items-center border-b-2 border-gray-800 pb-4 mb-6">
+          <img src="/Logo 7.png" alt="CREATION 2K26" className="h-24 w-auto mb-4" />
+          <h1 className="text-3xl font-bold text-center">CREATION 2K26</h1>
+          <p className="text-lg text-center mt-2">BCA Department, Bishop Heber College</p>
+          <p className="text-sm text-center mt-1">Trichy - 620 017, Tamil Nadu</p>
+        </div>
+
+        {/* Registration ID */}
+        {registrationId && (
+          <div className="bg-primary/10 p-4 rounded-lg border-2 border-primary mb-6">
+            <p className="text-center">
+              <span className="font-semibold">Registration ID: </span>
+              <span className="font-bold text-xl text-primary">{registrationId}</span>
+            </p>
+          </div>
+        )}
+
+        {/* Personal Details */}
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2">Personal Details</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="font-semibold text-sm text-gray-600">Full Name</p>
+              <p className="text-base">{form.name}</p>
+            </div>
+            <div>
+              <p className="font-semibold text-sm text-gray-600">Email</p>
+              <p className="text-base">{form.email}</p>
+            </div>
+            <div>
+              <p className="font-semibold text-sm text-gray-600">WhatsApp Phone</p>
+              <p className="text-base">{form.whatsapp_phone}</p>
+            </div>
+            <div>
+              <p className="font-semibold text-sm text-gray-600">Department</p>
+              <p className="text-base">{form.department}</p>
+            </div>
+            <div className="col-span-2">
+              <p className="font-semibold text-sm text-gray-600">College</p>
+              <p className="text-base">{form.college}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Event Details */}
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2">Event Details</h2>
+          
+          <div className="space-y-3">
+            <div className="border-l-4 border-primary pl-4">
+              <p className="font-semibold text-lg">Event 1: {event1?.name || "N/A"}</p>
+              <p className="text-sm text-gray-600">Number of Participants: {form.event_1_team_size}</p>
+              {form.event_1_team_size > 1 && form.event_1_team_name && (
+                <p className="text-sm text-gray-600">Team Name: {form.event_1_team_name}</p>
+              )}
+            </div>
+
+            {form.event_2_id && event2 && (
+              <div className="border-l-4 border-secondary pl-4">
+                <p className="font-semibold text-lg">Event 2: {event2.name}</p>
+                <p className="text-sm text-gray-600">Number of Participants: {form.event_2_team_size}</p>
+                {form.event_2_team_size > 1 && form.event_2_team_name && (
+                  <p className="text-sm text-gray-600">Team Name: {form.event_2_team_name}</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+
+        {/* Payment Details */}
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold border-b-2 border-gray-300 pb-2">Payment Details</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="font-semibold text-sm text-gray-600">UPI Transaction ID</p>
+              <p className="text-base">{form.upi_transaction_id || "N/A"}</p>
+            </div>
+            <div>
+              <p className="font-semibold text-sm text-gray-600">Payment Status</p>
+              <p className="text-base text-green-600 font-semibold">Confirmed</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Registration Date */}
+        <div className="space-y-2 border-t-2 border-gray-300 pt-4">
+          <p className="font-semibold text-sm text-gray-600">Registration Date & Time</p>
+          <p className="text-base">{registrationDate}</p>
+        </div>
+
+        {/* Footer */}
+        <div className="border-t-2 border-gray-300 pt-4 mt-6 text-center">
+          <p className="text-sm text-gray-600">This is an official registration confirmation document.</p>
+          <p className="text-xs text-gray-500 mt-2">Please keep this document safe for your records.</p>
+        </div>
+      </div>
+
+      {/* WhatsApp Group Notice */}
+      <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <MessageCircle className="w-5 h-5 text-primary" />
+          <p className="font-semibold text-foreground">Important Notice</p>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          This page will be shown only once. Please download your registration form now.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Join our WhatsApp group for further updates:
+        </p>
+        <a
+          href="https://chat.whatsapp.com/LuCiaJ1znph5KAWrT0gsMJ?mode=gi_t"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium text-sm"
+        >
+          <MessageCircle className="w-4 h-4" />
+          Join WhatsApp Group
+        </a>
+      </div>
+
+      {/* Action Buttons */}
+      <DialogFooter className="flex flex-col sm:flex-row gap-2">
+        <button
+          onClick={downloadPDF}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+        >
+          <Download className="w-4 h-4" />
+          Download PDF
+        </button>
+        <button
+          onClick={onClose}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors"
+        >
+          Close
+        </button>
+      </DialogFooter>
+    </div>
+  );
 };
 
 export default function Register() {
@@ -104,6 +320,10 @@ export default function Register() {
   const [activeTab, setActiveTab] = useState("registration");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showRegistrationAlert, setShowRegistrationAlert] = useState(false);
+  const [showPaymentConfirm, setShowPaymentConfirm] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [registrationId, setRegistrationId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const formattedDate = EVENT_DATE.toLocaleDateString("en-US", {
@@ -145,48 +365,6 @@ export default function Register() {
   const maxTeamSize1 = event1 ? getEventTeamSize(event1.name) : 1;
   const maxTeamSize2 = event2 ? getEventTeamSize(event2.name) : 1;
 
-  const totalTeamMembersNeeded = useMemo(() => {
-    const n1 = form.event_1_team_size || 1;
-    const n2 = form.event_2_id ? (form.event_2_team_size || 1) : 0;
-    return Math.max(n1, n2);
-  }, [form.event_1_team_size, form.event_2_team_size, form.event_2_id]);
-
-  const event1AdditionalCount = Math.max(0, (form.event_1_team_size || 1) - 1);
-  const event2AdditionalCount = form.event_2_id
-    ? Math.max(0, (form.event_2_team_size || 1) - 1)
-    : 0;
-
-  const syncEvent1TeamMembers = useCallback((count: number) => {
-    setForm((f) => {
-      const current = f.event_1_team_members;
-      const next: TeamMember[] = Array.from({ length: count }, (_, i) =>
-        current[i] ?? { name: "", email: "", whatsapp_phone: "" }
-      );
-      return { ...f, event_1_team_members: next };
-    });
-  }, []);
-
-  const syncEvent2TeamMembers = useCallback((count: number) => {
-    setForm((f) => {
-      const current = f.event_2_team_members;
-      const next: TeamMember[] = Array.from({ length: count }, (_, i) =>
-        current[i] ?? { name: "", email: "", whatsapp_phone: "" }
-      );
-      return { ...f, event_2_team_members: next };
-    });
-  }, []);
-
-  useEffect(() => {
-    if (form.event_1_team_members.length !== event1AdditionalCount) {
-      syncEvent1TeamMembers(event1AdditionalCount);
-    }
-  }, [event1AdditionalCount, syncEvent1TeamMembers]);
-
-  useEffect(() => {
-    if (form.event_2_team_members.length !== event2AdditionalCount) {
-      syncEvent2TeamMembers(event2AdditionalCount);
-    }
-  }, [event2AdditionalCount, syncEvent2TeamMembers]);
 
   const validateField = (field: string, value: string) => {
     try {
@@ -205,88 +383,233 @@ export default function Register() {
     }
   };
 
-  const validateTeamMembers = (members: TeamMember[]): boolean => {
-    for (const m of members) {
-      if (!nameSchema.safeParse(m.name).success) return false;
-      if (!emailSchema.safeParse(m.email).success) return false;
-      if (!phoneSchema.safeParse(m.whatsapp_phone).success) return false;
-    }
-    return true;
-  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const validateRegistrationStep = () => {
     setErrors({});
+    let isValid = true;
 
     const nameValid = validateField("name", form.name);
     const emailValid = validateField("email", form.email);
     const phoneValid = validateField("whatsapp_phone", form.whatsapp_phone);
     const departmentValid = validateField("department", form.department);
     const collegeValid = validateField("college", form.college);
-    if (!nameValid || !emailValid || !phoneValid || !departmentValid || !collegeValid) return;
+    
+    if (!nameValid || !emailValid || !phoneValid || !departmentValid || !collegeValid) {
+      isValid = false;
+    }
 
     if (!form.event_1_id) {
       setErrors((prev) => ({ ...prev, event_1_id: "Please select Event 1." }));
-      return;
+      isValid = false;
     }
 
-    const allTeamMembers = [...form.event_1_team_members, ...form.event_2_team_members];
-    if (allTeamMembers.length > 0 && !validateTeamMembers(allTeamMembers)) {
-      setErrors((prev) => ({ ...prev, team_members: "Please fill in all required fields for each team member (name, email, phone)." }));
-      setActiveTab("team");
-      return;
+    // Validate team names if team size > 1
+    if (form.event_1_team_size > 1 && !form.event_1_team_name.trim()) {
+      setErrors((prev) => ({ ...prev, event_1_team_name: "Team name is required for Event 1." }));
+      isValid = false;
     }
 
-    if (!form.payment_screenshot) {
-      setErrors((prev) => ({ ...prev, payment_screenshot: "Please upload your payment screenshot." }));
-      setActiveTab("payment");
-      return;
+    if (form.event_2_id && form.event_2_team_size > 1 && !form.event_2_team_name.trim()) {
+      setErrors((prev) => ({ ...prev, event_2_team_name: "Team name is required for Event 2." }));
+      isValid = false;
     }
 
+    return isValid;
+  };
+
+
+  const validatePaymentStep = () => {
+    // Payment screenshot is optional - registration can proceed without it
+    // UPI Transaction ID validation - required for payment tracking
+    if (!form.upi_transaction_id.trim()) {
+      setErrors((prev) => ({ ...prev, upi_transaction_id: "Please enter your UPI Transaction ID." }));
+      return false;
+    }
+    // Validate UPI transaction ID is numeric
+    if (!/^\d+$/.test(form.upi_transaction_id.trim())) {
+      setErrors((prev) => ({ ...prev, upi_transaction_id: "UPI Transaction ID must contain only numbers." }));
+      return false;
+    }
+    return true;
+  };
+
+  const handleRegistrationSubmit = () => {
+    if (!validateRegistrationStep()) return;
+    setShowRegistrationAlert(true);
+  };
+
+  const handleProceedToPayment = () => {
+    setShowRegistrationAlert(false);
+    setActiveTab("payment");
+  };
+
+  const handlePaymentSubmit = () => {
+    if (!validatePaymentStep()) return;
+    setShowPaymentConfirm(true);
+  };
+
+  const handleFinalSubmit = async () => {
+    setShowPaymentConfirm(false);
     setIsSubmitting(true);
     try {
       let paymentUrl: string | null = null;
       if (form.payment_screenshot) {
-        const ext = form.payment_screenshot.name.split(".").pop() || "png";
-        const path = `${crypto.randomUUID()}.${ext}`;
-        const { error: uploadError } = await supabase.storage
-          .from("payment-screenshots")
-          .upload(path, form.payment_screenshot, {
-            cacheControl: "3600",
-            upsert: false,
-          });
-        if (uploadError) {
+        try {
+          // Check if bucket exists first
+          const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+          
+          if (bucketError) {
+            console.warn("Could not check buckets:", bucketError);
+            // Continue without screenshot upload
+          } else {
+            const bucketExists = buckets?.some(b => b.name === "payment-screenshots");
+            
+            if (!bucketExists) {
+              // Try to create the bucket (requires admin privileges)
+              const { error: createError } = await supabase.storage.createBucket("payment-screenshots", {
+                public: true,
+                allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
+                fileSizeLimit: 5242880, // 5MB
+              });
+              
+              if (createError) {
+                console.warn("Bucket creation error:", createError);
+                // Continue without screenshot upload
+              }
+            }
+
+            // Try to upload the screenshot
+            const ext = form.payment_screenshot.name.split(".").pop() || "png";
+            const path = `${crypto.randomUUID()}.${ext}`;
+            
+            const { error: uploadError } = await supabase.storage
+              .from("payment-screenshots")
+              .upload(path, form.payment_screenshot, {
+                cacheControl: "3600",
+                upsert: false,
+              });
+            
+            if (uploadError) {
+              console.warn("Screenshot upload failed:", uploadError);
+              // Show warning but continue with registration
+              toast({
+                title: "Screenshot upload failed",
+                description: "Your registration will be submitted, but the payment screenshot could not be uploaded. Please contact support with your payment details.",
+                variant: "default",
+              });
+              // Continue with registration without screenshot URL
+            } else {
+              const { data: urlData } = supabase.storage.from("payment-screenshots").getPublicUrl(path);
+              paymentUrl = urlData.publicUrl;
+            }
+          }
+        } catch (uploadErr: any) {
+          console.warn("Upload error:", uploadErr);
+          // Continue with registration even if upload fails
           toast({
-            title: "Upload failed",
-            description: uploadError.message || "Could not upload payment screenshot.",
-            variant: "destructive",
+            title: "Screenshot upload failed",
+            description: "Your registration will be submitted, but the payment screenshot could not be uploaded. Please contact support with your payment details.",
+            variant: "default",
           });
-          setIsSubmitting(false);
-          return;
         }
-        const { data: urlData } = supabase.storage.from("payment-screenshots").getPublicUrl(path);
-        paymentUrl = urlData.publicUrl;
       }
 
-      await submitRegistration.mutateAsync({
+      // Build insert object conditionally to avoid schema cache errors
+      const insertData: any = {
         name: form.name,
         email: form.email,
-        whatsapp_phone: form.whatsapp_phone || undefined,
-        department: form.department || undefined,
-        college: form.college || undefined,
+        whatsapp_phone: form.whatsapp_phone,
+        department: form.department,
+        college: form.college,
         event_1_id: form.event_1_id,
         event_2_id: form.event_2_id || null,
         event_1_team_size: form.event_1_team_size,
         event_2_team_size: form.event_2_id ? form.event_2_team_size : null,
-        team_members: {
-          event_1: form.event_1_team_members,
-          event_2: form.event_2_team_members,
-        },
+        team_members: null,
         payment_screenshot_url: paymentUrl,
+      };
+
+      // Only include team_name fields if team_size > 1 (to avoid schema errors if columns don't exist)
+      if (form.event_1_team_size > 1 && form.event_1_team_name?.trim()) {
+        insertData.event_1_team_name = form.event_1_team_name;
+      }
+      if (form.event_2_id && form.event_2_team_size > 1 && form.event_2_team_name?.trim()) {
+        insertData.event_2_team_name = form.event_2_team_name;
+      }
+
+      // Only include upi_transaction_id if it has a value (to avoid schema errors if column doesn't exist)
+      if (form.upi_transaction_id?.trim()) {
+        insertData.upi_transaction_id = form.upi_transaction_id;
+      }
+
+      // Try to insert - handle errors gracefully
+      let result = await supabase.from("guest_registrations").insert(insertData).select("id").single();
+      
+      // If error, try with minimal required fields only
+      if (result.error) {
+        console.warn("Insert failed, retrying with minimal fields:", result.error);
+        
+        // Create minimal insert data with only required fields
+        const insertDataMinimal: any = {
+          name: form.name,
+          email: form.email,
+          whatsapp_phone: form.whatsapp_phone,
+          department: form.department,
+          college: form.college,
+          event_1_id: form.event_1_id,
+          event_2_id: form.event_2_id || null,
+          event_1_team_size: form.event_1_team_size,
+          event_2_team_size: form.event_2_id ? form.event_2_team_size : null,
+          team_members: null,
+        };
+        
+        // Only add payment_screenshot_url if we have it
+        if (paymentUrl) {
+          insertDataMinimal.payment_screenshot_url = paymentUrl;
+        }
+        
+        // Retry with minimal fields
+        result = await supabase.from("guest_registrations").insert(insertDataMinimal).select("id").single();
+        
+        if (result.error) {
+          // If still failing, show detailed error
+          console.error("Registration insert error:", result.error);
+          throw new Error(`Registration failed: ${result.error.message || "Unknown error"}. Please check: 1) Database migrations are run, 2) RLS policies allow inserts, 3) All required fields are present.`);
+        } else {
+          // Success but warn about missing optional data
+          toast({
+            title: "Registration saved! ⚠️",
+            description: "Registration completed. Some optional fields (team names, UPI ID) may not have been saved. Please check your database.",
+            variant: "default",
+          });
+        }
+      }
+
+      if (result.error) {
+        throw result.error;
+      }
+      
+      const { data } = result;
+
+      setRegistrationId(data.id);
+      setShowSuccessModal(true);
+    } catch (error: any) {
+      toast({
+        title: "Registration failed",
+        description: error.message || "Please try again.",
+        variant: "destructive",
       });
-      setForm(initialForm);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (activeTab === "registration") {
+      handleRegistrationSubmit();
+    } else if (activeTab === "payment") {
+      handlePaymentSubmit();
     }
   };
 
@@ -404,139 +727,195 @@ export default function Register() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsContent value="registration" className="space-y-4 mt-0">
-                  <div className="space-y-2">
-                    <Label>Event 1 *</Label>
-                    <Select
-                      value={form.event_1_id || EMPTY_VALUE}
-                      onValueChange={(v) => {
-                        const evId = v === EMPTY_VALUE ? "" : v;
-                        const ev = events.find((e) => e.id === evId);
-                        const maxSize = ev ? getEventTeamSize(ev.name) : 1;
-                        const newTeamSize1 = Math.min(form.event_1_team_size, maxSize) || 1;
-                        setForm((f) => ({
-                          ...f,
-                          event_1_id: evId,
-                          event_2_id: evId === "" ? "" : f.event_2_id,
-                          event_1_team_size: newTeamSize1,
-                        }));
-                      }}
-                    >
-                      <SelectTrigger className="w-full bg-muted/50 border-primary/20">
-                        <SelectValue placeholder="Select first event" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={EMPTY_VALUE} className="hidden" />
-                        {events.map((ev) => {
-                          const conflictWith2 = event2 && eventsConflict(ev.name, event2.name);
-                          return (
-                            <SelectItem
-                              key={ev.id}
-                              value={ev.id}
-                              disabled={conflictWith2}
-                              className={conflictWith2 ? "opacity-80 cursor-not-allowed" : ""}
-                            >
-                              {ev.name}
-                              {conflictWith2 ? (
-                                <span className="text-destructive font-medium ml-1">— TIME CONFLICT</span>
-                              ) : null}
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                    {errors.event_1_id && <p className="text-destructive text-sm">{errors.event_1_id}</p>}
-                  </div>
-
-                  {form.event_1_id && (
+                  {/* Event 1 Row */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Number of Participants — Event 1</Label>
+                      <Label>Event 1</Label>
                       <Select
-                        value={String(form.event_1_team_size)}
+                        value={form.event_1_id || EMPTY_VALUE}
                         onValueChange={(v) => {
-                          const n = parseInt(v, 10);
-                          setForm((f) => ({ ...f, event_1_team_size: n }));
+                          const evId = v === EMPTY_VALUE ? "" : v;
+                          const ev = events.find((e) => e.id === evId);
+                          const maxSize = ev ? getEventTeamSize(ev.name) : 1;
+                          const newTeamSize1 = Math.min(form.event_1_team_size, maxSize) || 1;
+                          setForm((f) => ({
+                            ...f,
+                            event_1_id: evId,
+                            event_2_id: evId === "" ? "" : f.event_2_id,
+                            event_1_team_size: newTeamSize1,
+                            event_1_team_name: newTeamSize1 === 1 ? "" : (newTeamSize1 > 1 ? f.event_1_team_name : ""),
+                          }));
                         }}
                       >
                         <SelectTrigger className="w-full bg-muted/50 border-primary/20">
-                          <SelectValue placeholder="SELECT NUMBER OF TEAM MEMBERS" />
+                          <SelectValue placeholder="Select first event" />
                         </SelectTrigger>
                         <SelectContent>
-                          {Array.from({ length: maxTeamSize1 }, (_, i) => i + 1).map((n) => (
-                            <SelectItem key={n} value={String(n)}>
-                              {n} {n === 1 ? "member" : "members"}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value={EMPTY_VALUE} className="hidden" />
+                          {events.map((ev) => {
+                            const conflictWith2 = event2 && eventsConflict(ev.name, event2.name);
+                            return (
+                              <SelectItem
+                                key={ev.id}
+                                value={ev.id}
+                                disabled={conflictWith2}
+                                className={conflictWith2 ? "opacity-80 cursor-not-allowed" : ""}
+                              >
+                                {ev.name}
+                                {conflictWith2 ? (
+                                  <span className="text-destructive font-medium ml-1">— TIME CONFLICT</span>
+                                ) : null}
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
+                      {errors.event_1_id && <p className="text-destructive text-sm">{errors.event_1_id}</p>}
+                    </div>
+
+                    {form.event_1_id && (
+                      <div className="space-y-2">
+                        <Label>Number of Participants — Event 1</Label>
+                        <Select
+                          value={String(form.event_1_team_size)}
+                          onValueChange={(v) => {
+                            const n = parseInt(v, 10);
+                            setForm((f) => ({ 
+                              ...f, 
+                              event_1_team_size: n,
+                              event_1_team_name: n === 1 ? "" : f.event_1_team_name,
+                            }));
+                          }}
+                        >
+                          <SelectTrigger className="w-full bg-muted/50 border-primary/20">
+                            <SelectValue placeholder="SELECT NUMBER OF TEAM MEMBERS" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({ length: maxTeamSize1 }, (_, i) => i + 1).map((n) => (
+                              <SelectItem key={n} value={String(n)}>
+                                {n} {n === 1 ? "member" : "members"}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Team Name for Event 1 */}
+                  {form.event_1_id && form.event_1_team_size > 1 && (
+                    <div className="space-y-2">
+                      <Label>Team Name — Event 1</Label>
+                      <Input
+                        placeholder="Enter team name"
+                        className="bg-muted/50 border-primary/20"
+                        value={form.event_1_team_name}
+                        onChange={(e) => setForm({ ...form, event_1_team_name: e.target.value })}
+                        required
+                      />
+                      {errors.event_1_team_name && <p className="text-destructive text-sm">{errors.event_1_team_name}</p>}
+                      <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 mt-2">
+                        <p className="text-sm font-medium text-amber-600 dark:text-amber-400">
+                          ⚠️ Important: All other team members have to register separately.
+                        </p>
+                      </div>
                     </div>
                   )}
 
-                  <div className="space-y-2">
-                    <Label>Event 2 (optional)</Label>
-                    <Select
-                      value={form.event_2_id || EMPTY_VALUE}
-                      onValueChange={(v) => {
-                        const evId = v === EMPTY_VALUE ? "" : v;
-                        const ev = evId ? events.find((e) => e.id === evId) : null;
-                        const maxSize = ev ? getEventTeamSize(ev.name) : 1;
-                        setForm((f) => ({
-                          ...f,
-                          event_2_id: evId,
-                          event_2_team_size: evId ? (Math.min(f.event_2_team_size, maxSize) || 1) : 1,
-                          event_2_team_members: evId ? f.event_2_team_members : [],
-                        }));
-                      }}
-                    >
-                      <SelectTrigger className="w-full bg-muted/50 border-primary/20">
-                        <SelectValue placeholder="Select second event" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={EMPTY_VALUE}>None</SelectItem>
-                        {events.map((ev) => {
-                          const conflictWith1 = event1 && eventsConflict(ev.name, event1.name);
-                          const isEvent1 = ev.id === form.event_1_id;
-                          const disabled = conflictWith1 || isEvent1;
-                          return (
-                            <SelectItem
-                              key={ev.id}
-                              value={ev.id}
-                              disabled={disabled}
-                              className={disabled ? "opacity-80 cursor-not-allowed" : ""}
-                            >
-                              {ev.name}
-                              {isEvent1 ? (
-                                <span className="text-muted-foreground ml-1">(same as Event 1)</span>
-                              ) : conflictWith1 ? (
-                                <span className="text-destructive font-medium ml-1">— TIME CONFLICT</span>
-                              ) : null}
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {form.event_2_id && (
+                  {/* Event 2 Row */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Number of Participants — Event 2</Label>
+                      <Label>Event 2</Label>
                       <Select
-                        value={String(form.event_2_team_size)}
+                        value={form.event_2_id || EMPTY_VALUE}
                         onValueChange={(v) => {
-                          const n = parseInt(v, 10);
-                          setForm((f) => ({ ...f, event_2_team_size: n }));
+                          const evId = v === EMPTY_VALUE ? "" : v;
+                          const ev = evId ? events.find((e) => e.id === evId) : null;
+                          const maxSize = ev ? getEventTeamSize(ev.name) : 1;
+                          const newTeamSize2 = evId ? (Math.min(form.event_2_team_size, maxSize) || 1) : 1;
+                          setForm((f) => ({
+                            ...f,
+                            event_2_id: evId,
+                            event_2_team_size: newTeamSize2,
+                            event_2_team_name: newTeamSize2 === 1 ? "" : (newTeamSize2 > 1 ? f.event_2_team_name : ""),
+                          }));
                         }}
                       >
                         <SelectTrigger className="w-full bg-muted/50 border-primary/20">
-                          <SelectValue placeholder="SELECT NUMBER OF TEAM MEMBERS" />
+                          <SelectValue placeholder="Select second event" />
                         </SelectTrigger>
                         <SelectContent>
-                          {Array.from({ length: maxTeamSize2 }, (_, i) => i + 1).map((n) => (
-                            <SelectItem key={n} value={String(n)}>
-                              {n} {n === 1 ? "member" : "members"}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value={EMPTY_VALUE}>None</SelectItem>
+                          {events.map((ev) => {
+                            const conflictWith1 = event1 && eventsConflict(ev.name, event1.name);
+                            const isEvent1 = ev.id === form.event_1_id;
+                            const disabled = conflictWith1 || isEvent1;
+                            return (
+                              <SelectItem
+                                key={ev.id}
+                                value={ev.id}
+                                disabled={disabled}
+                                className={disabled ? "opacity-80 cursor-not-allowed" : ""}
+                              >
+                                {ev.name}
+                                {isEvent1 ? (
+                                  <span className="text-muted-foreground ml-1">(same as Event 1)</span>
+                                ) : conflictWith1 ? (
+                                  <span className="text-destructive font-medium ml-1">— TIME CONFLICT</span>
+                                ) : null}
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
+                    </div>
+
+                    {form.event_2_id && (
+                      <div className="space-y-2">
+                        <Label>Number of Participants — Event 2</Label>
+                        <Select
+                          value={String(form.event_2_team_size)}
+                          onValueChange={(v) => {
+                            const n = parseInt(v, 10);
+                            setForm((f) => ({ 
+                              ...f, 
+                              event_2_team_size: n,
+                              event_2_team_name: n === 1 ? "" : f.event_2_team_name,
+                            }));
+                          }}
+                        >
+                          <SelectTrigger className="w-full bg-muted/50 border-primary/20">
+                            <SelectValue placeholder="SELECT NUMBER OF TEAM MEMBERS" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({ length: maxTeamSize2 }, (_, i) => i + 1).map((n) => (
+                              <SelectItem key={n} value={String(n)}>
+                                {n} {n === 1 ? "member" : "members"}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Team Name for Event 2 */}
+                  {form.event_2_id && form.event_2_team_size > 1 && (
+                    <div className="space-y-2">
+                      <Label>Team Name — Event 2</Label>
+                      <Input
+                        placeholder="Enter team name"
+                        className="bg-muted/50 border-primary/20"
+                        value={form.event_2_team_name}
+                        onChange={(e) => setForm({ ...form, event_2_team_name: e.target.value })}
+                        required
+                      />
+                      {errors.event_2_team_name && <p className="text-destructive text-sm">{errors.event_2_team_name}</p>}
+                      <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 mt-2">
+                        <p className="text-sm font-medium text-amber-600 dark:text-amber-400">
+                          ⚠️ Important: All other team members have to register separately.
+                        </p>
+                      </div>
                     </div>
                   )}
 
@@ -545,274 +924,155 @@ export default function Register() {
                   <p className="text-sm font-medium text-muted-foreground">Your details</p>
 
                   <div className="space-y-2">
-                <Label htmlFor="page-reg-name">Full Name *</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="page-reg-name"
-                    type="text"
-                    placeholder="John Doe"
-                    className="pl-10 bg-muted/50 border-primary/20 focus:border-primary/50"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    required
-                  />
-                </div>
-                {errors.name && <p className="text-destructive text-sm">{errors.name}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="page-reg-email">Email *</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="page-reg-email"
-                    type="email"
-                    placeholder="your@email.com"
-                    className="pl-10 bg-muted/50 border-primary/20 focus:border-primary/50"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    required
-                  />
-                </div>
-                {errors.email && <p className="text-destructive text-sm">{errors.email}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="page-reg-whatsapp">WhatsApp Phone Number *</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="page-reg-whatsapp"
-                    type="tel"
-                    placeholder="+91 98765 43210"
-                    className="pl-10 bg-muted/50 border-primary/20 focus:border-primary/50"
-                    value={form.whatsapp_phone}
-                    onChange={(e) => setForm({ ...form, whatsapp_phone: e.target.value })}
-                    required
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">Include country code</p>
-                {errors.whatsapp_phone && <p className="text-destructive text-sm">{errors.whatsapp_phone}</p>}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="page-reg-department">Department *</Label>
-                  <div className="relative">
-                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="page-reg-department"
-                      type="text"
-                      placeholder="BCA"
-                      className="pl-10 bg-muted/50 border-primary/20 focus:border-primary/50"
-                      value={form.department}
-                      onChange={(e) => setForm({ ...form, department: e.target.value })}
-                      required
-                    />
-                  </div>
-                  {errors.department && <p className="text-destructive text-sm">{errors.department}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="page-reg-college">College *</Label>
-                  <div className="relative">
-                    <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="page-reg-college"
-                      type="text"
-                      placeholder="Bishop Heber College"
-                      className="pl-10 bg-muted/50 border-primary/20 focus:border-primary/50"
-                      value={form.college}
-                      onChange={(e) => setForm({ ...form, college: e.target.value })}
-                      required
-                    />
-                  </div>
-                  {errors.college && <p className="text-destructive text-sm">{errors.college}</p>}
-                </div>
-              </div>
-                </TabsContent>
-
-                <TabsContent value="team" className="space-y-6 mt-0">
-                  {errors.team_members && (
-                    <p className="text-destructive text-sm rounded-lg border border-destructive/30 bg-destructive/10 p-3">{errors.team_members}</p>
-                  )}
-                  {event1AdditionalCount === 0 && event2AdditionalCount === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4">
-                      No additional team members required. You (the primary registrant) are the only participant for both events.
-                    </p>
-                  ) : (
-                    <div className="space-y-8">
-                      {event1AdditionalCount > 0 && (
-                        <div>
-                          <h3 className="text-base font-semibold text-primary mb-3 flex items-center gap-2">
-                            <Users className="w-4 h-4" />
-                            Event 1 — {event1?.name} ({form.event_1_team_size} {form.event_1_team_size === 1 ? "participant" : "participants"})
-                          </h3>
-                          <p className="text-sm text-muted-foreground mb-4">
-                            Add {event1AdditionalCount} team member(s) for Event 1. You (the primary registrant) are already counted.
-                          </p>
-                          <div className="space-y-4">
-                            {form.event_1_team_members.map((member, idx) => (
-                              <div key={idx} className="rounded-lg border border-border/50 p-4 space-y-3 bg-muted/20">
-                                <h4 className="text-sm font-medium text-foreground">Team member {idx + 1}</h4>
-                                <div className="grid gap-3 sm:grid-cols-1">
-                                  <div className="space-y-2">
-                                    <Label>Full Name *</Label>
-                                    <Input
-                                      placeholder="Full name"
-                                      className="bg-muted/50 border-primary/20"
-                                      value={member.name}
-                                      onChange={(e) =>
-                                        setForm((f) => {
-                                          const next = [...f.event_1_team_members];
-                                          next[idx] = { ...next[idx], name: e.target.value };
-                                          return { ...f, event_1_team_members: next };
-                                        })
-                                      }
-                                      required
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label>Email *</Label>
-                                    <Input
-                                      type="email"
-                                      placeholder="email@example.com"
-                                      className="bg-muted/50 border-primary/20"
-                                      value={member.email}
-                                      onChange={(e) =>
-                                        setForm((f) => {
-                                          const next = [...f.event_1_team_members];
-                                          next[idx] = { ...next[idx], email: e.target.value };
-                                          return { ...f, event_1_team_members: next };
-                                        })
-                                      }
-                                      required
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label>WhatsApp Phone *</Label>
-                                    <Input
-                                      type="tel"
-                                      placeholder="+91 98765 43210"
-                                      className="bg-muted/50 border-primary/20"
-                                      value={member.whatsapp_phone}
-                                      onChange={(e) =>
-                                        setForm((f) => {
-                                          const next = [...f.event_1_team_members];
-                                          next[idx] = { ...next[idx], whatsapp_phone: e.target.value };
-                                          return { ...f, event_1_team_members: next };
-                                        })
-                                      }
-                                      required
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {event2AdditionalCount > 0 && (
-                        <div>
-                          <h3 className="text-base font-semibold text-secondary mb-3 flex items-center gap-2">
-                            <Users className="w-4 h-4" />
-                            Event 2 — {event2?.name} ({form.event_2_team_size} {form.event_2_team_size === 1 ? "participant" : "participants"})
-                          </h3>
-                          <p className="text-sm text-muted-foreground mb-4">
-                            Add {event2AdditionalCount} team member(s) for Event 2. You (the primary registrant) are already counted.
-                          </p>
-                          <div className="space-y-4">
-                            {form.event_2_team_members.map((member, idx) => (
-                              <div key={idx} className="rounded-lg border border-border/50 p-4 space-y-3 bg-muted/20">
-                                <h4 className="text-sm font-medium text-foreground">Team member {idx + 1}</h4>
-                                <div className="grid gap-3 sm:grid-cols-1">
-                                  <div className="space-y-2">
-                                    <Label>Full Name *</Label>
-                                    <Input
-                                      placeholder="Full name"
-                                      className="bg-muted/50 border-primary/20"
-                                      value={member.name}
-                                      onChange={(e) =>
-                                        setForm((f) => {
-                                          const next = [...f.event_2_team_members];
-                                          next[idx] = { ...next[idx], name: e.target.value };
-                                          return { ...f, event_2_team_members: next };
-                                        })
-                                      }
-                                      required
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label>Email *</Label>
-                                    <Input
-                                      type="email"
-                                      placeholder="email@example.com"
-                                      className="bg-muted/50 border-primary/20"
-                                      value={member.email}
-                                      onChange={(e) =>
-                                        setForm((f) => {
-                                          const next = [...f.event_2_team_members];
-                                          next[idx] = { ...next[idx], email: e.target.value };
-                                          return { ...f, event_2_team_members: next };
-                                        })
-                                      }
-                                      required
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label>WhatsApp Phone *</Label>
-                                    <Input
-                                      type="tel"
-                                      placeholder="+91 98765 43210"
-                                      className="bg-muted/50 border-primary/20"
-                                      value={member.whatsapp_phone}
-                                      onChange={(e) =>
-                                        setForm((f) => {
-                                          const next = [...f.event_2_team_members];
-                                          next[idx] = { ...next[idx], whatsapp_phone: e.target.value };
-                                          return { ...f, event_2_team_members: next };
-                                        })
-                                      }
-                                      required
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                    <Label htmlFor="page-reg-name">Full Name</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="page-reg-name"
+                        type="text"
+                        placeholder="John Doe"
+                        className="pl-10 bg-muted/50 border-primary/20 focus:border-primary/50"
+                        value={form.name}
+                        onChange={(e) => setForm({ ...form, name: e.target.value })}
+                        required
+                      />
                     </div>
-                  )}
+                    {errors.name && <p className="text-destructive text-sm">{errors.name}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="page-reg-email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="page-reg-email"
+                        type="email"
+                        placeholder="your@email.com"
+                        className="pl-10 bg-muted/50 border-primary/20 focus:border-primary/50"
+                        value={form.email}
+                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                        required
+                      />
+                    </div>
+                    {errors.email && <p className="text-destructive text-sm">{errors.email}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="page-reg-whatsapp">WhatsApp Phone Number</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="page-reg-whatsapp"
+                        type="tel"
+                        placeholder="+91 98765 43210"
+                        className="pl-10 bg-muted/50 border-primary/20 focus:border-primary/50"
+                        value={form.whatsapp_phone}
+                        onChange={(e) => setForm({ ...form, whatsapp_phone: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">Include country code</p>
+                    {errors.whatsapp_phone && <p className="text-destructive text-sm">{errors.whatsapp_phone}</p>}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="page-reg-department">Department</Label>
+                      <div className="relative">
+                        <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="page-reg-department"
+                          type="text"
+                          placeholder="BCA"
+                          className="pl-10 bg-muted/50 border-primary/20 focus:border-primary/50"
+                          value={form.department}
+                          onChange={(e) => setForm({ ...form, department: e.target.value })}
+                          required
+                        />
+                      </div>
+                      {errors.department && <p className="text-destructive text-sm">{errors.department}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="page-reg-college">College</Label>
+                      <div className="relative">
+                        <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="page-reg-college"
+                          type="text"
+                          placeholder="Bishop Heber College"
+                          className="pl-10 bg-muted/50 border-primary/20 focus:border-primary/50"
+                          value={form.college}
+                          onChange={(e) => setForm({ ...form, college: e.target.value })}
+                          required
+                        />
+                      </div>
+                      {errors.college && <p className="text-destructive text-sm">{errors.college}</p>}
+                    </div>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="payment" className="space-y-4 mt-0">
-                  {(() => {
-                    const participants = Math.max(1, Math.min(5, totalTeamMembersNeeded));
-                    const qr = PAYMENT_QR_MAP[participants];
-                    return (
-                      <div className="rounded-lg border border-primary/20 bg-muted/10 p-6 flex flex-col items-center">
-                        <p className="text-sm font-medium text-foreground mb-1">
-                          {participants} {participants === 1 ? "participant" : "participants"} — ₹{qr.amount}
-                        </p>
-                        <p className="text-xs text-muted-foreground mb-4">
-                          Scan the QR code to complete payment
-                        </p>
-                        <div className="flex justify-center">
-                          <img
-                            src={qr.image}
-                            alt={`Payment QR - ₹${qr.amount}`}
-                            className="w-44 h-44 sm:w-52 sm:h-52 object-contain rounded-lg border border-border/50"
-                          />
-                        </div>
-                      </div>
-                    );
-                  })()}
-                  <p className="text-sm text-muted-foreground">
-                    Upload a screenshot of your payment confirmation.
-                  </p>
+                  {/* Back Arrow */}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("registration")}
+                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-4"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Edit Details
+                  </button>
+
+                  {/* UPI ID Message */}
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
+                    <p className="text-sm font-medium text-foreground mb-2">
+                      Having trouble with payment?
+                    </p>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Use this UPI ID:
+                    </p>
+                    <p className="text-lg font-mono font-bold text-primary break-all">
+                      chitrasathish1979-2@okicici
+                    </p>
+                  </div>
+
+                  <div className="rounded-lg border border-primary/20 bg-muted/10 p-6 flex flex-col items-center">
+                    <p className="text-sm font-medium text-foreground mb-1">
+                      Registration Fee — ₹{PAYMENT_AMOUNT}
+                    </p>
+                    <p className="text-xs text-muted-foreground mb-4">
+                      Scan the QR code to complete payment
+                    </p>
+                    <div className="flex justify-center">
+                      <img
+                        src={PAYMENT_QR_IMAGE}
+                        alt={`Payment QR - ₹${PAYMENT_AMOUNT}`}
+                        className="w-44 h-44 sm:w-52 sm:h-52 object-contain rounded-lg border border-border/50"
+                      />
+                    </div>
+                  </div>
+                  
                   <div className="space-y-2">
-                    <Label htmlFor="payment-upload">Payment screenshot *</Label>
+                    <Label htmlFor="upi-transaction-id">UPI Transaction ID</Label>
+                    <Input
+                      id="upi-transaction-id"
+                      type="text"
+                      placeholder="Enter UPI Transaction ID"
+                      className="bg-muted/50 border-primary/20"
+                      value={form.upi_transaction_id}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '');
+                        setForm({ ...form, upi_transaction_id: value });
+                      }}
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground">Enter the transaction ID from your payment confirmation</p>
+                    {errors.upi_transaction_id && (
+                      <p className="text-destructive text-sm">{errors.upi_transaction_id}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="payment-upload">Payment Screenshot (Optional)</Label>
                     <div className="flex flex-col gap-3">
                       <label
                         htmlFor="payment-upload"
@@ -828,6 +1088,8 @@ export default function Register() {
                           <div className="flex flex-col items-center gap-2 p-2">
                             <Upload className="w-10 h-10 text-muted-foreground" />
                             <span className="text-sm text-muted-foreground">Click to upload (PNG, JPG, WebP)</span>
+                            <span className="text-xs text-muted-foreground">Max file size: 2MB</span>
+                            <span className="text-xs text-muted-foreground">Optional - registration can proceed without it</span>
                           </div>
                         )}
                         <input
@@ -837,7 +1099,19 @@ export default function Register() {
                           className="hidden"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
-                            if (file) setForm((f) => ({ ...f, payment_screenshot: file }));
+                            if (file) {
+                              // Check file size (2MB = 2 * 1024 * 1024 bytes)
+                              const maxSize = 2 * 1024 * 1024; // 2MB
+                              if (file.size > maxSize) {
+                                toast({
+                                  title: "File too large",
+                                  description: "Payment screenshot must be 2MB or smaller. Please compress the image and try again.",
+                                  variant: "destructive",
+                                });
+                                return;
+                              }
+                              setForm((f) => ({ ...f, payment_screenshot: file }));
+                            }
                           }}
                         />
                       </label>
@@ -855,8 +1129,10 @@ export default function Register() {
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Submitting...
                   </>
+                ) : activeTab === "payment" ? (
+                  "Submit Registration"
                 ) : (
-                  "Submit registration"
+                  "Proceed to Payment"
                 )}
               </NeonButton>
             </form>
@@ -865,6 +1141,65 @@ export default function Register() {
       </main>
 
       <Footer />
+
+      {/* Registration Alert Modal */}
+      <AlertDialog open={showRegistrationAlert} onOpenChange={setShowRegistrationAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Registration Details</AlertDialogTitle>
+            <AlertDialogDescription>
+              Please review your registration details. You will proceed to the payment page after confirming.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Edit Details</AlertDialogCancel>
+            <AlertDialogAction onClick={handleProceedToPayment}>Proceed to Payment</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Payment Confirmation Modal */}
+      <AlertDialog open={showPaymentConfirm} onOpenChange={setShowPaymentConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Payment Submission</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to submit your registration? Please ensure all payment details are correct.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleFinalSubmit} disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Submitting...
+                </>
+              ) : (
+                "Confirm & Submit"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Success Modal with Registration Form */}
+      <Dialog open={showSuccessModal} onOpenChange={() => {}}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <RegistrationSuccessModal
+            form={form}
+            events={events}
+            event1={event1}
+            event2={event2}
+            registrationId={registrationId}
+            onClose={() => {
+              setShowSuccessModal(false);
+              setForm(initialForm);
+              window.location.href = "/";
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

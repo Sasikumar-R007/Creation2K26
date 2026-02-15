@@ -213,8 +213,11 @@ export const useSubmitGuestRegistration = () => {
       event_2_id?: string | null;
       event_1_team_size?: number;
       event_2_team_size?: number | null;
+      event_1_team_name?: string | null;
+      event_2_team_name?: string | null;
       team_members?: { event_1: TeamMemberPayload[]; event_2: TeamMemberPayload[] };
       payment_screenshot_url?: string | null;
+      upi_transaction_id?: string | null;
     }) => {
       const { error } = await supabase.from("guest_registrations").insert({
         name: payload.name,
@@ -226,8 +229,11 @@ export const useSubmitGuestRegistration = () => {
         event_2_id: payload.event_2_id ?? null,
         event_1_team_size: payload.event_1_team_size ?? null,
         event_2_team_size: payload.event_2_team_size ?? null,
+        event_1_team_name: payload.event_1_team_name ?? null,
+        event_2_team_name: payload.event_2_team_name ?? null,
         team_members: payload.team_members ?? null,
         payment_screenshot_url: payload.payment_screenshot_url ?? null,
+        upi_transaction_id: payload.upi_transaction_id ?? null,
       });
       if (error) throw error;
     },
