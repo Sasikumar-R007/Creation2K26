@@ -60,9 +60,10 @@ git push origin main
 3. **Configure Project Settings**
    - **Framework Preset**: `Vite` (auto-detected)
    - **Root Directory**: `./` (leave as default)
-   - **Build Command**: `npm run build` (auto-detected)
-   - **Output Directory**: `dist` (auto-detected)
-   - **Install Command**: `npm install` (auto-detected)
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+   - **Install Command**: `npm install`
+   - **Node.js Version**: `20.x` (recommended) or leave auto
 
 4. **Add Environment Variables**
    Click **"Environment Variables"** and add:
