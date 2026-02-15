@@ -61,30 +61,22 @@ function doPost(e) {
 
 /**
  * Get event name from event ID
- * TODO: Replace with your actual event IDs
+ * Fetches from Supabase API dynamically
  */
 function getEventName(eventId) {
   if (!eventId) return '';
   
-  // Option 1: Hardcoded mapping (quick solution)
-  // Replace these UUIDs with your actual event IDs from Supabase
-  const eventMap = {
-    // Example:
-    // '123e4567-e89b-12d3-a456-426614174000': 'Quiz',
-    // '123e4567-e89b-12d3-a456-426614174001': 'Web Design',
-    // Add all 10 events here
-  };
-  
-  if (eventMap[eventId]) {
-    return eventMap[eventId];
+  // Cache event names to avoid repeated API calls
+  const cache = CacheService.getScriptCache();
+  const cachedName = cache.get('event_' + eventId);
+  if (cachedName) {
+    return cachedName;
   }
   
-  // Option 2: Fetch from Supabase API (requires API key)
-  // Uncomment and configure if you want to fetch dynamically
-  /*
+  // Fetch from Supabase API
   try {
     const supabaseUrl = 'https://tovokkcouwwymarnftcu.supabase.co';
-    const supabaseKey = 'YOUR_ANON_KEY_HERE'; // Get from Supabase Dashboard
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvdm9ra2NvdXd3eW1hcm5mdGN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMjE5NjcsImV4cCI6MjA4NjY5Nzk2N30.CVN8RbHF1GA5Kvo3JlkZWjIryuCuGURwm6PV_auZOGs';
     
     const response = UrlFetchApp.fetch(
       `${supabaseUrl}/rest/v1/events?id=eq.${eventId}&select=name`,
@@ -93,19 +85,22 @@ function getEventName(eventId) {
         headers: {
           'apikey': supabaseKey,
           'Authorization': `Bearer ${supabaseKey}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
         }
       }
     );
     
     const result = JSON.parse(response.getContentText());
     if (result && result.length > 0) {
-      return result[0].name;
+      const eventName = result[0].name;
+      // Cache for 1 hour (3600 seconds)
+      cache.put('event_' + eventId, eventName, 3600);
+      return eventName;
     }
   } catch (err) {
     Logger.log('Error fetching event name: ' + err.toString());
   }
-  */
   
   // Fallback: return first 8 chars of UUID
   return eventId.substring(0, 8);
