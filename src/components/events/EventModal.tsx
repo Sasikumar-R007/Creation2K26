@@ -27,7 +27,7 @@ import {
   conflictsWithRegistered,
   getConflictingRegisteredEvents,
 } from "@/lib/eventParticipation";
-import { MAX_EVENTS_PER_PARTICIPANT, getEventDisplay } from "@/lib/constants";
+import { MAX_EVENTS_PER_PARTICIPANT, getEventDisplay, SOCIAL_LINKS } from "@/lib/constants";
 
 interface EventModalProps {
   event: EventData;
@@ -39,6 +39,125 @@ interface EventModalProps {
 const DynamicIcon = ({ name, className }: { name: string; className?: string }) => {
   const Icon = (LucideIcons as any)[name] || LucideIcons.Sparkles;
   return <Icon className={className} />;
+};
+
+// Get event-specific rules
+const getEventRules = (eventName: string): string[] => {
+  const normalizedName = eventName.trim().toUpperCase();
+  
+  const rulesMap: Record<string, string[]> = {
+    "WEB DESIGN": [
+      "Participants must design a web page UI/UX based on the theme announced at the start of the event.",
+      "The total duration of the competition is 60 minutes, starting immediately after the theme announcement.",
+      "Allowed tools: Figma, Adobe XD, Canva, or similar UI/UX design tools. Designs must be created from scratch during the event.",
+      "Use of pre-built templates, previously created designs, or copied layouts is strictly prohibited.",
+      "Evaluation will be based on UI/UX design, creativity, layout structure, visual consistency, and theme relevance; the judges' decision is final.",
+    ],
+    "PERSONALITY CONTEST": [
+      "The event is open to individual participants only.",
+      "Participants must bring their Curriculum Vitae (CV).",
+      "Participants will be shortlisted after the prelims.",
+      "The final round will be conducted on stage.",
+      "Judge's decision is final.",
+    ],
+    "IPL AUCTION": [
+      "Participants per team: 2",
+      "Prior knowledge of IPL from 2008-2025",
+      "Each team will be given a fixed virtual budget.",
+      "Players are classified as capped, uncapped, and overseas.",
+      "Participants are requested to maintain good conduct throughout the event.",
+      "Decision of judges is final.",
+    ],
+    "AI PROMPT": [
+      "The reference AI image will be shown once for 5 minutes only before the competition and will not be displayed again.",
+      "The competition duration is 30 minutes, starting immediately after the image is removed.",
+      "Participants may use mobile phones or laptops only for AI prompting and image generation. Capturing, saving, recording, or recreating the reference image in any form is strictly prohibited.",
+      "Participants must remain seated inside the venue. No communication or prompt sharing with others is allowed.",
+      "Any malpractice or rule violation will lead to immediate disqualification.",
+      "Submissions will be judged based on similarity, accuracy of details, prompt quality, and creativity. Judges' decision is final.",
+    ],
+    "AI PROMPT ENGINEERING": [
+      "The reference AI image will be shown once for 5 minutes only before the competition and will not be displayed again.",
+      "The competition duration is 30 minutes, starting immediately after the image is removed.",
+      "Participants may use mobile phones or laptops only for AI prompting and image generation. Capturing, saving, recording, or recreating the reference image in any form is strictly prohibited.",
+      "Participants must remain seated inside the venue. No communication or prompt sharing with others is allowed.",
+      "Any malpractice or rule violation will lead to immediate disqualification.",
+      "Submissions will be judged based on similarity, accuracy of details, prompt quality, and creativity. Judges' decision is final.",
+    ],
+    "BUG SMASH": [
+      "Participants per team: 2 members.",
+      "Event Duration: 1 hour.",
+      "Question is based on \"Python, Java, C++\" programming language.",
+      "No of rounds: 2.",
+    ],
+    DEBUGGING: [
+      "Participants per team: 2 members.",
+      "Event Duration: 1 hour.",
+      "Question is based on \"Python, Java, C++\" programming language.",
+      "No of rounds: 2.",
+    ],
+    "AD-ZAP": [
+      "Team Composition: Usually 3–5 members per team & one Team Per College.",
+      "Time Management: Teams are typically given 3-5 minutes(preparation) to brainstorm and 2-7 minutes to perform their ad.",
+      "On-the-Spot Topics: Product or service topics are usually provided immediately before the preparation time, demanding instant creativity.",
+      "Originality & Content: Ads must be original. Plagiarism, vulgarity, or offensive content will lead to disqualification.",
+      "Prohibited Items: Use of mobile phones, tablets, or other electronic devices is strictly prohibited.",
+      "Props: Teams may be allowed to bring their own props, charts, or costumes, but organizers rarely provide them.",
+      "Judging Criteria: Performance is judged on creativity, humor, brand name, tag line, and overall impact.",
+      "Disqualification: Violation of rules, such as exceeding the time limit or using inappropriate content, results in disqualification.",
+    ],
+    "AD ZAP": [
+      "Team Composition: Usually 3–5 members per team & one Team Per College.",
+      "Time Management: Teams are typically given 3-5 minutes(preparation) to brainstorm and 2-7 minutes to perform their ad.",
+      "On-the-Spot Topics: Product or service topics are usually provided immediately before the preparation time, demanding instant creativity.",
+      "Originality & Content: Ads must be original. Plagiarism, vulgarity, or offensive content will lead to disqualification.",
+      "Prohibited Items: Use of mobile phones, tablets, or other electronic devices is strictly prohibited.",
+      "Props: Teams may be allowed to bring their own props, charts, or costumes, but organizers rarely provide them.",
+      "Judging Criteria: Performance is judged on creativity, humor, brand name, tag line, and overall impact.",
+      "Disqualification: Violation of rules, such as exceeding the time limit or using inappropriate content, results in disqualification.",
+    ],
+    "MEMORY MATRIX": [
+      "2 persons per team and 1 team per department.",
+      "1st round will be logical reasoning (50 question).",
+      "6 teams will be shortlist.",
+      "Multiple rounds of memory matrix.",
+      "Based on the score, teams will be rewarded.",
+    ],
+    "PAPER PRESENTATION": [
+      "Eligibility: UG Students",
+      "Team size: 1-2",
+      "Topics on: AI & ML | Data Science | Cyber Security | Cloud | IoT | Blockchain | Networks | OS | DBMS | Green & Emerging Tech",
+      "Duration: 5-7 minutes + 3 minutes for Q&A",
+      "PPT Slide: Maximum of 10 slides",
+      `Submit slides in advance to: ${SOCIAL_LINKS.email}`,
+    ],
+    "MOVIE SPOOFING": [
+      "Each team can have 2 to 5 participants.",
+      "Participants must spoof a movie scene in a humorous and creative manner.",
+      "Time limit: Maximum 5 minutes per performance (including setup).",
+      "Use of offensive language, vulgarity, or political/religious content is strictly prohibited.",
+      "The spoof should be clearly related to the chosen movie; random skits won't be considered.",
+      "Participants may use simple props, but dangerous items are not allowed.",
+      "Background audio or music (if any) must be submitted before the event.",
+      "Teams must report at least 30 minutes before their scheduled slot.",
+      "Judges' decision will be final and binding.",
+      "Points will be awarded based on creativity, humor, coordination, and audience engagement.",
+    ],
+    "MOVIE SPOOF": [
+      "Each team can have 2 to 5 participants.",
+      "Participants must spoof a movie scene in a humorous and creative manner.",
+      "Time limit: Maximum 5 minutes per performance (including setup).",
+      "Use of offensive language, vulgarity, or political/religious content is strictly prohibited.",
+      "The spoof should be clearly related to the chosen movie; random skits won't be considered.",
+      "Participants may use simple props, but dangerous items are not allowed.",
+      "Background audio or music (if any) must be submitted before the event.",
+      "Teams must report at least 30 minutes before their scheduled slot.",
+      "Judges' decision will be final and binding.",
+      "Points will be awarded based on creativity, humor, coordination, and audience engagement.",
+    ],
+  };
+
+  return rulesMap[normalizedName] || [];
 };
 
 const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
@@ -202,8 +321,10 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
     }
   };
 
-  // Parse rules into array
-  const rulesArray = event.rules.split("\n").filter((rule) => rule.trim());
+  // Get event-specific rules
+  const rulesArray = getEventRules(event.name);
+  const hasCustomRules = rulesArray.length > 0;
+  const fallbackRules = hasCustomRules ? [] : event.rules.split("\n").filter((rule) => rule.trim());
 
   const registerDisabled =
     isRegistering ||
@@ -215,6 +336,7 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
       variant={isTechnical ? "cyan" : "purple"}
       onClick={handleRegister}
       disabled={registerDisabled}
+      className={`text-sm ${!registerDisabled && !isRegistering && !showConflict && !isAlreadyRegistered && !atMaxEvents ? 'register-now-button' : ''}`}
     >
       {isRegistering ? (
         <>
@@ -239,7 +361,7 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
       ) : (
         <>
           <LucideIcons.UserPlus className="w-4 h-4" />
-          {user ? "Register for Event" : "Sign Up to Register"}
+          Register Now
         </>
       )}
     </NeonButton>
@@ -247,184 +369,249 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-border">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-background via-background to-muted/20 border-2 border-border/50 shadow-2xl backdrop-blur-sm p-4 sm:p-6 [&>button]:hidden">
+        {/* Custom Close button - positioned properly */}
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 z-50 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 p-2 bg-background/80 backdrop-blur-sm"
+          aria-label="Close"
+        >
+          <LucideIcons.X className="h-5 w-5" />
+        </button>
         <DialogHeader>
-          <div className="flex items-start gap-4">
-            <div
-              className={`
-                w-24 h-24 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden p-1
-                ${isTechnical 
-                  ? "bg-primary/10 text-primary" 
-                  : "bg-secondary/10 text-secondary"
-                }
-              `}
-            >
-              {logo ? (
-                <img src={logo} alt="" className="w-full h-full object-contain" />
-              ) : (
-                <DynamicIcon name={event.icon_name} className="w-10 h-10" />
-              )}
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-6 mb-6">
+            <div className="flex items-start gap-3 sm:gap-4 flex-1 w-full sm:w-auto">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center shrink-0 overflow-hidden">
+                {logo ? (
+                  <img src={logo} alt="" className="w-full h-full object-contain" />
+                ) : (
+                  <DynamicIcon 
+                    name={event.icon_name} 
+                    className={`w-12 h-12 ${
+                      isTechnical ? "text-primary" : "text-secondary"
+                    }`} 
+                  />
+                )}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <Badge
+                    variant={isTechnical ? "default" : "secondary"}
+                    className={`
+                      text-xs font-semibold px-2.5 py-0.5
+                      ${isTechnical 
+                        ? "bg-primary/20 text-primary border border-primary/40 shadow-lg shadow-primary/20" 
+                        : "bg-secondary/20 text-secondary border border-secondary/40 shadow-lg shadow-secondary/20"
+                      }
+                    `}
+                  >
+                    {isTechnical ? "Technical" : "Non-Technical"}
+                  </Badge>
+                </div>
+                <DialogTitle className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-1">
+                  {displayName}
+                </DialogTitle>
+                <p className="text-xs sm:text-sm text-muted-foreground font-mono">{event.name}</p>
+              </div>
             </div>
-            <div className="flex-1">
-              <Badge
-                variant={isTechnical ? "default" : "secondary"}
-                className={`
-                  text-xs font-medium mb-2
-                  ${isTechnical 
-                    ? "bg-primary/20 text-primary border-primary/30" 
-                    : "bg-secondary/20 text-secondary border-secondary/30"
-                  }
-                `}
-              >
-                {isTechnical ? "Technical" : "Non-Technical"}
-              </Badge>
-              <DialogTitle className="text-2xl font-bold">
-                {displayName}
-              </DialogTitle>
-              <p className="text-sm text-muted-foreground">{event.name}</p>
+            <div className="flex-shrink-0 w-full sm:w-auto">
+              {showConflict ? (
+                <NeonButton
+                  variant={isTechnical ? "cyan" : "purple"}
+                  onClick={handleSwitchToThisEvent}
+                  disabled={isSwitching}
+                  className="text-sm"
+                >
+                  {isSwitching ? (
+                    <>
+                      <LucideIcons.Loader2 className="w-4 h-4 animate-spin" />
+                      Switching...
+                    </>
+                  ) : (
+                    <>
+                      <LucideIcons.RefreshCw className="w-4 h-4" />
+                      Switch to {event.name}
+                    </>
+                  )}
+                </NeonButton>
+              ) : (atMaxEvents && !isAlreadyRegistered) ? (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>{registerButton}</TooltipTrigger>
+                    <TooltipContent>
+                      <p>You can participate in only {MAX_EVENTS_PER_PARTICIPANT} events.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                registerButton
+              )}
             </div>
           </div>
         </DialogHeader>
 
-        <div className="space-y-6 mt-4">
+        <div className="space-y-4 sm:space-y-6 mt-2">
           {/* Description */}
-          <div>
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-              About
-            </h4>
-            <p className="text-foreground">{event.description}</p>
+          <div className="relative">
+            <div className={`absolute inset-0 bg-gradient-to-r ${
+              isTechnical 
+                ? "from-primary/5 to-transparent" 
+                : "from-secondary/5 to-transparent"
+            } rounded-lg blur-xl`} />
+            <div className="relative p-3 sm:p-4 rounded-lg border border-border/30 bg-card/50">
+              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 sm:mb-3 flex items-center gap-2">
+                <LucideIcons.Info className="w-4 h-4" />
+                About
+              </h4>
+              <p className="text-sm sm:text-base text-foreground leading-relaxed">{event.description}</p>
+            </div>
           </div>
 
-          <Separator className="bg-border/50" />
+          <Separator className="bg-gradient-to-r from-transparent via-border/50 to-transparent" />
 
           {/* Rules */}
-          <div>
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-              Rules & Guidelines
-            </h4>
-            <ul className="space-y-2">
-              {rulesArray.map((rule, index) => (
-                <li key={index} className="flex items-start gap-2 text-foreground">
-                  <LucideIcons.CheckCircle2 
-                    className={`w-5 h-5 shrink-0 mt-0.5 ${
-                      isTechnical ? "text-primary" : "text-secondary"
-                    }`} 
-                  />
-                  <span>{rule.replace(/^[•\-]\s*/, "")}</span>
-                </li>
-              ))}
-            </ul>
+          <div className="relative">
+            <div className={`absolute inset-0 bg-gradient-to-r ${
+              isTechnical 
+                ? "from-primary/5 to-transparent" 
+                : "from-secondary/5 to-transparent"
+            } rounded-lg blur-xl`} />
+            <div className="relative p-3 sm:p-4 rounded-lg border border-border/30 bg-card/50">
+              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 sm:mb-4 flex items-center gap-2">
+                <LucideIcons.FileText className="w-4 h-4" />
+                Rules & Guidelines
+              </h4>
+              <ul className="space-y-2 sm:space-y-3">
+                {hasCustomRules ? (
+                  rulesArray.map((rule, index) => (
+                    <li key={index} className="flex items-start gap-3 text-foreground group">
+                      <LucideIcons.CheckCircle2 className={`mt-0.5 w-4 h-4 sm:w-5 sm:h-5 shrink-0 ${
+                        isTechnical 
+                          ? "text-primary" 
+                          : "text-secondary"
+                      }`} />
+                      <span className="flex-1 text-sm sm:text-base leading-relaxed">{rule}</span>
+                    </li>
+                  ))
+                ) : (
+                  fallbackRules.map((rule, index) => (
+                    <li key={index} className="flex items-start gap-3 text-foreground group">
+                      <LucideIcons.CheckCircle2 className={`mt-0.5 w-4 h-4 sm:w-5 sm:h-5 shrink-0 ${
+                        isTechnical 
+                          ? "text-primary" 
+                          : "text-secondary"
+                      }`} />
+                      <span className="flex-1 text-sm sm:text-base leading-relaxed">{rule.replace(/^[•\-]\s*/, "")}</span>
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
           </div>
 
           {/* IC Info */}
           {event.student_incharges && event.student_incharges.length > 0 && (
             <>
-              <Separator className="bg-border/50" />
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                  <LucideIcons.User className="w-5 h-5 text-muted-foreground" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Student Incharge</p>
-                  <p className={`font-semibold ${isTechnical ? "text-primary" : "text-secondary"}`}>
-                    {event.student_incharges[0].name}
-                  </p>
+              <Separator className="bg-gradient-to-r from-transparent via-border/50 to-transparent" />
+              <div className="relative">
+                <div className={`absolute inset-0 bg-gradient-to-r ${
+                  isTechnical 
+                    ? "from-primary/5 to-transparent" 
+                    : "from-secondary/5 to-transparent"
+                } rounded-lg blur-xl`} />
+                <div className="relative p-4 rounded-lg border border-border/30 bg-card/50 flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                    isTechnical 
+                      ? "bg-primary/10 border border-primary/30" 
+                      : "bg-secondary/10 border border-secondary/30"
+                  }`}>
+                    <LucideIcons.User className={`w-6 h-6 ${
+                      isTechnical ? "text-primary" : "text-secondary"
+                    }`} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+                      Student Incharge
+                    </p>
+                    <p className={`font-bold text-lg ${
+                      isTechnical ? "text-primary" : "text-secondary"
+                    }`}>
+                      {event.student_incharges[0].name}
+                    </p>
+                  </div>
                 </div>
               </div>
             </>
           )}
 
           {/* Participation: Can / Cannot */}
-          <Separator className="bg-border/50" />
+          <Separator className="bg-gradient-to-r from-transparent via-border/50 to-transparent" />
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+              <LucideIcons.Link className="w-4 h-4" />
               If you register for this event
             </h4>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
-                <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
-                  <LucideIcons.CheckCircle2 className="h-4 w-4" />
-                  You can also participate in
-                </p>
-                {canParticipate.length > 0 ? (
-                  <ul className="space-y-1 text-sm text-foreground">
-                    {canParticipate.map((e) => (
-                      <li key={e.id}>• {e.name}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No other events in this slot.</p>
-                )}
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/5 rounded-lg blur-xl" />
+                <div className="relative rounded-lg border border-primary/30 bg-primary/5 p-4 backdrop-blur-sm">
+                  <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-primary">
+                    <LucideIcons.CheckCircle2 className="h-4 w-4" />
+                    You can also participate in
+                  </p>
+                  {canParticipate.length > 0 ? (
+                    <ul className="space-y-1.5 text-sm text-foreground">
+                      {canParticipate.map((e) => (
+                        <li key={e.id} className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                          <span>{e.name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No other events in this slot.</p>
+                  )}
+                </div>
               </div>
-              <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3">
-                <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-destructive">
-                  <LucideIcons.XCircle className="h-4 w-4" />
-                  You cannot participate in
-                </p>
-                {cannotParticipate.length > 0 ? (
-                  <ul className="space-y-1 text-sm text-muted-foreground">
-                    {cannotParticipate.map((e) => (
-                      <li key={e.id}>• {e.name}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No conflicts.</p>
-                )}
+              <div className="relative">
+                <div className="absolute inset-0 bg-destructive/5 rounded-lg blur-xl" />
+                <div className="relative rounded-lg border border-destructive/30 bg-destructive/5 p-4 backdrop-blur-sm">
+                  <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-destructive">
+                    <LucideIcons.XCircle className="h-4 w-4" />
+                    You cannot participate in
+                  </p>
+                  {cannotParticipate.length > 0 ? (
+                    <ul className="space-y-1.5 text-sm text-muted-foreground">
+                      {cannotParticipate.map((e) => (
+                        <li key={e.id} className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-destructive" />
+                          <span>{e.name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No conflicts.</p>
+                  )}
+                </div>
               </div>
             </div>
             {showConflict && (
-              <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 space-y-2">
-                <p className="text-xs text-amber-200">
-                  You're registered for <strong>{conflictingEventNames.length === 1 ? conflictingEventNames[0] : conflictingEventNames.join(", ")}</strong> (same time slot). You can switch to <strong>{event.name}</strong> instead.
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  If you didn't register for any event, refresh the page.
-                </p>
+              <div className="relative">
+                <div className="absolute inset-0 bg-amber-500/10 rounded-lg blur-xl" />
+                <div className="relative rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 space-y-2 backdrop-blur-sm">
+                  <p className="text-xs text-amber-200">
+                    You're registered for <strong>{conflictingEventNames.length === 1 ? conflictingEventNames[0] : conflictingEventNames.join(", ")}</strong> (same time slot). You can switch to <strong>{event.name}</strong> instead.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    If you didn't register for any event, refresh the page.
+                  </p>
+                </div>
               </div>
             )}
             {atMaxEvents && !isAlreadyRegistered && (
               <p className="text-xs text-destructive">
                 You can participate in only {MAX_EVENTS_PER_PARTICIPANT} events. Unregister from one to add this event.
               </p>
-            )}
-          </div>
-
-          <Separator className="bg-border/50" />
-
-          {/* Register / Switch / Close */}
-          <div className="flex justify-end gap-3 flex-wrap">
-            <NeonButton variant="ghost" onClick={onClose}>
-              Close
-            </NeonButton>
-            {showConflict ? (
-              <NeonButton
-                variant={isTechnical ? "cyan" : "purple"}
-                onClick={handleSwitchToThisEvent}
-                disabled={isSwitching}
-              >
-                {isSwitching ? (
-                  <>
-                    <LucideIcons.Loader2 className="w-4 h-4 animate-spin" />
-                    Switching...
-                  </>
-                ) : (
-                  <>
-                    <LucideIcons.RefreshCw className="w-4 h-4" />
-                    Switch to {event.name}
-                  </>
-                )}
-              </NeonButton>
-            ) : (atMaxEvents && !isAlreadyRegistered) ? (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>{registerButton}</TooltipTrigger>
-                  <TooltipContent>
-                    <p>You can participate in only {MAX_EVENTS_PER_PARTICIPANT} events.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            ) : (
-              registerButton
             )}
           </div>
         </div>

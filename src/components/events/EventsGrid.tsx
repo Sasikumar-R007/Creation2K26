@@ -76,13 +76,15 @@ const EventsGrid = () => {
     <div className="space-y-16">
       {/* Technical Events */}
       <div>
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Cpu className="w-6 h-6 text-primary" />
+        <div className="flex items-center gap-4 mb-12 relative group">
+          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:border-primary/50 group-hover:shadow-[0_0_20px_hsl(var(--primary)_/_0.3)]">
+            <Cpu className="w-7 h-7 text-primary transition-transform duration-500 group-hover:rotate-12" />
           </div>
-          <div>
-            <h3 className="text-2xl font-bold text-glow-cyan">Technical Events</h3>
-            <p className="text-muted-foreground text-sm">Showcase your technical prowess</p>
+          <div className="relative">
+            <h3 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-primary to-cyan-300 bg-clip-text text-transparent transition-all duration-500 group-hover:drop-shadow-[0_0_15px_hsl(var(--primary)_/_0.5)]">
+              Technical Events
+            </h3>
+            <p className="text-muted-foreground text-sm mt-1 group-hover:text-foreground/80 transition-colors duration-300">Showcase your technical prowess</p>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -104,13 +106,15 @@ const EventsGrid = () => {
 
       {/* Non-Technical Events */}
       <div>
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
-            <Palette className="w-6 h-6 text-secondary" />
+        <div className="flex items-center gap-4 mb-12 relative group">
+          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-secondary/20 to-secondary/5 border border-secondary/30 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:border-secondary/50 group-hover:shadow-[0_0_20px_hsl(var(--secondary)_/_0.3)]">
+            <Palette className="w-7 h-7 text-secondary transition-transform duration-500 group-hover:rotate-12" />
           </div>
-          <div>
-            <h3 className="text-2xl font-bold text-glow-purple">Non-Technical Events</h3>
-            <p className="text-muted-foreground text-sm">Unleash your creativity</p>
+          <div className="relative">
+            <h3 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-secondary via-secondary to-purple-300 bg-clip-text text-transparent transition-all duration-500 group-hover:drop-shadow-[0_0_15px_hsl(var(--secondary)_/_0.5)]">
+              Non-Technical Events
+            </h3>
+            <p className="text-muted-foreground text-sm mt-1 group-hover:text-foreground/80 transition-colors duration-300">Unleash your creativity</p>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -61,16 +61,17 @@ const EventCard = ({
   };
 
   const card = (
-    <GlassPanel
-      variant="hover"
-      glow={isTechnical ? "cyan" : "purple"}
+    <div
       className={`
-          p-6 card-hover group
-          animate-slide-up opacity-0
-          hover:border-${accentColor === "cyan" ? "primary" : "secondary"}/50
-          ${isDisabledBySelection ? "cursor-not-allowed opacity-60" : "cursor-pointer"}
-          ${isHighlightedAsCan ? (isTechnical ? "ring-2 ring-primary/50" : "ring-2 ring-secondary/50") + " ring-offset-2 ring-offset-background dark:ring-offset-background" : ""}
-        `}
+        p-6 group relative overflow-hidden rounded-xl
+        animate-slide-up opacity-0
+        transition-all duration-300 ease-out
+        bg-card/60 backdrop-blur-sm border border-border/30
+        ${isDisabledBySelection ? "cursor-not-allowed opacity-40" : "cursor-pointer"}
+        ${isHighlightedAsCan ? (isTechnical ? "ring-2 ring-primary/50" : "ring-2 ring-secondary/50") + " ring-offset-2 ring-offset-background" : ""}
+        ${!isDisabledBySelection ? "hover:border-primary/50 hover:shadow-[0_0_25px_hsl(var(--primary)_/_0.2)]" : ""}
+        ${!isDisabledBySelection && !isTechnical ? "hover:border-secondary/50 hover:shadow-[0_0_25px_hsl(var(--secondary)_/_0.2)]" : ""}
+      `}
       style={{
         animationDelay: `${index * 100}ms`,
         animationFillMode: "forwards",
@@ -78,7 +79,7 @@ const EventCard = ({
       onClick={handleCardClick}
     >
       {/* Category Badge + Conflict Badge */}
-      <div className="flex justify-between items-start mb-4">
+      <div className="flex justify-between items-start mb-6">
         <Badge
           variant={isTechnical ? "default" : "secondary"}
           className={`
@@ -106,61 +107,44 @@ const EventCard = ({
         )}
       </div>
 
-        {/* Logo or Icon */}
-        <div 
-          className={`
-            w-24 h-24 rounded-2xl flex items-center justify-center mb-4 overflow-hidden p-1
-            transition-all duration-300 group-hover:scale-105
-            ${isTechnical 
-              ? "bg-primary/10 text-primary group-hover:bg-primary/20" 
-              : "bg-secondary/10 text-secondary group-hover:bg-secondary/20"
-            }
-          `}
-        >
-          {logo ? (
-            <img src={logo} alt="" className="w-full h-full object-contain" />
-          ) : (
-            <DynamicIcon name={event.icon_name} className="w-10 h-10" />
-          )}
-        </div>
-
-        {/* Title: display name as heading, original name as subheading */}
-        <h3 className={`
-          text-xl font-bold mb-0.5 transition-colors
+      {/* Icon Container - rounded square like brochure */}
+      <div 
+        className={`
+          w-16 h-16 rounded-xl flex items-center justify-center mb-6 overflow-hidden
+          transition-all duration-300 group-hover:scale-105
           ${isTechnical 
-            ? "group-hover:text-primary" 
-            : "group-hover:text-secondary"
+            ? "bg-primary/10 border border-primary/20" 
+            : "bg-secondary/10 border border-secondary/20"
           }
-        `}>
-          {displayName}
-        </h3>
-        <p className="text-xs text-muted-foreground mb-2">{event.name}</p>
-
-        {/* Description Preview */}
-        <p className="text-muted-foreground text-sm line-clamp-2 mb-4">
-          {event.description}
-        </p>
-
-        {/* IC Name */}
-        {event.student_incharges && event.student_incharges.length > 0 && (
-          <div className="text-xs text-muted-foreground">
-            <span className="opacity-70">IC:</span>{" "}
-            <span className={isTechnical ? "text-primary" : "text-secondary"}>
-              {event.student_incharges[0].name}
-            </span>
-          </div>
+        `}
+      >
+        {logo ? (
+          <img src={logo} alt={displayName} className="w-full h-full object-cover rounded-xl" />
+        ) : (
+          <DynamicIcon name={event.icon_name} className={`w-8 h-8 ${isTechnical ? "text-primary" : "text-secondary"}`} />
         )}
-
-      {/* Hover Indicator */}
-      <div className={`
-          mt-4 text-sm font-medium flex items-center gap-2
-          opacity-0 group-hover:opacity-100 transition-opacity
-          ${isTechnical ? "text-primary" : "text-secondary"}
-        `}>
-        View Details
-        <LucideIcons.ArrowRight className="w-4 h-4" />
       </div>
-    </GlassPanel>
+
+      {/* Title - bold white text like brochure */}
+      <h3 className="text-xl font-bold mb-3 text-foreground group-hover:text-primary transition-colors duration-300">
+        {displayName}
+      </h3>
+
+      {/* Description - lighter text like brochure */}
+      <p className="text-muted-foreground text-sm line-clamp-3 mb-4 leading-relaxed">
+        {event.description}
+      </p>
+
+      {/* IC Name */}
+      {event.student_incharges && event.student_incharges.length > 0 && (
+        <div className="text-xs text-muted-foreground mt-auto">
+          <span className="opacity-70">IC:</span>{" "}
+          <span className={isTechnical ? "text-primary" : "text-secondary"}>
+            {event.student_incharges[0].name}
+          </span>
+        </div>
+      )}
+    </div>
   );
 
   return (

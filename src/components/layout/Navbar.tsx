@@ -46,11 +46,13 @@ const Navbar = () => {
       <GlassPanel className="mx-4 mt-4 rounded-2xl">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            {/* Logo – same text style as hero (gradient, gloss) */}
+            {/* Logo */}
             <Link to="/" className="flex items-center gap-2 group">
-              <span className="hero-creation-text text-xl font-bold tracking-tight sm:text-2xl">
-                CREATION 2K26
-              </span>
+              <img 
+                src="/Logo 4.png" 
+                alt="CREATION 2K26" 
+                className="h-8 sm:h-9 md:h-10 w-auto object-contain transition-all duration-300 group-hover:scale-105"
+              />
             </Link>
 
             {/* Desktop Navigation */}
@@ -59,8 +61,8 @@ const Navbar = () => {
                 <a
                   key={link.href}
                   href={link.href}
-                  className={`text-sm font-medium transition-colors hover:text-primary ${
-                    isActive(link.href) ? "text-primary" : "text-muted-foreground"
+                  className={`text-base font-medium transition-colors hover:text-primary ${
+                    isActive(link.href) ? "text-blue-500 font-semibold" : "text-muted-foreground"
                   }`}
                 >
                   {link.label}
@@ -76,18 +78,18 @@ const Navbar = () => {
                 <>
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="default"
                     onClick={() => navigate(getDashboardLink())}
-                    className="gap-2"
+                    className="gap-2 text-base"
                   >
                     <LayoutDashboard className="h-4 w-4" />
                     Dashboard
                   </Button>
                   <NeonButton
                     variant="outline"
-                    size="sm"
+                    size="default"
                     onClick={handleSignOut}
-                    className="gap-2"
+                    className="gap-2 text-base"
                   >
                     <LogOut className="h-4 w-4" />
                     Sign Out
@@ -95,8 +97,9 @@ const Navbar = () => {
                 </>
               ) : (
                 <NeonButton
-                  size="sm"
+                  size="default"
                   onClick={() => navigate("/register")}
+                  className="text-base register-now-button"
                 >
                   Register Now
                 </NeonButton>
@@ -115,14 +118,14 @@ const Navbar = () => {
           {/* Mobile Navigation */}
           {isOpen && (
             <div className="md:hidden mt-4 pb-4 border-t border-border/50 pt-4 animate-fade-in">
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 items-center">
                 {navLinks.map((link) => (
                   <a
                     key={link.href}
                     href={link.href}
                     onClick={() => setIsOpen(false)}
-                    className={`text-sm font-medium py-2 transition-colors hover:text-primary ${
-                      isActive(link.href) ? "text-primary" : "text-muted-foreground"
+                    className={`text-sm font-medium py-2 text-center transition-colors hover:text-primary ${
+                      isActive(link.href) ? "text-blue-500 font-semibold" : "text-muted-foreground"
                     }`}
                   >
                     {link.label}
@@ -160,6 +163,7 @@ const Navbar = () => {
                         navigate("/register");
                         setIsOpen(false);
                       }}
+                      className="register-now-button"
                     >
                       Register Now
                     </NeonButton>

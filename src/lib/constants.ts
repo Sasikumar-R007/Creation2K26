@@ -3,15 +3,14 @@
 export const EVENT_DATE = new Date('2026-02-25T09:00:00');
 
 export const VENUE = {
-  name: 'Main Auditorium',
+  name: 'Multi-Purpose Auditorium',
   college: 'Bishop Heber College',
-  address: 'Bishop Heber College, Trichy - 620 017, Tamil Nadu',
+  address: 'Trichy - 620 017, Tamil Nadu',
 };
 
 export const SOCIAL_LINKS = {
-  instagram: 'https://instagram.com/creation2k26',
-  linkedin: 'https://linkedin.com/company/creation2k26',
-  twitter: 'https://twitter.com/creation2k26',
+  instagram: 'https://www.instagram.com/bca_association_2k25?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==',
+  email: 'bcaassociation2k25@gmail.com',
 };
 
 export const IC_SECRET_CODES: Record<string, string> = {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, Instagram, Linkedin, Twitter, Mail, MapPin, Calendar, Lock } from "lucide-react";
+import { Sparkles, Instagram, Mail, MapPin, Calendar, Lock } from "lucide-react";
 import { VENUE, SOCIAL_LINKS, EVENT_DATE } from "@/lib/constants";
 import {
   Dialog,
@@ -119,7 +119,7 @@ const Footer = () => {
           {/* Contact & Social */}
           <div>
             <h3 className="font-semibold mb-4 text-foreground">Connect With Us</h3>
-            <div className="flex gap-3 mb-4">
+            <div className="flex gap-3">
               <a
                 href={SOCIAL_LINKS.instagram}
                 target="_blank"
@@ -129,29 +129,12 @@ const Footer = () => {
                 <Instagram className="h-5 w-5" />
               </a>
               <a
-                href={SOCIAL_LINKS.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={`mailto:${SOCIAL_LINKS.email}`}
                 className="p-2 rounded-lg bg-muted hover:bg-primary/20 hover:text-primary transition-all"
               >
-                <Linkedin className="h-5 w-5" />
-              </a>
-              <a
-                href={SOCIAL_LINKS.twitter}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 rounded-lg bg-muted hover:bg-primary/20 hover:text-primary transition-all"
-              >
-                <Twitter className="h-5 w-5" />
+                <Mail className="h-5 w-5" />
               </a>
             </div>
-            <a
-              href="mailto:contact@creation2k26.com"
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              <Mail className="h-4 w-4" />
-              contact@creation2k26.com
-            </a>
           </div>
         </div>
 
@@ -193,7 +176,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-border/50 mt-8 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2026 CREATION 2K26. All rights reserved.
+            © 2026 <span className="font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">CREATION 2K26</span>. All rights reserved.
           </p>
           <p className="text-sm text-muted-foreground">
             Made with <span className="text-primary">♥</span> by the CREATION Team

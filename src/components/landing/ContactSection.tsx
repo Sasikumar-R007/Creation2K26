@@ -62,7 +62,7 @@ const ContactSection = () => {
         </div>
 
         <div className="text-center mt-12">
-          <NeonButton variant="cyan" size="lg" onClick={() => navigate("/register")}>
+          <NeonButton variant="cyan" size="lg" onClick={() => navigate("/register")} className="register-now-button">
             <UserPlus className="w-5 h-5" />
             Register Now
           </NeonButton>

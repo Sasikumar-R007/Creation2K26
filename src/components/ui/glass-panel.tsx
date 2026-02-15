@@ -12,16 +12,16 @@ const GlassPanel = React.forwardRef<HTMLDivElement, GlassPanelProps>(
       <div
         ref={ref}
         className={cn(
-          "rounded-xl backdrop-blur-xl border transition-all duration-300",
-          // Base glass styles
-          "bg-card/80 border-border/50",
+          "rounded-xl backdrop-blur-xl border transition-all duration-500",
+          // Base glass styles - cleaner, more modern
+          "bg-card/40 border-border/30",
           // Variants
-          variant === "hover" && "hover:bg-card/90 hover:border-primary/30",
+          variant === "hover" && "hover:bg-card/60 hover:border-border/50",
           variant === "bordered" && "border-2",
-          // Glow effects
-          glow === "cyan" && "neon-glow-cyan",
-          glow === "purple" && "neon-glow-purple",
-          glow === "gold" && "neon-glow-gold",
+          // Glow effects - more subtle
+          glow === "cyan" && "hover:shadow-[0_0_25px_hsl(var(--primary)_/_0.2)]",
+          glow === "purple" && "hover:shadow-[0_0_25px_hsl(var(--secondary)_/_0.2)]",
+          glow === "gold" && "hover:shadow-[0_0_25px_hsl(var(--accent)_/_0.2)]",
           className
         )}
         {...props}

@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, Calendar, MapPin, ArrowDown } from "lucide-react";
+import { Calendar, MapPin, ArrowDown } from "lucide-react";
 import { NeonButton } from "@/components/ui/neon-button";
 import { EVENT_DATE, VENUE } from "@/lib/constants";
 
@@ -39,7 +39,7 @@ const HeroSection = () => {
   useEffect(() => {
     const calculateTimeLeft = () => {
       const difference = EVENT_DATE.getTime() - new Date().getTime();
-      
+
       if (difference > 0) {
         setTimeLeft({
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
@@ -71,7 +71,7 @@ const HeroSection = () => {
 
   return (
     <section
-      className="min-h-screen flex items-center justify-center relative overflow-hidden pt-24 pb-16"
+      className="min-h-screen flex items-center justify-center relative overflow-hidden pt-32 pb-16"
       onMouseMove={handleMouseMove}
     >
       {/* Mouse-follow spotlight */}
@@ -102,15 +102,15 @@ const HeroSection = () => {
         ))}
       </div>
 
-      {/* Background Effects - wave colors */}
+      {/* Background Effects - cleaner, more subtle */}
       <div className="absolute inset-0 overflow-hidden bg-background">
-        {/* Animated iridescent wave gradient base */}
-        <div 
-          className="absolute inset-0 opacity-40 hero-wave-gradient"
+        {/* Subtle animated gradient base - reduced opacity */}
+        <div
+          className="absolute inset-0 opacity-20 hero-wave-gradient"
           aria-hidden
         />
-        {/* SVG wave layers with gradient fills */}
-        <div className="absolute inset-0 opacity-30 hero-wave-shapes" aria-hidden>
+        {/* SVG wave layers - more subtle */}
+        <div className="absolute inset-0 opacity-15 hero-wave-shapes" aria-hidden>
           <svg className="absolute bottom-0 left-0 w-full h-1/2 animate-wave-slow" viewBox="0 0 1200 400" preserveAspectRatio="none">
             <defs>
               <linearGradient id="hero-wave-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -141,15 +141,15 @@ const HeroSection = () => {
             <path fill="url(#hero-wave-grad-3)" d="M0,100 Q600,0 1200,100 L1200,300 L0,300 Z" />
           </svg>
         </div>
-        {/* Soft gradient orbs (kept subtle behind waves) */}
-        <div className="absolute top-1/4 -left-1/4 w-96 h-96 bg-primary/15 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 -right-1/4 w-96 h-96 bg-secondary/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-        {/* Grid pattern */}
-        <div 
-          className="absolute inset-0 opacity-10"
+        {/* Subtle gradient orbs - more techy */}
+        <div className="absolute top-1/4 -left-1/4 w-96 h-96 bg-primary/8 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 -right-1/4 w-96 h-96 bg-secondary/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
+        {/* Tech grid pattern - more subtle */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
           style={{
-            backgroundImage: `linear-gradient(hsl(var(--primary) / 0.15) 1px, transparent 1px),
-                              linear-gradient(90deg, hsl(var(--primary) / 0.15) 1px, transparent 1px)`,
+            backgroundImage: `linear-gradient(hsl(var(--primary) / 0.1) 1px, transparent 1px),
+                              linear-gradient(90deg, hsl(var(--primary) / 0.1) 1px, transparent 1px)`,
             backgroundSize: "50px 50px",
           }}
         />
@@ -157,26 +157,190 @@ const HeroSection = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-8 animate-fade-in">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">2026 Edition</span>
-          </div>
-
-          {/* Main Title */}
-          <p className="hero-mind-marvel text-sm md:text-base uppercase tracking-[0.35em] mb-4 animate-fade-in" style={{ animationDelay: "80ms" }}>
+          {/* Make Mind Marvel - White Bold Text above logo */}
+          <p className="hero-mind-marvel-text text-lg md:text-xl lg:text-2xl font-bold text-white uppercase tracking-[0.2em] mb-6 animate-fade-in relative z-10" style={{ animationDelay: "80ms" }}>
             Make Mind Marvel
           </p>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 animate-fade-in" style={{ animationDelay: "100ms" }}>
-            <span className="hero-creation-text block">CREATION</span>
-            <span className="hero-year-text block mt-2 text-4xl md:text-6xl lg:text-7xl tracking-tight">2K26</span>
-          </h1>
+
+          <div className="mb-6 animate-fade-in flex flex-col justify-center relative min-h-[45vh] items-center" style={{ animationDelay: "100ms" }}>
+
+            {/* THUNDER LINES SECTION - Multiple lightning strikes around logo area */}
+            {/* 
+              THUNDER LINE LOCATIONS:
+              1. Main Lightning Strikes (2 lines) - Lines 170-220: Two main jagged lightning paths at different angles
+              2. Thinner Lightning Strikes (8 lines) - Lines 222-267: Eight thinner lightning paths at various angles
+              3. Lightning Strike Effects (4 lines) - Lines 204-215: Four rotating vertical lightning beams around logo container
+              
+              TO REMOVE ANY THUNDER LINES:
+              - Remove main strikes: Delete the Array(2).map() block (lines 170-220)
+              - Remove thinner strikes: Delete the Array(8).map() block (lines 222-267)  
+              - Remove rotating beams: Delete the Array(4).map() block (lines 204-215)
+            */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+              {/* Main lightning strikes - 2 only (THUNDER LINES GROUP 1) */}
+              {/* {[...Array(2)].map((_, i) => {
+                // Use fixed seed for consistent randomness per lightning
+                const seed = i * 7;
+                const angle = (i * 90) + (seed % 20) - 10;
+                const startX = 50 + Math.cos((angle * Math.PI) / 180) * 30;
+                const startY = 50 + Math.sin((angle * Math.PI) / 180) * 30;
+                const endX = 50 + Math.cos((angle * Math.PI) / 180) * 45;
+                const endY = 50 + Math.sin((angle * Math.PI) / 180) * 45;
+                const gradientId = `lightningGradient-${i}`;
+                // Create jagged lightning path with fixed offsets
+                const offset1 = ((seed * 3) % 4) - 2;
+                const offset2 = ((seed * 5) % 6) - 3;
+                const offset3 = ((seed * 7) % 4) - 2;
+                const offset4 = ((seed * 11) % 4) - 2;
+                return (
+                  <svg
+                    key={i}
+                    className="hero-lightning-strike-svg absolute"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      animationDelay: `${i * 0.8 + (seed % 10) * 0.1}s`,
+                      animationDuration: `${4 + (seed % 4) * 0.5}s`,
+                    }}
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                  >
+                    <defs>
+                      <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0" />
+                        <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity="1" />
+                        <stop offset="100%" stopColor="hsl(var(--secondary))" stopOpacity="0.8" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d={`M ${startX} ${startY} 
+                          L ${startX + (endX - startX) * 0.2} ${startY + (endY - startY) * 0.2 + offset1} 
+                          L ${startX + (endX - startX) * 0.4} ${startY + (endY - startY) * 0.4 + offset2} 
+                          L ${startX + (endX - startX) * 0.6} ${startY + (endY - startY) * 0.6 + offset3} 
+                          L ${startX + (endX - startX) * 0.8} ${startY + (endY - startY) * 0.8 + offset4} 
+                          L ${endX} ${endY}`}
+                      stroke={`url(#${gradientId})`}
+                      strokeWidth="0.6"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="hero-lightning-path"
+                    />
+                  </svg>
+                );
+              })} */}
+              {/* Thinner lightning strikes - 8 of them (THUNDER LINES GROUP 2) */}
+              {[...Array(8)].map((_, i) => {
+                const seed = (i + 10) * 7;
+                const angle = (i * 45) + (seed % 15) - 7.5;
+                const startX = 50 + Math.cos((angle * Math.PI) / 180) * 25;
+                const startY = 50 + Math.sin((angle * Math.PI) / 180) * 25;
+                const endX = 50 + Math.cos((angle * Math.PI) / 180) * 40;
+                const endY = 50 + Math.sin((angle * Math.PI) / 180) * 40;
+                const gradientId = `lightningGradient-thin-${i}`;
+                const offset1 = ((seed * 3) % 3) - 1.5;
+                const offset2 = ((seed * 5) % 4) - 2;
+                const offset3 = ((seed * 7) % 3) - 1.5;
+                return (
+                  <svg
+                    key={`thin-${i}`}
+                    className="hero-lightning-strike-svg absolute opacity-60"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      animationDelay: `${i * 0.5 + (seed % 8) * 0.1}s`,
+                      animationDuration: `${3 + (seed % 3) * 0.4}s`,
+                    }}
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                  >
+                    <defs>
+                      <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0" />
+                        <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity="0.6" />
+                        <stop offset="100%" stopColor="hsl(var(--secondary))" stopOpacity="0.4" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d={`M ${startX} ${startY} 
+                          L ${startX + (endX - startX) * 0.3} ${startY + (endY - startY) * 0.3 + offset1} 
+                          L ${startX + (endX - startX) * 0.6} ${startY + (endY - startY) * 0.6 + offset2} 
+                          L ${endX} ${endY + offset3}`}
+                      stroke={`url(#${gradientId})`}
+                      strokeWidth="0.3"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="hero-lightning-path"
+                    />
+                  </svg>
+                );
+              })}
+            </div>
+
+            {/* Stars/Sparks instead of circular particles */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              {[...Array(20)].map((_, i) => {
+                const angle = (i * 360) / 20;
+                const radius = 150 + Math.random() * 150;
+                const x = Math.cos((angle * Math.PI) / 180) * radius;
+                const y = Math.sin((angle * Math.PI) / 180) * radius;
+                const size = 3 + Math.random() * 4;
+                return (
+                  <div
+                    key={i}
+                    className="hero-star-spark absolute"
+                    style={{
+                      animationDelay: `${i * 0.15}s`,
+                      animationDuration: `${2 + Math.random() * 2}s`,
+                      left: `calc(50% + ${x}px)`,
+                      top: `calc(50% + ${y}px)`,
+                      transform: 'translate(-50%, -50%)',
+                      width: `${size}px`,
+                      height: `${size}px`,
+                    }}
+                  >
+                    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M12 2L14.09 8.26L20 9.27L15 14.14L16.18 20.02L12 16.77L7.82 20.02L9 14.14L4 9.27L9.91 8.26L12 2Z"
+                        fill="hsl(var(--primary))"
+                        className="hero-star-path"
+                      />
+                    </svg>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Main logo with thunder/storm effects */}
+            <div className="relative z-10 hero-logo-container">
+              {/* Lightning strike effects around logo */}
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={i}
+                  className="hero-lightning-strike absolute"
+                  style={{
+                    animationDelay: `${i * 1.5 + Math.random() * 1}s`,
+                    animationDuration: `${4 + Math.random() * 2}s`,
+                    transform: `rotate(${i * 90}deg)`,
+                    transformOrigin: 'center',
+                  }}
+                />
+              ))}
+
+              <img
+                src="/Logo 7.png"
+                alt="CREATION 2K26"
+                className="hero-logo-main w-[90vw] sm:w-[75vw] max-w-[650px] h-auto object-contain transition-all duration-500"
+              />
+            </div>
+          </div>
 
           {/* Tagline */}
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 animate-fade-in" style={{ animationDelay: "200ms" }}>
-            <span className="text-primary font-semibold">BCA Department</span>,{" "}
-            <span className="text-secondary font-semibold">Bishop Heber College</span>
-          </p>
+          <div className="text-xl md:text-2xl text-muted-foreground mb-8 animate-fade-in" style={{ animationDelay: "200ms" }}>
+            <p className="text-primary font-semibold">Bachelor of Computer Applications</p>
+            <p className="text-secondary font-semibold">Bishop Heber College, Trichy</p>
+          </div>
 
           {/* Event Info - floating pills */}
           <div className="flex flex-wrap justify-center gap-6 mb-12 animate-fade-in" style={{ animationDelay: "300ms" }}>
@@ -186,39 +350,41 @@ const HeroSection = () => {
             </div>
             <div className="hero-pill-float flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/5 border border-secondary/20 text-muted-foreground" style={{ animationDelay: "0.5s" }}>
               <MapPin className="w-5 h-5 text-secondary" />
-              <span>{VENUE.name}, {VENUE.college}</span>
+              <span className="text-center sm:text-left">
+                <span className="sm:inline">{VENUE.name}</span>
+                <span className="sm:hidden"><br /></span>
+                <span className="hidden sm:inline">, </span>
+                {VENUE.college}
+              </span>
             </div>
           </div>
 
-          {/* Countdown Timer - premium, digits slide top-to-bottom on change */}
-          <div className="flex flex-wrap justify-center items-end gap-3 md:gap-6 mb-12 animate-fade-in" style={{ animationDelay: "400ms" }}>
+          {/* Countdown Timer - glassmorphism design */}
+          <div className="flex flex-wrap justify-center items-end gap-3 md:gap-5 mb-12 animate-fade-in" style={{ animationDelay: "400ms" }}>
             {[
-              { value: timeLeft.days, label: "Days" },
-              { value: timeLeft.hours, label: "Hours" },
-              { value: timeLeft.minutes, label: "Minutes" },
-              { value: timeLeft.seconds, label: "Seconds" },
+              { value: timeLeft.days, label: "DAYS" },
+              { value: timeLeft.hours, label: "HOURS" },
+              { value: timeLeft.minutes, label: "MINUTES" },
+              { value: timeLeft.seconds, label: "SECONDS" },
             ].map((item, index) => (
               <div key={item.label} className="flex flex-col items-center">
                 <div
-                  className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-2xl flex items-center justify-center overflow-hidden countdown-card group transition-transform duration-300 hover:scale-105"
-                  style={{ animationDelay: `${index * 80}ms` }}
+                  className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg flex items-center justify-center overflow-hidden"
+                  style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  {/* Gradient border glow */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/40 via-primary/20 to-secondary/30 opacity-80 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute inset-[1px] rounded-2xl bg-card/95 backdrop-blur border border-white/5" />
-                  {/* Inner glow */}
-                  <div className="absolute inset-0 rounded-2xl shadow-[inset_0_0_30px_hsl(var(--primary)_/_0.15)]" />
-                  {/* Viewport: digit slides from top to center when value changes */}
-                  <div className="relative w-full h-full overflow-hidden">
+                  {/* Glassmorphism effect */}
+                  <div className="absolute inset-0 rounded-lg bg-card/30 backdrop-blur-xl border border-primary/30 shadow-lg" />
+                  {/* Number */}
+                  <div className="relative w-full h-full flex items-center justify-center">
                     <span
                       key={`${item.label}-${item.value}`}
-                      className="countdown-slide-in absolute left-1/2 top-1/2 text-3xl sm:text-4xl md:text-5xl font-bold tabular-nums text-transparent bg-clip-text bg-gradient-to-br from-primary via-primary to-secondary drop-shadow-[0_0_20px_hsl(var(--primary)_/_0.5)]"
+                      className="text-2xl sm:text-3xl md:text-4xl font-bold tabular-nums text-primary"
                     >
                       {String(item.value).padStart(2, "0")}
                     </span>
                   </div>
                 </div>
-                <span className="mt-2 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground/90">
+                <span className="mt-2 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                   {item.label}
                 </span>
               </div>
@@ -231,9 +397,8 @@ const HeroSection = () => {
               variant="cyan"
               size="xl"
               onClick={() => navigate("/register")}
-              className="animate-glow-pulse"
+              className="register-now-button"
             >
-              <Sparkles className="w-5 h-5" />
               Register Now
             </NeonButton>
             <NeonButton
@@ -255,14 +420,17 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Marquee strip */}
+      {/* Marquee strip - continuous scrolling */}
       <div className="absolute bottom-0 left-0 right-0 py-3 overflow-hidden border-t border-white/5 bg-background/50 backdrop-blur-sm">
         <div className="hero-marquee-track flex gap-12 whitespace-nowrap text-xs uppercase tracking-[0.25em] text-muted-foreground/70">
           <span className="flex gap-12 shrink-0">
-            CREATION 2K26 · Register Now · 10 Events · BCA Department · Bishop Heber College ·
+            CREATION 2K26 · REGISTER NOW · 10 EVENTS · BACHELOR OF COMPUTER APPLICATIONS · BISHOP HEBER COLLEGE, TRICHY ·
           </span>
           <span className="flex gap-12 shrink-0">
-            CREATION 2K26 · Register Now · 10 Events · BCA Department · Bishop Heber College ·
+            CREATION 2K26 · REGISTER NOW · 10 EVENTS · BACHELOR OF COMPUTER APPLICATIONS · BISHOP HEBER COLLEGE, TRICHY ·
+          </span>
+          <span className="flex gap-12 shrink-0">
+            CREATION 2K26 · REGISTER NOW · 10 EVENTS · BACHELOR OF COMPUTER APPLICATIONS · BISHOP HEBER COLLEGE, TRICHY ·
           </span>
         </div>
       </div>
