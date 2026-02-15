@@ -131,7 +131,10 @@ const RegistrationSuccessModal = ({ form, events, event1, event2, registrationId
     if (!element) return;
 
     try {
-      const html2pdf = (await import("html2pdf.js")).default;
+      // Dynamic import to avoid build issues
+      const html2pdfModule = await import("html2pdf.js");
+      const html2pdf = html2pdfModule.default || html2pdfModule;
+      
       const opt = {
         margin: [10, 10, 10, 10],
         filename: `CN2K26_Registration_${registrationId || "form"}.pdf`,

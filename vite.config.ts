@@ -18,4 +18,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ["html2pdf.js", "html2canvas", "jspdf"],
+  },
 }));
