@@ -3,17 +3,24 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 // Support environment variables for easy deployment
-// Fallback to original values for backward compatibility
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://hqkrexlemuhgwbblbbkn.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhxa3JleGxlbXVoZ3diYmxiYmtuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDI0NzMsImV4cCI6MjA4NTY3ODQ3M30.UjTpvrnwZDXkCUoFbIA80wsLHfFp3SCicm_lmexPxMI";
+// HARDCODED: Using new Supabase project (tovokkcouwwymarnftcu)
+// Using direct values to bypass .env.local loading issues
+const SUPABASE_URL = "https://tovokkcouwwymarnftcu.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvdm9ra2NvdXd3eW1hcm5mdGN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMjE5NjcsImV4cCI6MjA4NjY5Nzk2N30.CVN8RbHF1GA5Kvo3JlkZWjIryuCuGURwm6PV_auZOGs";
+
+// Debug: Log which Supabase URL is being used
+if (import.meta.env.DEV) {
+  console.log("✅ Supabase URL:", SUPABASE_URL);
+  console.log("✅ Using NEW Supabase project: tovokkcouwwymarnftcu");
+}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  }
+    persistSession: false, // Don't persist sessions for anonymous users
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+  },
 });

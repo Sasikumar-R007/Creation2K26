@@ -455,53 +455,29 @@ export default function Register() {
       let paymentUrl: string | null = null;
       if (form.payment_screenshot) {
         try {
-          // Check if bucket exists first
-          const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+          // Try to upload the screenshot (bucket should already exist - created manually in Supabase)
+          const ext = form.payment_screenshot.name.split(".").pop() || "png";
+          const path = `${crypto.randomUUID()}.${ext}`;
           
-          if (bucketError) {
-            console.warn("Could not check buckets:", bucketError);
-            // Continue without screenshot upload
+          const { error: uploadError } = await supabase.storage
+            .from("payment-screenshots")
+            .upload(path, form.payment_screenshot, {
+              cacheControl: "3600",
+              upsert: false,
+            });
+          
+          if (uploadError) {
+            console.warn("Screenshot upload failed:", uploadError);
+            // Show warning but continue with registration
+            toast({
+              title: "Screenshot upload failed",
+              description: "Your registration will be submitted, but the payment screenshot could not be uploaded. Please contact support with your payment details.",
+              variant: "default",
+            });
+            // Continue with registration without screenshot URL
           } else {
-            const bucketExists = buckets?.some(b => b.name === "payment-screenshots");
-            
-            if (!bucketExists) {
-              // Try to create the bucket (requires admin privileges)
-              const { error: createError } = await supabase.storage.createBucket("payment-screenshots", {
-                public: true,
-                allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
-                fileSizeLimit: 5242880, // 5MB
-              });
-              
-              if (createError) {
-                console.warn("Bucket creation error:", createError);
-                // Continue without screenshot upload
-              }
-            }
-
-            // Try to upload the screenshot
-            const ext = form.payment_screenshot.name.split(".").pop() || "png";
-            const path = `${crypto.randomUUID()}.${ext}`;
-            
-            const { error: uploadError } = await supabase.storage
-              .from("payment-screenshots")
-              .upload(path, form.payment_screenshot, {
-                cacheControl: "3600",
-                upsert: false,
-              });
-            
-            if (uploadError) {
-              console.warn("Screenshot upload failed:", uploadError);
-              // Show warning but continue with registration
-              toast({
-                title: "Screenshot upload failed",
-                description: "Your registration will be submitted, but the payment screenshot could not be uploaded. Please contact support with your payment details.",
-                variant: "default",
-              });
-              // Continue with registration without screenshot URL
-            } else {
-              const { data: urlData } = supabase.storage.from("payment-screenshots").getPublicUrl(path);
-              paymentUrl = urlData.publicUrl;
-            }
+            const { data: urlData } = supabase.storage.from("payment-screenshots").getPublicUrl(path);
+            paymentUrl = urlData.publicUrl;
           }
         } catch (uploadErr: any) {
           console.warn("Upload error:", uploadErr);
@@ -537,7 +513,7 @@ export default function Register() {
         insertData.event_2_team_name = form.event_2_team_name;
       }
 
-      // Only include upi_transaction_id if it has a value (to avoid schema errors if column doesn't exist)
+      // Include UPI transaction ID if provided
       if (form.upi_transaction_id?.trim()) {
         insertData.upi_transaction_id = form.upi_transaction_id;
       }
@@ -545,11 +521,16 @@ export default function Register() {
       // Try to insert - handle errors gracefully
       let result = await supabase.from("guest_registrations").insert(insertData).select("id").single();
       
-      // If error, try with minimal required fields only
-      if (result.error) {
-        console.warn("Insert failed, retrying with minimal fields:", result.error);
+      // If error is about missing column (schema cache issue), retry without optional fields
+      if (result.error && (
+        result.error.message?.includes("upi_transaction_id") || 
+        result.error.message?.includes("schema cache") ||
+        result.error.message?.includes("column") ||
+        result.error.code === "PGRST204"
+      )) {
+        console.warn("Schema cache issue detected, retrying without optional fields:", result.error);
         
-        // Create minimal insert data with only required fields
+        // Create minimal insert data without optional fields that might cause cache issues
         const insertDataMinimal: any = {
           name: form.name,
           email: form.email,
@@ -563,25 +544,41 @@ export default function Register() {
           team_members: null,
         };
         
-        // Only add payment_screenshot_url if we have it
+        // Only add payment_screenshot_url if we have it (this column should exist)
         if (paymentUrl) {
           insertDataMinimal.payment_screenshot_url = paymentUrl;
         }
         
-        // Retry with minimal fields
+        // Retry with minimal fields (no upi_transaction_id, no team names)
         result = await supabase.from("guest_registrations").insert(insertDataMinimal).select("id").single();
         
         if (result.error) {
           // If still failing, show detailed error
           console.error("Registration insert error:", result.error);
-          throw new Error(`Registration failed: ${result.error.message || "Unknown error"}. Please check: 1) Database migrations are run, 2) RLS policies allow inserts, 3) All required fields are present.`);
+          
+          // Check if it's an RLS error
+          if (result.error.code === "42501" || result.error.message?.includes("row-level security")) {
+            throw new Error(`Registration failed: Row-level security policy is blocking inserts. Please run the RLS policy fix SQL in your Supabase dashboard. See FIX_RLS_ERROR.sql for the SQL to run.`);
+          } else {
+            throw new Error(`Registration failed: ${result.error.message || "Unknown error"}. Please check: 1) Database migrations are run, 2) RLS policies allow inserts, 3) All required fields are present.`);
+          }
         } else {
           // Success but warn about missing optional data
           toast({
             title: "Registration saved! ⚠️",
-            description: "Registration completed. Some optional fields (team names, UPI ID) may not have been saved. Please check your database.",
+            description: "Registration completed. Some optional fields (team names, UPI ID) may not have been saved due to schema cache. Please run migrations and try again.",
             variant: "default",
           });
+        }
+      } else if (result.error) {
+        // Other errors (not schema cache related)
+        console.error("Registration insert error:", result.error);
+        
+        // Check if it's an RLS error
+        if (result.error.code === "42501" || result.error.message?.includes("row-level security")) {
+          throw new Error(`Registration failed: Row-level security policy is blocking inserts. Please run the RLS policy fix SQL in your Supabase dashboard. See FIX_RLS_ERROR.sql for the SQL to run.`);
+        } else {
+          throw new Error(`Registration failed: ${result.error.message || "Unknown error"}. Please check: 1) Database migrations are run, 2) RLS policies allow inserts, 3) All required fields are present.`);
         }
       }
 
