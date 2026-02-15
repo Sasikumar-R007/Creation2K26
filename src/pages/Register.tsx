@@ -338,13 +338,12 @@ export default function Register() {
   const { data: events = [], isLoading: loadingEvents, error: eventsError } = useEvents();
   const submitRegistration = useSubmitGuestRegistration();
   
-  // Debug: Log events loading state
+  // Debug: Log events loading state (only on mount and error)
   useEffect(() => {
     if (eventsError) {
       console.error("Error loading events:", eventsError);
     }
-    console.log("Events loaded:", events.length, events);
-  }, [events, eventsError]);
+  }, [eventsError]);
 
   const [form, setForm] = useState(initialForm);
   const [activeTab, setActiveTab] = useState("registration");
@@ -468,6 +467,10 @@ export default function Register() {
     return true;
   };
 
+  const isRegistrationStepComplete = () => {
+    return validateRegistrationStep();
+  };
+
   const handleRegistrationSubmit = () => {
     if (!validateRegistrationStep()) return;
     setShowRegistrationAlert(true);
@@ -475,7 +478,21 @@ export default function Register() {
 
   const handleProceedToPayment = () => {
     setShowRegistrationAlert(false);
-    setActiveTab("payment");
+    if (isRegistrationStepComplete()) {
+      setActiveTab("payment");
+    }
+  };
+
+  const handleTabClick = (tabId: string) => {
+    if (tabId === "payment" && !isRegistrationStepComplete()) {
+      toast({
+        title: "Complete Registration First",
+        description: "Please complete the registration step before proceeding to payment.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setActiveTab(tabId);
   };
 
   const handlePaymentSubmit = () => {
@@ -642,13 +659,6 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-background dark relative">
-      {/* Techy Frame Animations */}
-      <div className="techy-frame techy-frame-1" />
-      <div className="techy-frame techy-frame-2" />
-      <div className="techy-frame techy-frame-3" />
-      <div className="techy-frame techy-frame-4" />
-      <div className="techy-frame techy-frame-5" />
-      <div className="techy-frame techy-frame-6" />
       
       <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden>
         <div className="absolute inset-0 bg-gradient-to-br from-background via-[hsl(260,25%,6%)] to-background opacity-100" />
@@ -680,83 +690,110 @@ export default function Register() {
 
           {/* Redesigned Header Section */}
           <div className="mb-10 relative">
-            <div className="relative border-2 border-primary/30 bg-background/80 backdrop-blur-sm rounded-lg p-6 sm:p-8 overflow-hidden">
-              {/* Techy corner accents */}
-              <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-primary/50" />
-              <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-primary/50" />
-              <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-primary/50" />
-              <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-primary/50" />
+            <div className="relative bg-gradient-to-br from-primary/10 via-background/95 to-secondary/10 backdrop-blur-xl rounded-2xl p-8 sm:p-10 overflow-hidden border border-primary/20">
+              {/* Animated gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 animate-gradient-shift" />
               
-              {/* Grid pattern overlay */}
-              <div 
-                className="absolute inset-0 opacity-5"
-                style={{
-                  backgroundImage: `
-                    linear-gradient(hsl(var(--primary)) 1px, transparent 1px),
-                    linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)
-                  `,
-                  backgroundSize: "20px 20px",
-                }}
-              />
+              {/* Radial glow effects */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-secondary/5 rounded-full blur-3xl" />
               
               <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-1 h-8 bg-gradient-to-b from-primary via-secondary to-accent rounded-full" />
-                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">
-                    <span className="gradient-text">CREATION 2K26</span>
-                  </h1>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-12 bg-gradient-to-b from-primary via-secondary to-accent rounded-full shadow-lg shadow-primary/50" />
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">
+                      <span className="gradient-text">CREATION 2K26</span>
+                    </h1>
+                  </div>
                 </div>
-                <p className="text-muted-foreground text-sm sm:text-base ml-4">
+                <p className="text-muted-foreground text-base sm:text-lg ml-4.5">
                   BCA Department, Bishop Heber College. Register for up to two events.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Step progress indicator */}
-          <div className="mb-8 sm:mb-10">
-            <div className="flex items-center justify-between w-full">
-              {STEPS.map((step, index) => {
-                const isActive = activeTab === step.id;
-                const stepIndex = STEPS.findIndex((s) => s.id === activeTab);
-                const isCompleted = index < stepIndex;
-                return (
-                  <div key={step.id} className="flex flex-1 items-center">
-                    <div className="flex flex-col items-center flex-1">
+          {/* Techy Multi-Step Progress Indicator */}
+          <div className="mb-10 sm:mb-12">
+            <div className="relative">
+              {/* Background connector line */}
+              <div className="absolute top-8 left-0 right-0 h-1 bg-muted/30 rounded-full z-0" />
+              <div 
+                className="absolute top-8 left-0 h-1 bg-gradient-to-r from-primary via-secondary to-primary rounded-full z-10 transition-all duration-500"
+                style={{ 
+                  width: activeTab === "payment" ? "100%" : "50%",
+                }}
+              />
+              
+              <div className="relative flex items-center justify-between">
+                {STEPS.map((step, index) => {
+                  const isActive = activeTab === step.id;
+                  const isCompleted = index === 0 && isRegistrationStepComplete();
+                  const isDisabled = index === 1 && !isRegistrationStepComplete();
+                  
+                  return (
+                    <div key={step.id} className="flex flex-col items-center flex-1 relative z-20">
                       <button
                         type="button"
-                        onClick={() => setActiveTab(step.id)}
+                        onClick={() => !isDisabled && handleTabClick(step.id)}
+                        disabled={isDisabled}
                         className={`
-                          w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-sm font-semibold
-                          transition-colors touch-manipulation
+                          relative w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center
+                          transition-all duration-300 touch-manipulation
                           ${isActive
-                            ? "bg-primary text-primary-foreground ring-2 ring-primary/30"
+                            ? "bg-gradient-to-br from-primary via-primary to-secondary text-primary-foreground scale-110 shadow-lg shadow-primary/50 ring-4 ring-primary/30"
                             : isCompleted
-                              ? "bg-primary/80 text-primary-foreground"
-                              : "bg-muted/80 text-muted-foreground border border-border"
+                              ? "bg-gradient-to-br from-primary/80 to-primary/60 text-primary-foreground scale-105 shadow-md shadow-primary/30"
+                              : isDisabled
+                                ? "bg-muted/40 text-muted-foreground/50 cursor-not-allowed opacity-50"
+                                : "bg-muted/60 text-muted-foreground border-2 border-border hover:border-primary/50 hover:bg-muted/80"
                           }
                         `}
                       >
-                        {isCompleted ? <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" /> : step.number}
+                        {/* Inner glow for active */}
+                        {isActive && (
+                          <div className="absolute inset-0 rounded-full bg-primary/20 animate-pulse" />
+                        )}
+                        
+                        {/* Check icon or number */}
+                        {isCompleted && !isActive ? (
+                          <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-primary-foreground" />
+                        ) : (
+                          <span className="text-xl sm:text-2xl font-bold relative z-10">{step.number}</span>
+                        )}
+                        
+                        {/* Outer ring animation for active */}
+                        {isActive && (
+                          <div className="absolute inset-[-4px] rounded-full border-2 border-primary/50 animate-ping" />
+                        )}
                       </button>
-                      <span
-                        className={`mt-2 text-xs sm:text-sm font-medium text-center max-w-[80px] ${
-                          isActive ? "text-foreground" : "text-muted-foreground"
-                        }`}
-                      >
-                        {step.label}
-                      </span>
+                      
+                      {/* Label */}
+                      <div className="mt-4 text-center">
+                        <span
+                          className={`text-sm sm:text-base font-semibold block ${
+                            isActive 
+                              ? "text-primary" 
+                              : isCompleted
+                                ? "text-primary/80"
+                                : isDisabled
+                                  ? "text-muted-foreground/50"
+                                  : "text-muted-foreground"
+                          }`}
+                        >
+                          {step.label}
+                        </span>
+                        {isDisabled && (
+                          <span className="text-xs text-muted-foreground/70 mt-1 block">
+                            Complete Step 1
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    {index < STEPS.length - 1 && (
-                      <div
-                        className={`flex-1 h-0.5 mx-1 sm:mx-2 border-t-2 border-dashed ${
-                          index < stepIndex ? "border-primary" : "border-muted-foreground/30"
-                        }`}
-                      />
-                    )}
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -783,7 +820,7 @@ export default function Register() {
             </details>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <Tabs value={activeTab} onValueChange={handleTabClick} className="w-full">
                 <TabsContent value="registration" className="space-y-4 mt-0">
                   {/* Event 1 Row */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1089,7 +1126,7 @@ export default function Register() {
                   {/* Back Arrow */}
                   <button
                     type="button"
-                    onClick={() => setActiveTab("registration")}
+                    onClick={() => handleTabClick("registration")}
                     className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-4"
                   >
                     <ArrowLeft className="w-4 h-4" />
