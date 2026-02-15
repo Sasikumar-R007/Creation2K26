@@ -335,8 +335,16 @@ const RegistrationSuccessModal = ({ form, events, event1, event2, registrationId
 };
 
 export default function Register() {
-  const { data: events = [] } = useEvents();
+  const { data: events = [], isLoading: loadingEvents, error: eventsError } = useEvents();
   const submitRegistration = useSubmitGuestRegistration();
+  
+  // Debug: Log events loading state
+  useEffect(() => {
+    if (eventsError) {
+      console.error("Error loading events:", eventsError);
+    }
+    console.log("Events loaded:", events.length, events);
+  }, [events, eventsError]);
 
   const [form, setForm] = useState(initialForm);
   const [activeTab, setActiveTab] = useState("registration");
@@ -771,7 +779,14 @@ export default function Register() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value={EMPTY_VALUE} className="hidden" />
-                          {events.map((ev) => {
+                          {loadingEvents ? (
+                            <SelectItem value="loading" disabled>Loading events...</SelectItem>
+                          ) : eventsError ? (
+                            <SelectItem value="error" disabled>Error loading events. Please refresh the page.</SelectItem>
+                          ) : events.length === 0 ? (
+                            <SelectItem value="empty" disabled>No events available. Please contact support.</SelectItem>
+                          ) : (
+                            events.map((ev) => {
                             const conflictWith2 = event2 && eventsConflict(ev.name, event2.name);
                             return (
                               <SelectItem
@@ -865,26 +880,34 @@ export default function Register() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value={EMPTY_VALUE}>None</SelectItem>
-                          {events.map((ev) => {
-                            const conflictWith1 = event1 && eventsConflict(ev.name, event1.name);
-                            const isEvent1 = ev.id === form.event_1_id;
-                            const disabled = conflictWith1 || isEvent1;
-                            return (
-                              <SelectItem
-                                key={ev.id}
-                                value={ev.id}
-                                disabled={disabled}
-                                className={disabled ? "opacity-80 cursor-not-allowed" : ""}
-                              >
-                                {ev.name}
-                                {isEvent1 ? (
-                                  <span className="text-muted-foreground ml-1">(same as Event 1)</span>
-                                ) : conflictWith1 ? (
-                                  <span className="text-destructive font-medium ml-1">— TIME CONFLICT</span>
-                                ) : null}
-                              </SelectItem>
-                            );
-                          })}
+                          {loadingEvents ? (
+                            <SelectItem value="loading" disabled>Loading events...</SelectItem>
+                          ) : eventsError ? (
+                            <SelectItem value="error" disabled>Error loading events</SelectItem>
+                          ) : events.length === 0 ? (
+                            <SelectItem value="empty" disabled>No events available</SelectItem>
+                          ) : (
+                            events.map((ev) => {
+                              const conflictWith1 = event1 && eventsConflict(ev.name, event1.name);
+                              const isEvent1 = ev.id === form.event_1_id;
+                              const disabled = conflictWith1 || isEvent1;
+                              return (
+                                <SelectItem
+                                  key={ev.id}
+                                  value={ev.id}
+                                  disabled={disabled}
+                                  className={disabled ? "opacity-80 cursor-not-allowed" : ""}
+                                >
+                                  {ev.name}
+                                  {isEvent1 ? (
+                                    <span className="text-muted-foreground ml-1">(same as Event 1)</span>
+                                  ) : conflictWith1 ? (
+                                    <span className="text-destructive font-medium ml-1">— TIME CONFLICT</span>
+                                  ) : null}
+                                </SelectItem>
+                              );
+                            })
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
