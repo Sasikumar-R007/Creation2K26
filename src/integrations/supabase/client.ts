@@ -3,10 +3,9 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 // Support environment variables for easy deployment
-// HARDCODED: Using new Supabase project (tovokkcouwwymarnftcu)
-// Using direct values to bypass .env.local loading issues
-const SUPABASE_URL = "https://tovokkcouwwymarnftcu.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvdm9ra2NvdXd3eW1hcm5mdGN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMjE5NjcsImV4cCI6MjA4NjY5Nzk2N30.CVN8RbHF1GA5Kvo3JlkZWjIryuCuGURwm6PV_auZOGs";
+// Fallback to hardcoded values for backward compatibility
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://tovokkcouwwymarnftcu.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvdm9ra2NvdXd3eW1hcm5mdGN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMjE5NjcsImV4cCI6MjA4NjY5Nzk2N30.CVN8RbHF1GA5Kvo3JlkZWjIryuCuGURwm6PV_auZOGs";
 
 // Debug: Log which Supabase URL is being used
 if (import.meta.env.DEV) {
