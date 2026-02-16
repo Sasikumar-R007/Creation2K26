@@ -80,7 +80,7 @@ const Footer = () => {
           {/* Contact & Social */}
           <div>
             <h3 className="font-semibold mb-4 text-foreground">Connect With Us</h3>
-            <div className="flex gap-3">
+            <div className="flex gap-3 mb-4">
               <a
                 href={SOCIAL_LINKS.instagram}
                 target="_blank"
@@ -95,6 +95,14 @@ const Footer = () => {
               >
                 <Mail className="h-5 w-5" />
               </a>
+            </div>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p>
+                <span className="font-medium text-foreground">Sasikumar R</span> - <a href="tel:+916369196110" className="hover:text-primary transition-colors">+91 6369196110</a>
+              </p>
+              <p>
+                <span className="font-medium text-foreground">Magitha G</span> - <a href="tel:+919363181927" className="hover:text-primary transition-colors">+91 9363181927</a>
+              </p>
             </div>
           </div>
         </div>

@@ -71,7 +71,7 @@ const HeroSection = () => {
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     mouseRef.current = { x, y };
-    
+
     if (!rafRef.current) {
       rafRef.current = requestAnimationFrame(() => {
         setMouse(mouseRef.current);
@@ -93,22 +93,39 @@ const HeroSection = () => {
       className="min-h-screen flex items-center justify-center relative overflow-hidden pt-32 pb-16"
       onMouseMove={handleMouseMove}
     >
-      {/* Mouse-follow spotlight */}
+      {/* Mouse-follow spotlight - disabled on mobile for performance */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-30 transition-opacity duration-300"
+        className="absolute inset-0 pointer-events-none opacity-0 md:opacity-30 transition-opacity duration-300 hidden md:block"
         aria-hidden
         style={{
           background: `radial-gradient(circle 40vmax at ${mouse.x}% ${mouse.y}%, hsl(var(--primary) / 0.12) 0%, transparent 50%)`,
         }}
       />
 
-      {/* Floating particles - lazy loaded after initial render */}
+      {/* Floating particles - lazy loaded after initial render, fewer on mobile */}
       {isLoaded && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
           {particles.map((p) => (
             <div
               key={p.id}
-              className="absolute rounded-full hero-particle-float"
+              className="absolute rounded-full hero-particle-float hidden md:block"
+              style={{
+                left: `${p.left}%`,
+                top: `${p.top}%`,
+                width: p.size,
+                height: p.size,
+                background: p.color,
+                animationDelay: `${p.delay}s`,
+                animationDuration: `${p.duration}s`,
+                willChange: 'transform',
+              }}
+            />
+          ))}
+          {/* Reduced particles for mobile */}
+          {particles.slice(0, 10).map((p) => (
+            <div
+              key={`mobile-${p.id}`}
+              className="absolute rounded-full hero-particle-float md:hidden"
               style={{
                 left: `${p.left}%`,
                 top: `${p.top}%`,
@@ -131,8 +148,8 @@ const HeroSection = () => {
           className="absolute inset-0 opacity-20 hero-wave-gradient"
           aria-hidden
         />
-        {/* SVG wave layers - more subtle */}
-        <div className="absolute inset-0 opacity-15 hero-wave-shapes" aria-hidden>
+        {/* SVG wave layers - more subtle, reduced opacity on mobile */}
+        <div className="absolute inset-0 opacity-10 md:opacity-15 hero-wave-shapes" aria-hidden>
           <svg className="absolute bottom-0 left-0 w-full h-1/2 animate-wave-slow" viewBox="0 0 1200 400" preserveAspectRatio="none">
             <defs>
               <linearGradient id="hero-wave-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -163,9 +180,9 @@ const HeroSection = () => {
             <path fill="url(#hero-wave-grad-3)" d="M0,100 Q600,0 1200,100 L1200,300 L0,300 Z" />
           </svg>
         </div>
-        {/* Subtle gradient orbs - more techy */}
-        <div className="absolute top-1/4 -left-1/4 w-96 h-96 bg-primary/8 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 -right-1/4 w-96 h-96 bg-secondary/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
+        {/* Subtle gradient orbs - more techy, smaller on mobile */}
+        <div className="absolute top-1/4 -left-1/4 w-48 h-48 md:w-96 md:h-96 bg-primary/8 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 -right-1/4 w-48 h-48 md:w-96 md:h-96 bg-secondary/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
         {/* Tech grid pattern - more subtle */}
         <div
           className="absolute inset-0 opacity-[0.03]"
@@ -300,66 +317,103 @@ const HeroSection = () => {
               })}
             </div>
 
-            {/* Stars/Sparks instead of circular particles - lazy loaded */}
+            {/* Stars/Sparks instead of circular particles - lazy loaded, reduced on mobile */}
             {isLoaded && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                {/* Desktop stars */}
                 {[...Array(15)].map((_, i) => {
-                const angle = (i * 360) / 20;
-                const radius = 150 + Math.random() * 150;
-                const x = Math.cos((angle * Math.PI) / 180) * radius;
-                const y = Math.sin((angle * Math.PI) / 180) * radius;
-                const size = 3 + Math.random() * 4;
-                return (
-                  <div
-                    key={i}
-                    className="hero-star-spark absolute"
-                    style={{
-                      animationDelay: `${i * 0.15}s`,
-                      animationDuration: `${2 + Math.random() * 2}s`,
-                      left: `calc(50% + ${x}px)`,
-                      top: `calc(50% + ${y}px)`,
-                      transform: 'translate(-50%, -50%)',
-                      width: `${size}px`,
-                      height: `${size}px`,
-                    }}
-                  >
-                    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="M12 2L14.09 8.26L20 9.27L15 14.14L16.18 20.02L12 16.77L7.82 20.02L9 14.14L4 9.27L9.91 8.26L12 2Z"
-                        fill="hsl(var(--primary))"
-                        className="hero-star-path"
-                      />
-                    </svg>
-                  </div>
-                );
-              })}
+                  const angle = (i * 360) / 20;
+                  const radius = 150 + Math.random() * 150;
+                  const x = Math.cos((angle * Math.PI) / 180) * radius;
+                  const y = Math.sin((angle * Math.PI) / 180) * radius;
+                  const size = 3 + Math.random() * 4;
+                  return (
+                    <div
+                      key={`desktop-${i}`}
+                      className="hero-star-spark absolute hidden md:block"
+                      style={{
+                        animationDelay: `${i * 0.15}s`,
+                        animationDuration: `${2 + Math.random() * 2}s`,
+                        left: `calc(50% + ${x}px)`,
+                        top: `calc(50% + ${y}px)`,
+                        transform: 'translate(-50%, -50%)',
+                        width: `${size}px`,
+                        height: `${size}px`,
+                      }}
+                    >
+                      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M12 2L14.09 8.26L20 9.27L15 14.14L16.18 20.02L12 16.77L7.82 20.02L9 14.14L4 9.27L9.91 8.26L12 2Z"
+                          fill="hsl(var(--primary))"
+                          className="hero-star-path"
+                        />
+                      </svg>
+                    </div>
+                  );
+                })}
+                {/* Mobile stars - fewer */}
+                {[...Array(8)].map((_, i) => {
+                  const angle = (i * 360) / 20;
+                  const radius = 150 + Math.random() * 150;
+                  const x = Math.cos((angle * Math.PI) / 180) * radius;
+                  const y = Math.sin((angle * Math.PI) / 180) * radius;
+                  const size = 3 + Math.random() * 4;
+                  return (
+                    <div
+                      key={`mobile-star-${i}`}
+                      className="hero-star-spark absolute md:hidden"
+                      style={{
+                        animationDelay: `${i * 0.15}s`,
+                        animationDuration: `${2 + Math.random() * 2}s`,
+                        left: `calc(50% + ${x}px)`,
+                        top: `calc(50% + ${y}px)`,
+                        transform: 'translate(-50%, -50%)',
+                        width: `${size}px`,
+                        height: `${size}px`,
+                      }}
+                    >
+                      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M12 2L14.09 8.26L20 9.27L15 14.14L16.18 20.02L12 16.77L7.82 20.02L9 14.14L4 9.27L9.91 8.26L12 2Z"
+                          fill="hsl(var(--primary))"
+                          className="hero-star-path"
+                        />
+                      </svg>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
             {/* Main logo with thunder/storm effects */}
             <div className="relative z-10 hero-logo-container">
               {/* Lightning strike effects around logo - lazy loaded */}
-              {isLoaded && [...Array(4)].map((_, i) => (
-                <div
-                  key={i}
-                  className="hero-lightning-strike absolute"
-                  style={{
-                    animationDelay: `${i * 1.5 + Math.random() * 1}s`,
-                    animationDuration: `${4 + Math.random() * 2}s`,
-                    transform: `rotate(${i * 90}deg)`,
-                    transformOrigin: 'center',
-                  }}
-                />
-              ))}
+              {/* Hide only the first two thick lines (vertical and horizontal cross) on mobile */}
+              {isLoaded && [...Array(4)].map((_, i) => {
+                // First two (i=0, i=1) are the vertical and horizontal thick lines of the cross - hide on mobile
+                // Last two (i=2, i=3) are diagonal - keep visible
+                const isThickCrossLine = i === 0 || i === 1;
+                return (
+                  <div
+                    key={i}
+                    className={`hero-lightning-strike absolute ${isThickCrossLine ? 'hidden md:block' : ''}`}
+                    style={{
+                      animationDelay: `${i * 1.5 + Math.random() * 1}s`,
+                      animationDuration: `${4 + Math.random() * 2}s`,
+                      transform: `rotate(${i * 90}deg)`,
+                      transformOrigin: 'center',
+                    }}
+                  />
+                );
+              })}
 
               <img
                 src="/Logo 7.png"
                 alt="CREATION 2K26"
                 loading="eager"
                 fetchPriority="high"
-                className={`hero-logo-main w-[90vw] sm:w-[75vw] max-w-[650px] h-auto object-contain transition-all duration-500 ${
-                  isLoaded ? 'opacity-100' : 'opacity-0'
-                }`}
+                className={`hero-logo-main w-[90vw] sm:w-[75vw] max-w-[650px] h-auto object-contain transition-all duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
                 style={{ willChange: 'transform' }}
               />
             </div>
@@ -409,18 +463,18 @@ const HeroSection = () => {
                     <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-primary/60" />
                     <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-primary/60" />
                     <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-primary/60" />
-                    
+
                     {/* Loading line effect - fills from bottom */}
-                    <div 
+                    <div
                       className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary/40 via-primary/30 to-primary/20 transition-all duration-1000 ease-out"
                       style={{ height: `${progress}%` }}
                     >
                       {/* Animated shimmer on loading line */}
                       <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent animate-shimmer-line" />
                     </div>
-                    
+
                     {/* Grid pattern overlay */}
-                    <div 
+                    <div
                       className="absolute inset-0 opacity-5"
                       style={{
                         backgroundImage: `
@@ -430,7 +484,7 @@ const HeroSection = () => {
                         backgroundSize: "8px 8px",
                       }}
                     />
-                    
+
                     {/* Number */}
                     <div className="relative w-full h-full flex items-center justify-center z-10">
                       <span
@@ -440,7 +494,7 @@ const HeroSection = () => {
                         {String(item.value).padStart(2, "0")}
                       </span>
                     </div>
-                    
+
                     {/* Subtle scanline effect */}
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent animate-pulse" />
                   </div>

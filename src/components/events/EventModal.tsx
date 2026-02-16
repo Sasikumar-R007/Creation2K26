@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import * as LucideIcons from "lucide-react";
+import { X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -369,14 +370,14 @@ const EventModal = ({ event, isOpen, onClose }: EventModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-background via-background to-muted/20 border-2 border-border/50 shadow-2xl backdrop-blur-sm p-4 sm:p-6 [&>button]:hidden">
-        {/* Custom Close button - positioned properly */}
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-background via-background to-muted/20 border-2 border-border/50 shadow-2xl backdrop-blur-sm p-4 sm:p-6 [&>button]:hidden sm:[&>button]:hidden">
+        {/* Custom Close button - visible on mobile only */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 z-50 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 p-2 bg-background/80 backdrop-blur-sm"
+          className="md:hidden absolute right-4 top-4 z-50 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-background/80 backdrop-blur-sm p-2 border border-border/50"
           aria-label="Close"
         >
-          <LucideIcons.X className="h-5 w-5" />
+          <X className="h-5 w-5" />
         </button>
         <DialogHeader>
           <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-6 mb-6">
