@@ -38,6 +38,16 @@ const EventsGrid = () => {
   const onModalOpen = useCallback((event: EventData) => setSelectedEvent(event), []);
   const onModalClose = useCallback(() => setSelectedEvent(null), []);
 
+  // Sort non-technical events to put "Personality Contest" first
+  const sortedNonTechnicalEvents = useMemo(() => {
+    if (!nonTechnicalEvents) return [];
+    return [...nonTechnicalEvents].sort((a, b) => {
+      if (a.name === "Personality Contest") return -1;
+      if (b.name === "Personality Contest") return 1;
+      return a.name.localeCompare(b.name);
+    });
+  }, [nonTechnicalEvents]);
+
   const isLoading = loadingTech || loadingNonTech;
 
   if (isLoading) {
@@ -118,16 +128,7 @@ const EventsGrid = () => {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {useMemo(() => {
-            if (!nonTechnicalEvents) return [];
-            // Sort to put "Personality Contest" (Persona League) first
-            const sorted = [...nonTechnicalEvents].sort((a, b) => {
-              if (a.name === "Personality Contest") return -1;
-              if (b.name === "Personality Contest") return 1;
-              return a.name.localeCompare(b.name);
-            });
-            return sorted;
-          }, [nonTechnicalEvents])?.map((event, index) => (
+          {sortedNonTechnicalEvents.map((event, index) => (
             <EventCard
               key={event.id}
               event={event}
