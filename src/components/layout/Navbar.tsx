@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, LogOut, LayoutDashboard, User } from "lucide-react";
 import { GlassPanel } from "@/components/ui/glass-panel";
@@ -8,9 +8,43 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
   const { user, signOut, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname !== "/") {
+      setActiveSection("home");
+      return;
+    }
+
+    const handleScroll = () => {
+      const sections = ["home", "events", "about", "contact"];
+      const scrollPosition = window.scrollY + 150;
+
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = document.getElementById(sections[i]);
+        if (section) {
+          const sectionTop = section.offsetTop;
+          if (scrollPosition >= sectionTop) {
+            setActiveSection(sections[i]);
+            break;
+          }
+        }
+      }
+
+      // If at the top, set to home
+      if (window.scrollY < 100) {
+        setActiveSection("home");
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll(); // Initial check
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [location.pathname]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -30,15 +64,17 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/#events", label: "Events" },
-    { href: "/#about", label: "About" },
-    { href: "/#contact", label: "Contact" },
+    { href: "/", label: "Home", id: "home" },
+    { href: "/#events", label: "Events", id: "events" },
+    { href: "/#about", label: "About", id: "about" },
+    { href: "/#contact", label: "Contact", id: "contact" },
   ];
 
-  const isActive = (href: string) => {
-    if (href === "/") return location.pathname === "/";
-    return location.pathname.startsWith(href.replace("/#", "/"));
+  const isActive = (linkId: string) => {
+    if (location.pathname !== "/") {
+      return linkId === "home";
+    }
+    return activeSection === linkId;
   };
 
   return (
@@ -62,7 +98,7 @@ const Navbar = () => {
                   key={link.href}
                   href={link.href}
                   className={`text-base font-medium transition-colors hover:text-primary ${
-                    isActive(link.href) ? "text-primary font-semibold" : "text-muted-foreground/50"
+                    isActive(link.id) ? "text-primary font-semibold" : "text-muted-foreground/50"
                   }`}
                 >
                   {link.label}
@@ -125,7 +161,7 @@ const Navbar = () => {
                     href={link.href}
                     onClick={() => setIsOpen(false)}
                     className={`text-sm font-medium py-2 text-center transition-colors hover:text-primary ${
-                      isActive(link.href) ? "text-primary font-semibold" : "text-muted-foreground/50"
+                      isActive(link.id) ? "text-primary font-semibold" : "text-muted-foreground/50"
                     }`}
                   >
                     {link.label}

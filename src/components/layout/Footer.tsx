@@ -20,9 +20,9 @@ const Footer = () => {
             <div className="flex items-center gap-2 mb-4">
               <Link to="/" className="flex items-center gap-2">
                 <img 
-                  src="/Logo 7.png" 
+                  src="/Logo 4.png" 
                   alt="CREATION 2K26" 
-                  className="h-10 w-auto object-contain"
+                  className="h-12 w-auto object-contain"
                 />
               </Link>
             </div>

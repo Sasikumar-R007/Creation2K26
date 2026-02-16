@@ -8,18 +8,15 @@ import EventsGrid from "@/components/events/EventsGrid";
 const Index = () => {
   return (
     <div className="min-h-screen bg-background dark relative">
-      {/* Techy Frame Animations */}
-      <div className="techy-frame techy-frame-1" />
-      <div className="techy-frame techy-frame-2" />
-      <div className="techy-frame techy-frame-3" />
-      <div className="techy-frame techy-frame-4" />
-      <div className="techy-frame techy-frame-5" />
-      <div className="techy-frame techy-frame-6" />
+      {/* Techy Background Animations - Non-square */}
+      <div className="techy-bg-animation" />
       
       <Navbar />
       
       {/* Hero Section */}
-      <HeroSection />
+      <section id="home">
+        <HeroSection />
+      </section>
 
       {/* Events Section */}
       <section id="events" className="py-24 relative">

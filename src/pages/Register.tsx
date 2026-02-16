@@ -301,15 +301,15 @@ const RegistrationSuccessModal = ({ form, events, event1, event2, registrationId
           This page will be shown only once. Please download your registration form now.
         </p>
         <p className="text-sm text-muted-foreground">
-          Join our WhatsApp group for further updates:
+          Join our WhatsApp group for further updates. <span className="text-primary font-medium">Click the button below to join:</span>
         </p>
         <a
           href="https://chat.whatsapp.com/LuCiaJ1znph5KAWrT0gsMJ?mode=gi_t"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium text-sm"
+          className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-sm px-6 py-3 rounded-lg transition-all duration-300 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 active:scale-100"
         >
-          <MessageCircle className="w-4 h-4" />
+          <MessageCircle className="w-5 h-5" />
           Join WhatsApp Group
         </a>
       </div>
@@ -467,9 +467,23 @@ export default function Register() {
     return true;
   };
 
-  const isRegistrationStepComplete = () => {
-    return validateRegistrationStep();
-  };
+  // Check if registration step is complete WITHOUT updating errors (to avoid infinite re-renders)
+  const isRegistrationStepComplete = useCallback(() => {
+    // Just check form fields without calling setErrors
+    if (!form.name || !form.email || !form.whatsapp_phone || !form.department || !form.college) {
+      return false;
+    }
+    if (!form.event_1_id) {
+      return false;
+    }
+    if (form.event_1_team_size > 1 && !form.event_1_team_name.trim()) {
+      return false;
+    }
+    if (form.event_2_id && form.event_2_team_size > 1 && !form.event_2_team_name.trim()) {
+      return false;
+    }
+    return true;
+  }, [form]);
 
   const handleRegistrationSubmit = () => {
     if (!validateRegistrationStep()) return;
@@ -483,7 +497,7 @@ export default function Register() {
     }
   };
 
-  const handleTabClick = (tabId: string) => {
+  const handleTabClick = useCallback((tabId: string) => {
     if (tabId === "payment" && !isRegistrationStepComplete()) {
       toast({
         title: "Complete Registration First",
@@ -493,7 +507,7 @@ export default function Register() {
       return;
     }
     setActiveTab(tabId);
-  };
+  }, [isRegistrationStepComplete, toast]);
 
   const handlePaymentSubmit = () => {
     if (!validatePaymentStep()) return;
@@ -688,104 +702,98 @@ export default function Register() {
             Back to Home
           </Link>
 
-          {/* Redesigned Header Section */}
-          <div className="mb-10 relative">
-            <div className="relative bg-gradient-to-br from-primary/10 via-background/95 to-secondary/10 backdrop-blur-xl rounded-2xl p-8 sm:p-10 overflow-hidden border border-primary/20">
-              {/* Animated gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 animate-gradient-shift" />
+          {/* Redesigned Header Section - Centered & Compact */}
+          <div className="mb-8 sm:mb-10 relative">
+            <div className="relative bg-background/80 backdrop-blur-xl rounded-xl p-6 sm:p-8 overflow-hidden border border-primary/20 shadow-lg">
+              {/* Subtle gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5" />
               
-              {/* Radial glow effects */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-secondary/5 rounded-full blur-3xl" />
-              
-              <div className="relative z-10">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-12 bg-gradient-to-b from-primary via-secondary to-accent rounded-full shadow-lg shadow-primary/50" />
-                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">
-                      <span className="gradient-text">CREATION 2K26</span>
-                    </h1>
-                  </div>
-                </div>
-                <p className="text-muted-foreground text-base sm:text-lg ml-4.5">
+              {/* Content - Centered */}
+              <div className="relative z-10 text-center">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
+                  <span className="gradient-text">CREATION 2K26</span>
+                </h1>
+                <p className="text-muted-foreground text-sm sm:text-base">
                   BCA Department, Bishop Heber College. Register for up to two events.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Techy Multi-Step Progress Indicator */}
-          <div className="mb-10 sm:mb-12">
+          {/* Simple Techy Stepper */}
+          <div className="mb-8 sm:mb-10">
             <div className="relative">
-              {/* Background connector line */}
-              <div className="absolute top-8 left-0 right-0 h-1 bg-muted/30 rounded-full z-0" />
-              <div 
-                className="absolute top-8 left-0 h-1 bg-gradient-to-r from-primary via-secondary to-primary rounded-full z-10 transition-all duration-500"
-                style={{ 
-                  width: activeTab === "payment" ? "100%" : "50%",
-                }}
-              />
+              {/* Connecting line - full width background */}
+              <div className="absolute top-6 left-0 right-0 h-0.5 z-0">
+                {/* Inactive line (full width, muted) */}
+                <div className="absolute inset-0 bg-muted/20" />
+                {/* Active line (gradient, fills based on progress) */}
+                <div 
+                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary via-secondary to-primary transition-all duration-500 ease-out"
+                  style={{ 
+                    width: activeTab === "payment" ? "100%" : "50%",
+                  }}
+                />
+              </div>
               
-              <div className="relative flex items-center justify-between">
+              <div className="relative flex items-start justify-between">
                 {STEPS.map((step, index) => {
                   const isActive = activeTab === step.id;
                   const isCompleted = index === 0 && isRegistrationStepComplete();
                   const isDisabled = index === 1 && !isRegistrationStepComplete();
                   
                   return (
-                    <div key={step.id} className="flex flex-col items-center flex-1 relative z-20">
+                    <div key={step.id} className="flex flex-col items-center flex-1 relative z-10">
+                      {/* Step Circle */}
                       <button
                         type="button"
                         onClick={() => !isDisabled && handleTabClick(step.id)}
                         disabled={isDisabled}
                         className={`
-                          relative w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center
-                          transition-all duration-300 touch-manipulation
+                          relative w-12 h-12 rounded-full flex items-center justify-center
+                          transition-all duration-300
                           ${isActive
-                            ? "bg-gradient-to-br from-primary via-primary to-secondary text-primary-foreground scale-110 shadow-lg shadow-primary/50 ring-4 ring-primary/30"
-                            : isCompleted
-                              ? "bg-gradient-to-br from-primary/80 to-primary/60 text-primary-foreground scale-105 shadow-md shadow-primary/30"
-                              : isDisabled
-                                ? "bg-muted/40 text-muted-foreground/50 cursor-not-allowed opacity-50"
-                                : "bg-muted/60 text-muted-foreground border-2 border-border hover:border-primary/50 hover:bg-muted/80"
+                            ? "bg-gradient-to-b from-primary to-secondary shadow-[0_0_20px_hsl(var(--primary)/0.5)] scale-110"
+                            : isDisabled
+                              ? "bg-muted/30 border border-muted/40 cursor-not-allowed"
+                              : "bg-muted/50 border border-muted/60"
                           }
                         `}
                       >
-                        {/* Inner glow for active */}
-                        {isActive && (
-                          <div className="absolute inset-0 rounded-full bg-primary/20 animate-pulse" />
-                        )}
+                        {/* Number */}
+                        <span 
+                          className={`text-lg font-bold relative z-10 ${
+                            isActive 
+                              ? "text-foreground" 
+                              : isDisabled
+                                ? "text-muted-foreground/40"
+                                : "text-muted-foreground"
+                          }`}
+                        >
+                          {step.number}
+                        </span>
                         
-                        {/* Check icon or number */}
-                        {isCompleted && !isActive ? (
-                          <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-primary-foreground" />
-                        ) : (
-                          <span className="text-xl sm:text-2xl font-bold relative z-10">{step.number}</span>
-                        )}
-                        
-                        {/* Outer ring animation for active */}
+                        {/* Glow ring for active */}
                         {isActive && (
-                          <div className="absolute inset-[-4px] rounded-full border-2 border-primary/50 animate-ping" />
+                          <div className="absolute inset-[-2px] rounded-full border-2 border-primary/30 animate-pulse" />
                         )}
                       </button>
                       
                       {/* Label */}
-                      <div className="mt-4 text-center">
+                      <div className="mt-3 text-center">
                         <span
-                          className={`text-sm sm:text-base font-semibold block ${
+                          className={`text-sm font-medium block ${
                             isActive 
                               ? "text-primary" 
-                              : isCompleted
-                                ? "text-primary/80"
-                                : isDisabled
-                                  ? "text-muted-foreground/50"
-                                  : "text-muted-foreground"
+                              : isDisabled
+                                ? "text-muted-foreground/50"
+                                : "text-muted-foreground"
                           }`}
                         >
                           {step.label}
                         </span>
                         {isDisabled && (
-                          <span className="text-xs text-muted-foreground/70 mt-1 block">
+                          <span className="text-xs text-muted-foreground/60 mt-1 block">
                             Complete Step 1
                           </span>
                         )}

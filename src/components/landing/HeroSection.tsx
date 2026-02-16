@@ -359,55 +359,68 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Countdown Timer - Techy Design */}
+          {/* Countdown Timer - Square with Loading Line Effect */}
           <div className="flex flex-wrap justify-center items-end gap-3 md:gap-5 mb-12 animate-fade-in" style={{ animationDelay: "400ms" }}>
             {[
-              { value: timeLeft.days, label: "DAYS" },
-              { value: timeLeft.hours, label: "HOURS" },
-              { value: timeLeft.minutes, label: "MINUTES" },
-              { value: timeLeft.seconds, label: "SECONDS" },
-            ].map((item, index) => (
-              <div key={item.label} className="flex flex-col items-center">
-                <div
-                  className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded border-2 border-primary/40 bg-background/80 backdrop-blur-sm overflow-hidden techy-timer"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  {/* Techy corner accents */}
-                  <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-primary/60" />
-                  <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-primary/60" />
-                  <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-primary/60" />
-                  <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-primary/60" />
-                  
-                  {/* Grid pattern overlay */}
-                  <div 
-                    className="absolute inset-0 opacity-10"
-                    style={{
-                      backgroundImage: `
-                        linear-gradient(hsl(var(--primary)) 1px, transparent 1px),
-                        linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)
-                      `,
-                      backgroundSize: "8px 8px",
-                    }}
-                  />
-                  
-                  {/* Number */}
-                  <div className="relative w-full h-full flex items-center justify-center z-10">
-                    <span
-                      key={`${item.label}-${item.value}`}
-                      className="text-2xl sm:text-3xl md:text-4xl font-mono font-bold tabular-nums text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)]"
+              { value: timeLeft.days, label: "DAYS", max: 365 },
+              { value: timeLeft.hours, label: "HOURS", max: 24 },
+              { value: timeLeft.minutes, label: "MINUTES", max: 60 },
+              { value: timeLeft.seconds, label: "SECONDS", max: 60 },
+            ].map((item, index) => {
+              // Progress fills as time decreases (full when max, empty when 0)
+              const progress = (item.value / item.max) * 100;
+              return (
+                <div key={item.label} className="flex flex-col items-center">
+                  <div
+                    className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-lg border-2 border-primary/40 bg-background/80 backdrop-blur-sm overflow-hidden techy-timer-square"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    {/* Corner accents */}
+                    <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-primary/60" />
+                    <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-primary/60" />
+                    <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-primary/60" />
+                    <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-primary/60" />
+                    
+                    {/* Loading line effect - fills from bottom */}
+                    <div 
+                      className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary/40 via-primary/30 to-primary/20 transition-all duration-1000 ease-out"
+                      style={{ height: `${progress}%` }}
                     >
-                      {String(item.value).padStart(2, "0")}
-                    </span>
+                      {/* Animated shimmer on loading line */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent animate-shimmer-line" />
+                    </div>
+                    
+                    {/* Grid pattern overlay */}
+                    <div 
+                      className="absolute inset-0 opacity-5"
+                      style={{
+                        backgroundImage: `
+                          linear-gradient(hsl(var(--primary)) 1px, transparent 1px),
+                          linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)
+                        `,
+                        backgroundSize: "8px 8px",
+                      }}
+                    />
+                    
+                    {/* Number */}
+                    <div className="relative w-full h-full flex items-center justify-center z-10">
+                      <span
+                        key={`${item.label}-${item.value}`}
+                        className="text-2xl sm:text-3xl md:text-4xl font-mono font-bold tabular-nums text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)]"
+                      >
+                        {String(item.value).padStart(2, "0")}
+                      </span>
+                    </div>
+                    
+                    {/* Subtle scanline effect */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent animate-pulse" />
                   </div>
-                  
-                  {/* Subtle scanline effect */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent animate-pulse" />
+                  <span className="mt-2 text-[10px] sm:text-xs font-mono font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                    {item.label}
+                  </span>
                 </div>
-                <span className="mt-2 text-[10px] sm:text-xs font-mono font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-                  {item.label}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* CTA Buttons */}
