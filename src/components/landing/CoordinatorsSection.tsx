@@ -36,18 +36,27 @@ const CoordinatorsSection = () => {
 
   // Track user interaction anywhere on the page (click, scroll, touch, keypress)
   useEffect(() => {
+    let interactionDetected = false;
+    
     const handleUserInteraction = () => {
-      setHasUserInteracted(true);
+      if (!interactionDetected) {
+        interactionDetected = true;
+        setHasUserInteracted(true);
+      }
     };
 
-    // Listen for various user interactions - don't use once:true so we catch interactions anytime
-    const events = ['click', 'scroll', 'touchstart', 'keydown', 'mousedown', 'wheel'];
+    // Listen for various user interactions - use both document and window for better coverage
+    const events = ['click', 'scroll', 'touchstart', 'keydown', 'mousedown', 'wheel', 'mousemove'];
+    
+    // Add listeners to both document and window for better event capture
     events.forEach(event => {
-      window.addEventListener(event, handleUserInteraction, { passive: true });
+      document.addEventListener(event, handleUserInteraction, { once: true, passive: true });
+      window.addEventListener(event, handleUserInteraction, { once: true, passive: true });
     });
 
     return () => {
       events.forEach(event => {
+        document.removeEventListener(event, handleUserInteraction);
         window.removeEventListener(event, handleUserInteraction);
       });
     };
@@ -61,23 +70,27 @@ const CoordinatorsSection = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && hasUserInteracted && audioRef.current) {
-            // Section is visible and user has interacted - try to play audio
-            const playPromise = audioRef.current.play();
-            if (playPromise !== undefined) {
-              playPromise
-                .then(() => {
-                  setIsPlaying(true);
-                })
-                .catch((err) => {
-                  console.log('Audio play error:', err);
-                  setIsPlaying(false);
-                });
+          if (entry.isIntersecting && hasUserInteracted) {
+            // Section is visible and user has interacted - play audio
+            if (audioRef.current) {
+              const playPromise = audioRef.current.play();
+              if (playPromise !== undefined) {
+                playPromise
+                  .then(() => {
+                    setIsPlaying(true);
+                  })
+                  .catch((err) => {
+                    console.log('Audio play error:', err);
+                    setIsPlaying(false);
+                  });
+              }
             }
-          } else if (!entry.isIntersecting && audioRef.current) {
+          } else if (!entry.isIntersecting) {
             // Section is not visible - pause audio
-            audioRef.current.pause();
-            setIsPlaying(false);
+            if (audioRef.current) {
+              audioRef.current.pause();
+              setIsPlaying(false);
+            }
           }
         });
       },
@@ -88,6 +101,9 @@ const CoordinatorsSection = () => {
 
     return () => {
       observer.disconnect();
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
     };
   }, [hasUserInteracted]);
 
@@ -269,9 +285,12 @@ const CoordinatorsSection = () => {
         ref={audioRef}
         src="/bgm.mpeg"
         loop
-        preload="metadata"
+        preload="auto"
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
+        onLoadedData={() => {
+          // Audio is loaded and ready
+        }}
       />
     </section>
   );
