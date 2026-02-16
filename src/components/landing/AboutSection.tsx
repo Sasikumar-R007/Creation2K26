@@ -21,7 +21,46 @@ const AboutSection = () => {
     <section id="about" className="py-24 relative">
       <div className="container mx-auto px-4">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-5xl mx-auto mb-16 relative">
+          {/* Logos at both ends - Desktop - moved further out */}
+          <div className="absolute -left-32 top-1/2 -translate-y-1/2 hidden lg:block">
+            <div className="relative w-32 h-32 rounded-2xl bg-white backdrop-blur-xl border-2 border-primary/40 shadow-lg shadow-primary/10 p-2 hover:border-primary/60 hover:shadow-primary/20 transition-all duration-300">
+              <img
+                src="/Other photos/BHC logo.png"
+                alt="Bishop Heber College Logo"
+                className="w-full h-full object-contain relative z-10"
+              />
+            </div>
+          </div>
+          
+          <div className="absolute -right-32 top-1/2 -translate-y-1/2 hidden lg:block">
+            <div className="relative w-32 h-32 rounded-2xl bg-white backdrop-blur-xl border-2 border-primary/40 shadow-lg shadow-secondary/10 p-2 hover:border-primary/60 hover:shadow-secondary/20 transition-all duration-300">
+              <img
+                src="/Other photos/BCA logo.png"
+                alt="BCA Association Logo"
+                className="w-full h-full object-contain relative z-10"
+              />
+            </div>
+          </div>
+
+          {/* Logos for mobile - below heading */}
+          <div className="flex items-center justify-center gap-4 sm:gap-6 mb-6 lg:hidden">
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-white backdrop-blur-xl border-2 border-primary/40 shadow-lg shadow-primary/10 p-1.5 sm:p-2">
+              <img
+                src="/Other photos/BHC logo.png"
+                alt="Bishop Heber College Logo"
+                className="w-full h-full object-contain relative z-10"
+              />
+            </div>
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-white backdrop-blur-xl border-2 border-primary/40 shadow-lg shadow-secondary/10 p-1.5 sm:p-2">
+              <img
+                src="/Other photos/BCA logo.png"
+                alt="BCA Association Logo"
+                className="w-full h-full object-contain relative z-10"
+              />
+            </div>
+          </div>
+
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             About <span className="gradient-text">CREATION 2K26</span>
           </h2>

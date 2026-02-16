@@ -47,6 +47,13 @@ const getEventRules = (eventName: string): string[] => {
   const normalizedName = eventName.trim().toUpperCase();
   
   const rulesMap: Record<string, string[]> = {
+    "QUIZ": [
+      "One team per department.",
+      "Two participants per team.",
+      "Prelims will be conducted.",
+      "Questions will be based on Programming, Current Technical Trends and General Awareness.",
+      "Use of mobile phones, smart watches or any electronic devices is strictly prohibited during the quiz.",
+    ],
     "WEB DESIGN": [
       "Participants must design a web page UI/UX based on the theme announced at the start of the event.",
       "The total duration of the competition is 60 minutes, starting immediately after the theme announcement.",

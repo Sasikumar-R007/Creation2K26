@@ -118,7 +118,16 @@ const EventsGrid = () => {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {nonTechnicalEvents?.map((event, index) => (
+          {useMemo(() => {
+            if (!nonTechnicalEvents) return [];
+            // Sort to put "Personality Contest" (Persona League) first
+            const sorted = [...nonTechnicalEvents].sort((a, b) => {
+              if (a.name === "Personality Contest") return -1;
+              if (b.name === "Personality Contest") return 1;
+              return a.name.localeCompare(b.name);
+            });
+            return sorted;
+          }, [nonTechnicalEvents])?.map((event, index) => (
             <EventCard
               key={event.id}
               event={event}
