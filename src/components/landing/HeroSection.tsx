@@ -1,10 +1,10 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, MapPin, ArrowDown } from "lucide-react";
 import { NeonButton } from "@/components/ui/neon-button";
 import { EVENT_DATE, VENUE } from "@/lib/constants";
 
-const PARTICLE_COUNT = 28;
+const PARTICLE_COUNT = 20; // Reduced from 28 for better performance
 const PARTICLE_COLORS = [
   "hsl(var(--primary) / 0.35)",
   "hsl(var(--secondary) / 0.3)",
@@ -15,12 +15,15 @@ const PARTICLE_COLORS = [
 const HeroSection = () => {
   const navigate = useNavigate();
   const [mouse, setMouse] = useState({ x: 50, y: 50 });
+  const [isLoaded, setIsLoaded] = useState(false);
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
     minutes: 0,
     seconds: 0,
   });
+  const rafRef = useRef<number | null>(null);
+  const mouseRef = useRef({ x: 50, y: 50 });
 
   const particles = useMemo(
     () =>
@@ -62,12 +65,28 @@ const HeroSection = () => {
     day: "numeric",
   });
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+  // Optimized mouse tracking with requestAnimationFrame
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setMouse({ x, y });
-  };
+    mouseRef.current = { x, y };
+    
+    if (!rafRef.current) {
+      rafRef.current = requestAnimationFrame(() => {
+        setMouse(mouseRef.current);
+        rafRef.current = null;
+      });
+    }
+  }, []);
+
+  // Preload logo image
+  useEffect(() => {
+    const img = new Image();
+    img.src = "/Logo 7.png";
+    img.onload = () => setIsLoaded(true);
+    img.onerror = () => setIsLoaded(true); // Set loaded even on error to prevent blocking
+  }, []);
 
   return (
     <section
@@ -83,24 +102,27 @@ const HeroSection = () => {
         }}
       />
 
-      {/* Floating particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
-        {particles.map((p) => (
-          <div
-            key={p.id}
-            className="absolute rounded-full hero-particle-float"
-            style={{
-              left: `${p.left}%`,
-              top: `${p.top}%`,
-              width: p.size,
-              height: p.size,
-              background: p.color,
-              animationDelay: `${p.delay}s`,
-              animationDuration: `${p.duration}s`,
-            }}
-          />
-        ))}
-      </div>
+      {/* Floating particles - lazy loaded after initial render */}
+      {isLoaded && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
+          {particles.map((p) => (
+            <div
+              key={p.id}
+              className="absolute rounded-full hero-particle-float"
+              style={{
+                left: `${p.left}%`,
+                top: `${p.top}%`,
+                width: p.size,
+                height: p.size,
+                background: p.color,
+                animationDelay: `${p.delay}s`,
+                animationDuration: `${p.duration}s`,
+                willChange: 'transform',
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Background Effects - cleaner, more subtle */}
       <div className="absolute inset-0 overflow-hidden bg-background">
@@ -229,8 +251,8 @@ const HeroSection = () => {
                   </svg>
                 );
               })} */}
-              {/* Thinner lightning strikes - 8 of them (THUNDER LINES GROUP 2) */}
-              {[...Array(8)].map((_, i) => {
+              {/* Thinner lightning strikes - reduced to 6 for performance (THUNDER LINES GROUP 2) */}
+              {isLoaded && [...Array(6)].map((_, i) => {
                 const seed = (i + 10) * 7;
                 const angle = (i * 45) + (seed % 15) - 7.5;
                 const startX = 50 + Math.cos((angle * Math.PI) / 180) * 25;
@@ -278,9 +300,10 @@ const HeroSection = () => {
               })}
             </div>
 
-            {/* Stars/Sparks instead of circular particles */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              {[...Array(20)].map((_, i) => {
+            {/* Stars/Sparks instead of circular particles - lazy loaded */}
+            {isLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                {[...Array(15)].map((_, i) => {
                 const angle = (i * 360) / 20;
                 const radius = 150 + Math.random() * 150;
                 const x = Math.cos((angle * Math.PI) / 180) * radius;
@@ -310,12 +333,13 @@ const HeroSection = () => {
                   </div>
                 );
               })}
-            </div>
+              </div>
+            )}
 
             {/* Main logo with thunder/storm effects */}
             <div className="relative z-10 hero-logo-container">
-              {/* Lightning strike effects around logo */}
-              {[...Array(4)].map((_, i) => (
+              {/* Lightning strike effects around logo - lazy loaded */}
+              {isLoaded && [...Array(4)].map((_, i) => (
                 <div
                   key={i}
                   className="hero-lightning-strike absolute"
@@ -331,7 +355,12 @@ const HeroSection = () => {
               <img
                 src="/Logo 7.png"
                 alt="CREATION 2K26"
-                className="hero-logo-main w-[90vw] sm:w-[75vw] max-w-[650px] h-auto object-contain transition-all duration-500"
+                loading="eager"
+                fetchPriority="high"
+                className={`hero-logo-main w-[90vw] sm:w-[75vw] max-w-[650px] h-auto object-contain transition-all duration-500 ${
+                  isLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                style={{ willChange: 'transform' }}
               />
             </div>
           </div>

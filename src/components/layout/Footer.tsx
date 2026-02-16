@@ -19,9 +19,9 @@ const Footer = () => {
           <div className="md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <Link to="/" className="flex items-center gap-2">
-                <img 
-                  src="/Logo 4.png" 
-                  alt="CREATION 2K26" 
+                <img
+                  src="/Logo 4.png"
+                  alt="CREATION 2K26"
                   className="h-12 w-auto object-contain"
                 />
               </Link>

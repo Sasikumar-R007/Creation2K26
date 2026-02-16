@@ -9,7 +9,7 @@ export const VENUE = {
 };
 
 export const SOCIAL_LINKS = {
-  instagram: 'https://www.instagram.com/bca_association_2k25?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==',
+  instagram: 'https://www.instagram.com/bca_association_2k25/',
   email: 'bcaassociation2k25@gmail.com',
 };
 
