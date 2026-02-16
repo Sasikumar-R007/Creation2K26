@@ -2,9 +2,9 @@ import { FileText } from "lucide-react";
 import { GlassPanel } from "@/components/ui/glass-panel";
 
 const generalRules = [
-  "The competition is open to all UG students from Engineering and Arts and Science colleges.",
+  "The competition is open to all UG students from Engineering and Arts and Science colleges. Bishop Heber College students must not participate.",
   "Online registration opens from 5.2.2026. Limited spot registration will be entertained until 10:00 AM on the day of the event.",
-  "A registration fee of Rs. 250 per participant must be paid online during the registration.",
+  "A registration fee of Rs. 250 per participant must be paid online during the registration. Note: The amount is not refundable in any case.",
   "Entry is restricted to college students only. Carrying a valid college ID card is compulsory for all participants.",
   "The Overall Championship will be calculated department-wise and not college-wise.",
   "Lunch and refreshments will be provided.",
