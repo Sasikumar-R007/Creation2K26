@@ -622,6 +622,28 @@
   }
 }
 
+/* 3D Carousel Perspective */
+.perspective-1000 {
+  perspective: 1000px;
+  perspective-origin: center center;
+}
+
+/* Smooth 3D transforms */
+[style*="transform-style: preserve-3d"] {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* Hide scrollbar for mobile auto-scroll */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Show thick cross lines on desktop */
 @media (min-width: 768px) {
   .hero-lightning-strike.thick-cross-line-mobile {

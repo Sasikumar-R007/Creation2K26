@@ -1,5 +1,7 @@
-import { FileText } from "lucide-react";
+import { FileText, Download, ArrowRight } from "lucide-react";
 import { GlassPanel } from "@/components/ui/glass-panel";
+import { Link } from "react-router-dom";
+import { NeonButton } from "@/components/ui/neon-button";
 
 const generalRules = [
   "The competition is open to all UG students from Engineering and Arts and Science colleges. Bishop Heber College students must not participate.",
@@ -23,11 +25,32 @@ const AboutSection = () => {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             About <span className="gradient-text">CREATION 2K26</span>
           </h2>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-lg mb-6">
             CREATION 2K26 is the flagship technical and cultural symposium that brings together
             the brightest minds to compete, collaborate, and create. Join us for a day filled
             with innovation, creativity, and unforgettable experiences.
           </p>
+          
+          {/* Action Buttons */}
+          <div className="flex flex-row items-center justify-center gap-2 sm:gap-4 mt-6">
+            <a
+              href="/Docs/Creation 2k26 Brochure.pdf"
+              download="Creation 2k26 Brochure.pdf"
+              className="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-base bg-primary text-primary-foreground hover:bg-primary/90 font-semibold rounded-lg transition-all duration-300 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 active:scale-100"
+            >
+              <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline">Download Brochure</span>
+              <span className="sm:hidden">Brochure</span>
+            </a>
+            <Link
+              to="/register"
+              className="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-base bg-gradient-to-r from-primary to-secondary text-white font-semibold rounded-lg transition-all duration-300 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-secondary/40 hover:scale-105 active:scale-100 hover:from-primary/90 hover:to-secondary/90"
+            >
+              <span className="hidden sm:inline">Secure Your Spot</span>
+              <span className="sm:hidden">Register</span>
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+            </Link>
+          </div>
         </div>
 
         {/* General Instructions - premium card */}

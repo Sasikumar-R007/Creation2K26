@@ -214,9 +214,13 @@ const RegistrationSuccessModal = ({ form, events, event1, event2, registrationId
               <p className="font-semibold text-xs text-gray-500 uppercase tracking-wide mb-1">Department</p>
               <p className="text-base text-gray-800 font-medium">{form.department}</p>
             </div>
-            <div className="col-span-2">
+            <div>
               <p className="font-semibold text-xs text-gray-500 uppercase tracking-wide mb-1">College</p>
               <p className="text-base text-gray-800 font-medium">{form.college}</p>
+            </div>
+            <div>
+              <p className="font-semibold text-xs text-gray-500 uppercase tracking-wide mb-1">Food Preference</p>
+              <p className="text-base text-gray-800 font-medium">{form.food_preference ? (form.food_preference === 'veg' ? 'Veg' : 'Non-Veg') : 'Not specified'}</p>
             </div>
           </div>
         </div>
@@ -775,10 +779,10 @@ export default function Register() {
                         {/* Number */}
                         <span
                           className={`text-lg font-bold relative z-10 ${isActive
-                              ? "text-foreground"
-                              : isDisabled
-                                ? "text-muted-foreground/40"
-                                : "text-muted-foreground"
+                            ? "text-foreground"
+                            : isDisabled
+                              ? "text-muted-foreground/40"
+                              : "text-muted-foreground"
                             }`}
                         >
                           {step.number}
@@ -794,10 +798,10 @@ export default function Register() {
                       <div className="mt-3 text-center">
                         <span
                           className={`text-sm font-medium block ${isActive
-                              ? "text-primary"
-                              : isDisabled
-                                ? "text-muted-foreground/50"
-                                : "text-muted-foreground"
+                            ? "text-primary"
+                            : isDisabled
+                              ? "text-muted-foreground/50"
+                              : "text-muted-foreground"
                             }`}
                         >
                           {step.label}

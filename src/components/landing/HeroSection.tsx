@@ -412,7 +412,7 @@ const HeroSection = () => {
                 src="/Logo 7.png"
                 alt="CREATION 2K26"
                 loading="eager"
-                fetchPriority="high"
+                {...({ fetchpriority: 'high' } as any)}
                 className={`hero-logo-main w-[90vw] sm:w-[75vw] max-w-[650px] h-auto object-contain transition-all duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'
                   }`}
                 style={{ willChange: 'transform' }}
@@ -508,12 +508,12 @@ const HeroSection = () => {
           </div>
 
           {/* CTA Buttons */}
-          <div className="flex flex-wrap justify-center gap-4 animate-fade-in" style={{ animationDelay: "500ms" }}>
+          <div className="flex flex-row justify-center gap-2 sm:gap-4 animate-fade-in" style={{ animationDelay: "500ms" }}>
             <NeonButton
               variant="cyan"
               size="xl"
               onClick={() => navigate("/register")}
-              className="register-now-button"
+              className="register-now-button text-xs sm:text-base px-3 sm:px-6 py-2 sm:py-3"
             >
               Register Now
             </NeonButton>
@@ -521,6 +521,7 @@ const HeroSection = () => {
               variant="outline"
               size="xl"
               onClick={() => document.getElementById("events")?.scrollIntoView({ behavior: "smooth" })}
+              className="text-xs sm:text-base px-3 sm:px-6 py-2 sm:py-3"
             >
               Explore Events
             </NeonButton>

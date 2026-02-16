@@ -2,6 +2,8 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import HeroSection from "@/components/landing/HeroSection";
 import AboutSection from "@/components/landing/AboutSection";
+import CoordinatorsSection from "@/components/landing/CoordinatorsSection";
+import FacultyCoordinatorsSection from "@/components/landing/FacultyCoordinatorsSection";
 import ContactSection from "@/components/landing/ContactSection";
 import EventsGrid from "@/components/events/EventsGrid";
 
@@ -40,6 +42,12 @@ const Index = () => {
 
       {/* About Section */}
       <AboutSection />
+
+      {/* Faculty Coordinators Section */}
+      <FacultyCoordinatorsSection />
+
+      {/* Coordinators Section */}
+      <CoordinatorsSection />
 
       {/* Contact Section */}
       <ContactSection />
