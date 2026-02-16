@@ -612,6 +612,39 @@
   animation: lightning-strike-rotate 4s ease-in-out infinite;
 }
 
+/* Hide thick cross lines on mobile - force hide with !important */
+@media (max-width: 767px) {
+  .hero-lightning-strike.thick-cross-line-mobile {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+
+/* Show thick cross lines on desktop */
+@media (min-width: 768px) {
+  .hero-lightning-strike.thick-cross-line-mobile {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Mobile close button - force visible on mobile */
+@media (max-width: 767px) {
+  .mobile-close-btn {
+    display: block !important;
+    visibility: visible !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .mobile-close-btn {
+    display: none !important;
+  }
+}
+
 @keyframes lightning-strike-rotate {
   0%, 90%, 100% {
     opacity: 0;

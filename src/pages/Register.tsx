@@ -1309,17 +1309,18 @@ export default function Register() {
       {/* Success Modal with Registration Form */}
       <Dialog open={showSuccessModal} onOpenChange={() => {}}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto [&>button]:hidden sm:[&>button]:hidden">
-          {/* Mobile close button */}
+          {/* Mobile close button - visible on mobile only, with high z-index */}
           <button
             onClick={() => {
               setShowSuccessModal(false);
               setForm(initialForm);
               window.location.href = "/";
             }}
-            className="md:hidden absolute right-4 top-4 z-50 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-background/80 backdrop-blur-sm p-2 border border-border/50"
+            className="mobile-close-btn absolute right-4 top-4 z-[100] rounded-sm opacity-90 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-background/90 backdrop-blur-sm p-2.5 border-2 border-border/60 shadow-lg"
             aria-label="Close"
+            style={{ display: 'block' }}
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5 text-foreground" />
           </button>
           <RegistrationSuccessModal
             form={form}

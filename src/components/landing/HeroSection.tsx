@@ -392,16 +392,17 @@ const HeroSection = () => {
               {isLoaded && [...Array(4)].map((_, i) => {
                 // First two (i=0, i=1) are the vertical and horizontal thick lines of the cross - hide on mobile
                 // Last two (i=2, i=3) are diagonal - keep visible
-                const isThickCrossLine = i === 0 || i === 1;
+                const isThickCrossLine = i === 3 || i === 1;
                 return (
                   <div
                     key={i}
-                    className={`hero-lightning-strike absolute ${isThickCrossLine ? 'hidden md:block' : ''}`}
+                    className={`hero-lightning-strike absolute ${isThickCrossLine ? 'thick-cross-line-mobile' : ''}`}
                     style={{
                       animationDelay: `${i * 1.5 + Math.random() * 1}s`,
                       animationDuration: `${4 + Math.random() * 2}s`,
                       transform: `rotate(${i * 90}deg)`,
                       transformOrigin: 'center',
+                      ...(isThickCrossLine ? { display: 'none' } : {}),
                     }}
                   />
                 );
