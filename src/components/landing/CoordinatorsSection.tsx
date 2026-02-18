@@ -14,7 +14,8 @@ const STUDENT_IMAGES = [
   { name: "Magitha", image: "/Students ID/Magitha.png" },
   { name: "Mallesh", image: "/Students ID/Mallesh.png" },
   { name: "Rishi", image: "/Students ID/Rishi.png" },
-  { name: "Sasi", image: "/Students ID/Sasi.png" },
+  { name: "Saragan", image: "/Students ID/Saragan.png" },
+  { name: "Sasi", image: "/Students ID/Sasi 3.png" },
   { name: "Shivani", image: "/Students ID/Shivani.png" },
   { name: "Sujai", image: "/Students ID/Sujai.png" },
 ];
@@ -37,7 +38,7 @@ const CoordinatorsSection = () => {
   // Track user interaction anywhere on the page (click, scroll, touch, keypress)
   useEffect(() => {
     let interactionDetected = false;
-    
+
     const handleUserInteraction = () => {
       if (!interactionDetected) {
         interactionDetected = true;
@@ -47,7 +48,7 @@ const CoordinatorsSection = () => {
 
     // Listen for various user interactions - use both document and window for better coverage
     const events = ['click', 'scroll', 'touchstart', 'keydown', 'mousedown', 'wheel', 'mousemove'];
-    
+
     // Add listeners to both document and window for better event capture
     events.forEach(event => {
       document.addEventListener(event, handleUserInteraction, { once: true, passive: true });
@@ -118,7 +119,7 @@ const CoordinatorsSection = () => {
   // Handle audio play/pause (manual control)
   const handleAudioToggle = async () => {
     if (!audioRef.current) return;
-    
+
     try {
       if (isPlaying) {
         audioRef.current.pause();
@@ -136,13 +137,13 @@ const CoordinatorsSection = () => {
   const getVisibleIndices = () => {
     const indices = [];
     const total = STUDENT_IMAGES.length;
-    
+
     // Get previous, current, and next indices
     for (let i = -2; i <= 2; i++) {
       const index = (currentIndex + i + total) % total;
       indices.push({ index, offset: i });
     }
-    
+
     return indices;
   };
 
@@ -186,7 +187,7 @@ const CoordinatorsSection = () => {
                 const isActive = offset === 0;
                 const isLeft = offset < 0;
                 const isRight = offset > 0;
-                
+
                 // Calculate transform based on position
                 const translateX = offset * 120; // Horizontal spacing
                 const translateZ = -Math.abs(offset) * 100; // Depth effect
@@ -215,9 +216,8 @@ const CoordinatorsSection = () => {
                   >
                     <GlassPanel
                       variant="hover"
-                      className={`w-[280px] md:w-[320px] h-[400px] md:h-[480px] overflow-hidden relative group transition-all duration-300 ${
-                        isActive ? 'cursor-default' : 'cursor-pointer hover:scale-105'
-                      }`}
+                      className={`w-[280px] md:w-[320px] h-[400px] md:h-[480px] overflow-hidden relative group transition-all duration-300 ${isActive ? 'cursor-default' : 'cursor-pointer hover:scale-105'
+                        }`}
                       onClick={() => {
                         if (!isActive) {
                           if (isLeft) goToPrevious();
@@ -265,11 +265,10 @@ const CoordinatorsSection = () => {
                 onClick={() => {
                   setCurrentIndex(index);
                 }}
-                className={`transition-all duration-300 rounded-full ${
-                  index === currentIndex
+                className={`transition-all duration-300 rounded-full ${index === currentIndex
                     ? "w-8 h-2 bg-primary"
                     : "w-2 h-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
-                }`}
+                  }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
@@ -279,7 +278,7 @@ const CoordinatorsSection = () => {
 
       {/* Background gradient effect */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent pointer-events-none -z-10" />
-      
+
       {/* BGM Audio - only plays when section is visible and user has interacted */}
       <audio
         ref={audioRef}

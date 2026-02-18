@@ -17,7 +17,6 @@ import {
   X,
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { NeonButton } from "@/components/ui/neon-button";
 import { Button } from "@/components/ui/button";
@@ -162,7 +161,6 @@ const ICDashboard = () => {
             </Button>
           </GlassPanel>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -449,8 +447,6 @@ const ICDashboard = () => {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

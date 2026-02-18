@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { NeonButton } from "@/components/ui/neon-button";
 import { Button } from "@/components/ui/button";
@@ -347,8 +346,6 @@ const Dashboard = () => {
           </div>
         </div>
       </main>
-
-      <Footer />
 
       {/* Event Modal */}
       {selectedEvent && (

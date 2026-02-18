@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { useTechnicalEvents, useNonTechnicalEvents, useEvents } from "@/hooks/useEvents";
 import { useMyRegistrations } from "@/hooks/useRegistrations";
 import { conflictsWithRegistered, getParticipationForEvent } from "@/lib/eventParticipation";
@@ -38,7 +38,7 @@ const EventsGrid = () => {
   const onModalOpen = useCallback((event: EventData) => setSelectedEvent(event), []);
   const onModalClose = useCallback(() => setSelectedEvent(null), []);
 
-  // Sort non-technical events to put "Personality Contest" first
+  // Sort non-technical events to put "Personality Contest" first - MUST be before useEffects that use it
   const sortedNonTechnicalEvents = useMemo(() => {
     if (!nonTechnicalEvents) return [];
     return [...nonTechnicalEvents].sort((a, b) => {
@@ -47,6 +47,62 @@ const EventsGrid = () => {
       return a.name.localeCompare(b.name);
     });
   }, [nonTechnicalEvents]);
+  
+  // Scroll tracking for pagination dots (2 dots: left/right)
+  const [techScrollState, setTechScrollState] = useState({ canScrollLeft: false, canScrollRight: true });
+  const [nonTechScrollState, setNonTechScrollState] = useState({ canScrollLeft: false, canScrollRight: true });
+  const techScrollRef = useRef<HTMLDivElement>(null);
+  const nonTechScrollRef = useRef<HTMLDivElement>(null);
+  
+  // Handle scroll for technical events
+  useEffect(() => {
+    const container = techScrollRef.current;
+    if (!container || !technicalEvents || technicalEvents.length === 0) return;
+    
+    const handleScroll = () => {
+      const scrollLeft = container.scrollLeft;
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      const canScrollLeft = scrollLeft > 10; // 10px threshold
+      const canScrollRight = scrollLeft < maxScroll - 10; // 10px threshold
+      setTechScrollState({ canScrollLeft, canScrollRight });
+    };
+    
+    // Initial calculation
+    handleScroll();
+    
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    // Also check on resize
+    window.addEventListener('resize', handleScroll, { passive: true });
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [technicalEvents]);
+  
+  // Handle scroll for non-technical events
+  useEffect(() => {
+    const container = nonTechScrollRef.current;
+    if (!container || !sortedNonTechnicalEvents || sortedNonTechnicalEvents.length === 0) return;
+    
+    const handleScroll = () => {
+      const scrollLeft = container.scrollLeft;
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      const canScrollLeft = scrollLeft > 10; // 10px threshold
+      const canScrollRight = scrollLeft < maxScroll - 10; // 10px threshold
+      setNonTechScrollState({ canScrollLeft, canScrollRight });
+    };
+    
+    // Initial calculation
+    handleScroll();
+    
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    // Also check on resize
+    window.addEventListener('resize', handleScroll, { passive: true });
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [sortedNonTechnicalEvents]);
 
   const isLoading = loadingTech || loadingNonTech;
 
@@ -97,20 +153,68 @@ const EventsGrid = () => {
             <p className="text-muted-foreground text-sm mt-1 group-hover:text-foreground/80 transition-colors duration-300">Showcase your technical prowess</p>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {technicalEvents?.map((event, index) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              index={index}
-              hasConflictWithRegistered={isEventConflicting(event.name)}
-              selectedEventId={selectedEvent?.id ?? null}
-              canParticipateIds={canParticipateIds}
-              cannotParticipateIds={cannotParticipateIds}
-              onModalOpen={onModalOpen}
-              onModalClose={onModalClose}
-            />
-          ))}
+        
+        {/* Horizontal Scrollable Container - Desktop, Vertical Stack - Mobile */}
+        <div className="relative">
+          {/* Desktop: Horizontal Scroll */}
+          <div className="hidden md:block">
+            <div ref={techScrollRef} className="overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
+              <div className="flex gap-6 min-w-max">
+                {technicalEvents?.map((event, index) => (
+                  <div key={event.id} className="flex-shrink-0 w-[300px]">
+                    <EventCard
+                      event={event}
+                      index={index}
+                      hasConflictWithRegistered={isEventConflicting(event.name)}
+                      selectedEventId={selectedEvent?.id ?? null}
+                      canParticipateIds={canParticipateIds}
+                      cannotParticipateIds={cannotParticipateIds}
+                      onModalOpen={onModalOpen}
+                      onModalClose={onModalClose}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Pagination Dots - Desktop (2 dots) */}
+            {technicalEvents && technicalEvents.length > 0 && (
+              <div className="flex justify-center items-center gap-2 mt-6">
+                <div
+                  className={`transition-all duration-300 ${
+                    techScrollState.canScrollLeft
+                      ? "w-8 h-2 rounded-full bg-primary"
+                      : "w-2 h-2 rounded-full bg-muted-foreground/30"
+                  }`}
+                />
+                <div
+                  className={`transition-all duration-300 ${
+                    techScrollState.canScrollRight
+                      ? "w-8 h-2 rounded-full bg-primary"
+                      : "w-2 h-2 rounded-full bg-muted-foreground/30"
+                  }`}
+                />
+              </div>
+            )}
+            {/* Scroll hint gradient fade */}
+            <div className="absolute right-0 top-0 bottom-4 w-20 bg-gradient-to-l from-background to-transparent pointer-events-none" />
+          </div>
+          
+          {/* Mobile: Vertical Stack */}
+          <div className="md:hidden grid grid-cols-1 gap-6">
+            {technicalEvents?.map((event, index) => (
+              <EventCard
+                key={event.id}
+                event={event}
+                index={index}
+                hasConflictWithRegistered={isEventConflicting(event.name)}
+                selectedEventId={selectedEvent?.id ?? null}
+                canParticipateIds={canParticipateIds}
+                cannotParticipateIds={cannotParticipateIds}
+                onModalOpen={onModalOpen}
+                onModalClose={onModalClose}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
@@ -127,20 +231,68 @@ const EventsGrid = () => {
             <p className="text-muted-foreground text-sm mt-1 group-hover:text-foreground/80 transition-colors duration-300">Unleash your creativity</p>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sortedNonTechnicalEvents.map((event, index) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              index={index}
-              hasConflictWithRegistered={isEventConflicting(event.name)}
-              selectedEventId={selectedEvent?.id ?? null}
-              canParticipateIds={canParticipateIds}
-              cannotParticipateIds={cannotParticipateIds}
-              onModalOpen={onModalOpen}
-              onModalClose={onModalClose}
-            />
-          ))}
+        
+        {/* Horizontal Scrollable Container - Desktop, Vertical Stack - Mobile */}
+        <div className="relative">
+          {/* Desktop: Horizontal Scroll */}
+          <div className="hidden md:block">
+            <div ref={nonTechScrollRef} className="overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
+              <div className="flex gap-6 min-w-max">
+                {sortedNonTechnicalEvents.map((event, index) => (
+                  <div key={event.id} className="flex-shrink-0 w-[300px]">
+                    <EventCard
+                      event={event}
+                      index={index}
+                      hasConflictWithRegistered={isEventConflicting(event.name)}
+                      selectedEventId={selectedEvent?.id ?? null}
+                      canParticipateIds={canParticipateIds}
+                      cannotParticipateIds={cannotParticipateIds}
+                      onModalOpen={onModalOpen}
+                      onModalClose={onModalClose}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Pagination Dots - Desktop (2 dots) */}
+            {sortedNonTechnicalEvents && sortedNonTechnicalEvents.length > 0 && (
+              <div className="flex justify-center items-center gap-2 mt-6">
+                <div
+                  className={`transition-all duration-300 ${
+                    nonTechScrollState.canScrollLeft
+                      ? "w-8 h-2 rounded-full bg-secondary"
+                      : "w-2 h-2 rounded-full bg-muted-foreground/30"
+                  }`}
+                />
+                <div
+                  className={`transition-all duration-300 ${
+                    nonTechScrollState.canScrollRight
+                      ? "w-8 h-2 rounded-full bg-secondary"
+                      : "w-2 h-2 rounded-full bg-muted-foreground/30"
+                  }`}
+                />
+              </div>
+            )}
+            {/* Scroll hint gradient fade */}
+            <div className="absolute right-0 top-0 bottom-4 w-20 bg-gradient-to-l from-background to-transparent pointer-events-none" />
+          </div>
+          
+          {/* Mobile: Vertical Stack */}
+          <div className="md:hidden grid grid-cols-1 gap-6">
+            {sortedNonTechnicalEvents.map((event, index) => (
+              <EventCard
+                key={event.id}
+                event={event}
+                index={index}
+                hasConflictWithRegistered={isEventConflicting(event.name)}
+                selectedEventId={selectedEvent?.id ?? null}
+                canParticipateIds={canParticipateIds}
+                cannotParticipateIds={cannotParticipateIds}
+                onModalOpen={onModalOpen}
+                onModalClose={onModalClose}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>

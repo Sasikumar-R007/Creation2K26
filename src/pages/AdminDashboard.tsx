@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Users,
@@ -19,9 +19,10 @@ import {
   Menu,
   Filter,
   X,
+  Download,
+  Check,
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { NeonButton } from "@/components/ui/neon-button";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,21 @@ import { useEvents } from "@/hooks/useEvents";
 import { useAllRegistrations, useAllProfiles, useGuestRegistrations } from "@/hooks/useRegistrations";
 import { useAllMessages, useSendMessage } from "@/hooks/useMessages";
 import { cn } from "@/lib/utils";
+import { exportData, AVAILABLE_COLUMNS, type ExportFormat, type ColumnOption } from "@/utils/exportData";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Cell } from "recharts";
 
 type AdminMenuId = "dashboard" | "events" | "guest-registrations" | "signups" | "registrations" | "messages";
 
@@ -74,7 +90,20 @@ const AdminDashboard = () => {
   const [regEvent2, setRegEvent2] = useState<string>("all");
   const [regDepartment, setRegDepartment] = useState<string>("all");
   const [regCollege, setRegCollege] = useState<string>("all");
+  
+  // Download dialog state
+  const [downloadDialogOpen, setDownloadDialogOpen] = useState(false);
+  const [downloadFormat, setDownloadFormat] = useState<ExportFormat>("excel");
+  const [downloadEventId, setDownloadEventId] = useState<string>("all");
+  const [downloadColumns, setDownloadColumns] = useState<ColumnOption[]>(
+    AVAILABLE_COLUMNS.map(col => ({ ...col, enabled: false }))
+  );
+  const { toast } = useToast();
+  
+  // Registration stats modal state
+  const [statsModalOpen, setStatsModalOpen] = useState(false);
 
+  // Fetch data hooks - must be declared first
   const { data: events, isLoading: loadingEvents } = useEvents();
   const { data: registrations, isLoading: loadingRegistrations } = useAllRegistrations();
   const { data: profiles, isLoading: loadingProfiles } = useAllProfiles();
@@ -109,16 +138,65 @@ const AdminDashboard = () => {
   };
 
   // Calculate stats
-  const totalRegistrations = registrations?.length || 0;
+  // Total Sign-ups = All user profiles (people who created accounts)
+  const totalSignUps = profiles?.length || 0;
+  
+  // Event Registrations = Auth registrations + Guest registrations
+  const totalAuthRegistrations = registrations?.length || 0;
+  const totalGuestRegistrations = guestRegistrations?.length || 0;
+  const totalRegistrations = totalAuthRegistrations + totalGuestRegistrations;
+  
   const technicalEvents = events?.filter((e) => e.category === "technical") || [];
   const nonTechnicalEvents = events?.filter((e) => e.category === "non_technical") || [];
 
-  // Group registrations by event
+  // Group auth registrations by event
   const registrationsByEvent = registrations?.reduce((acc: Record<string, number>, reg: any) => {
     const eventId = reg.event_id;
     acc[eventId] = (acc[eventId] || 0) + 1;
     return acc;
   }, {}) || {};
+
+  // Group guest registrations by event (event_1 and event_2)
+  const guestRegistrationsByEvent = (guestRegistrations || []).reduce((acc: Record<string, number>, reg: any) => {
+    if (reg.event_1_id) {
+      acc[reg.event_1_id] = (acc[reg.event_1_id] || 0) + 1;
+    }
+    if (reg.event_2_id) {
+      acc[reg.event_2_id] = (acc[reg.event_2_id] || 0) + 1;
+    }
+    return acc;
+  }, {});
+
+  // Combine both registration types
+  const allRegistrationsByEvent = events?.reduce((acc: Record<string, number>, event) => {
+    acc[event.id] = (registrationsByEvent[event.id] || 0) + (guestRegistrationsByEvent[event.id] || 0);
+    return acc;
+  }, {}) || {};
+
+  // Find max registration count for progress bars
+  const maxRegistrationCount = Math.max(...Object.values(allRegistrationsByEvent), 1);
+
+  // Prepare chart data for registration stats
+  const chartData = useMemo(() => {
+    if (!events) return [];
+    return events.map(event => {
+      const count = allRegistrationsByEvent[event.id] || 0;
+      const isTechnical = event.category === "technical";
+      return {
+        name: event.name,
+        registrations: count,
+        category: isTechnical ? "Technical" : "Non-Technical",
+        color: isTechnical ? "hsl(var(--primary))" : "hsl(var(--secondary))",
+      };
+    }).sort((a, b) => b.registrations - a.registrations);
+  }, [events, allRegistrationsByEvent]);
+
+  const chartConfig = {
+    registrations: {
+      label: "Registrations",
+      color: "hsl(var(--primary))",
+    },
+  };
 
   // Filter guest registrations
   const filteredGuestRegistrations = (() => {
@@ -222,14 +300,78 @@ const AdminDashboard = () => {
               </GlassPanel>
               <GlassPanel className="p-3 text-center" glow="purple">
                 <Users className="w-5 h-5 text-secondary mx-auto mb-1" />
-                <p className="text-xl font-bold">{profiles?.length || 0}</p>
+                <p className="text-xl font-bold">{totalSignUps}</p>
                 <p className="text-xs text-muted-foreground">Total Sign-ups</p>
               </GlassPanel>
-              <GlassPanel className="p-3 text-center">
-                <Users className="w-5 h-5 text-primary mx-auto mb-1" />
-                <p className="text-xl font-bold">{totalRegistrations}</p>
-                <p className="text-xs text-muted-foreground">Event Reg.</p>
-              </GlassPanel>
+              <Dialog open={statsModalOpen} onOpenChange={setStatsModalOpen}>
+                <DialogTrigger asChild>
+                  <GlassPanel className="p-3 text-center cursor-pointer hover:bg-muted/50 transition-colors">
+                    <Users className="w-5 h-5 text-primary mx-auto mb-1" />
+                    <p className="text-xl font-bold">{totalRegistrations}</p>
+                    <p className="text-xs text-muted-foreground">Event Reg.</p>
+                  </GlassPanel>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Event Registration Statistics</DialogTitle>
+                    <DialogDescription>
+                      Bar chart showing the number of participants registered for each event
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="mt-6">
+                    <ChartContainer config={chartConfig} className="h-[500px] w-full">
+                      <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <XAxis
+                          dataKey="name"
+                          angle={-45}
+                          textAnchor="end"
+                          height={120}
+                          className="text-xs"
+                          tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                        />
+                        <YAxis
+                          tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                          className="text-xs"
+                        />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Bar
+                          dataKey="registrations"
+                          radius={[8, 8, 0, 0]}
+                        >
+                          {chartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ChartContainer>
+                  </div>
+                  <div className="mt-4 grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-semibold">Technical Events</h4>
+                      <div className="space-y-1 text-xs">
+                        {chartData.filter(e => e.category === "Technical").map(event => (
+                          <div key={event.name} className="flex justify-between">
+                            <span className="text-muted-foreground">{event.name}</span>
+                            <span className="font-medium">{event.registrations}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-semibold">Non-Technical Events</h4>
+                      <div className="space-y-1 text-xs">
+                        {chartData.filter(e => e.category === "Non-Technical").map(event => (
+                          <div key={event.name} className="flex justify-between">
+                            <span className="text-muted-foreground">{event.name}</span>
+                            <span className="font-medium">{event.registrations}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
               <GlassPanel className="p-3 text-center">
                 <MessageSquare className="w-5 h-5 text-accent mx-auto mb-1" />
                 <p className="text-xl font-bold">{messages?.length || 0}</p>
@@ -271,7 +413,7 @@ const AdminDashboard = () => {
                                   </p>
                                 </div>
                                 <Badge className="bg-primary/20 text-primary">
-                                  {registrationsByEvent[event.id] || 0} registered
+                                  {allRegistrationsByEvent[event.id] || 0} registered
                                 </Badge>
                               </div>
                             ))}
@@ -294,7 +436,7 @@ const AdminDashboard = () => {
                                   </p>
                                 </div>
                                 <Badge className="bg-secondary/20 text-secondary">
-                                  {registrationsByEvent[event.id] || 0} registered
+                                  {allRegistrationsByEvent[event.id] || 0} registered
                                 </Badge>
                               </div>
                             ))}
@@ -390,9 +532,56 @@ const AdminDashboard = () => {
                             Clear
                           </Button>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          Showing {filteredGuestRegistrations.length} of {guestRegistrations.length} registrations
-                        </p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm text-muted-foreground">
+                            Showing {filteredGuestRegistrations.length} of {guestRegistrations.length} registrations
+                          </p>
+                          <DownloadDialog
+                            open={downloadDialogOpen}
+                            onOpenChange={setDownloadDialogOpen}
+                            format={downloadFormat}
+                            onFormatChange={setDownloadFormat}
+                            eventId={downloadEventId}
+                            onEventIdChange={setDownloadEventId}
+                            columns={downloadColumns}
+                            onColumnsChange={setDownloadColumns}
+                            events={events || []}
+                            data={filteredGuestRegistrations}
+                            onExport={async (finalColumns?: ColumnOption[]) => {
+                              try {
+                                const selectedEvent = events?.find(e => e.id === downloadEventId);
+                                const dataToExport = downloadEventId === "all" 
+                                  ? filteredGuestRegistrations 
+                                  : filteredGuestRegistrations.filter((g: any) => 
+                                      g.event_1_id === downloadEventId || g.event_2_id === downloadEventId
+                                    );
+                                
+                                // Use finalColumns if provided (includes custom column), otherwise use downloadColumns
+                                const columnsToUse = finalColumns || downloadColumns;
+                                
+                                await exportData({
+                                  format: downloadFormat,
+                                  eventId: downloadEventId === "all" ? undefined : downloadEventId,
+                                  eventName: selectedEvent?.name,
+                                  columns: columnsToUse,
+                                  data: dataToExport,
+                                });
+                                
+                                toast({
+                                  title: "Export successful",
+                                  description: `Data exported as ${downloadFormat.toUpperCase()}`,
+                                });
+                                setDownloadDialogOpen(false);
+                              } catch (error: any) {
+                                toast({
+                                  title: "Export failed",
+                                  description: error.message || "Failed to export data",
+                                  variant: "destructive",
+                                });
+                              }
+                            }}
+                          />
+                        </div>
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                           {filteredGuestRegistrations.map((g: any) => (
                             <ParticipantTile
@@ -627,10 +816,11 @@ const AdminDashboard = () => {
             {/* Quick Stats */}
             <GlassPanel className="p-6">
               <h3 className="font-semibold mb-4">Registration Stats</h3>
-              <div className="space-y-4">
-                {events?.slice(0, 5).map((event) => {
-                  const count = registrationsByEvent[event.id] || 0;
+              <div className="space-y-4 max-h-96 overflow-y-auto scrollbar-hide">
+                {events?.map((event) => {
+                  const count = allRegistrationsByEvent[event.id] || 0;
                   const isTechnical = event.category === "technical";
+                  const percentage = maxRegistrationCount > 0 ? (count / maxRegistrationCount) * 100 : 0;
                   return (
                     <div key={event.id}>
                       <div className="flex justify-between text-sm mb-1">
@@ -642,7 +832,7 @@ const AdminDashboard = () => {
                           className={`h-full rounded-full ${
                             isTechnical ? "bg-primary" : "bg-secondary"
                           }`}
-                          style={{ width: `${Math.min((count / 50) * 100, 100)}%` }}
+                          style={{ width: `${Math.min(percentage, 100)}%` }}
                         />
                       </div>
                     </div>
@@ -654,9 +844,237 @@ const AdminDashboard = () => {
         </div>
         </div>
       </main>
-
-      <Footer />
     </div>
+  );
+};
+
+// Download Dialog Component
+interface DownloadDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  format: ExportFormat;
+  onFormatChange: (format: ExportFormat) => void;
+  eventId: string;
+  onEventIdChange: (eventId: string) => void;
+  columns: ColumnOption[];
+  onColumnsChange: (columns: ColumnOption[]) => void;
+  events: any[];
+  data: any[];
+  onExport: (columns?: ColumnOption[]) => Promise<void>;
+}
+
+const DownloadDialog = ({
+  open,
+  onOpenChange,
+  format,
+  onFormatChange,
+  eventId,
+  onEventIdChange,
+  columns,
+  onColumnsChange,
+  events,
+  onExport,
+}: DownloadDialogProps) => {
+  const [customColumnName, setCustomColumnName] = useState("");
+  const [hasCustomColumn, setHasCustomColumn] = useState(false);
+  
+  const regularSelectedCount = columns.filter(c => c.enabled).length;
+  const selectedCount = regularSelectedCount + (hasCustomColumn ? 1 : 0);
+  const maxColumns = 5;
+  const supportsCustomColumn = format === 'pdf' || format === 'word';
+
+  // Disable custom column if format doesn't support it
+  useEffect(() => {
+    if (!supportsCustomColumn && hasCustomColumn) {
+      setHasCustomColumn(false);
+      setCustomColumnName("");
+    }
+  }, [format, supportsCustomColumn, hasCustomColumn]);
+
+  // Reset custom column when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setHasCustomColumn(false);
+      setCustomColumnName("");
+    }
+  }, [open]);
+
+  const handleColumnToggle = (key: string) => {
+    const column = columns.find(c => c.key === key);
+    if (!column) return;
+    
+    if (column.enabled) {
+      // Disable
+      onColumnsChange(columns.map(c => c.key === key ? { ...c, enabled: false } : c));
+    } else {
+      // Enable only if under limit (excluding custom column)
+      if (regularSelectedCount < maxColumns - (hasCustomColumn ? 1 : 0)) {
+        onColumnsChange(columns.map(c => c.key === key ? { ...c, enabled: true } : c));
+      }
+    }
+  };
+
+  const handleCustomColumnToggle = (enabled: boolean) => {
+    if (enabled && selectedCount < maxColumns) {
+      setHasCustomColumn(true);
+    } else {
+      setHasCustomColumn(false);
+      setCustomColumnName("");
+    }
+  };
+
+  const handleExport = async () => {
+    // Create columns with custom column if enabled
+    let finalColumns = [...columns];
+    if (hasCustomColumn && customColumnName.trim() && supportsCustomColumn) {
+      const customColumn: ColumnOption = {
+        key: 'custom',
+        label: customColumnName.trim(),
+        enabled: true,
+        isCustom: true,
+        customLabel: customColumnName.trim(),
+      };
+      finalColumns = [...columns, customColumn];
+    }
+    
+    // Pass final columns directly to export function
+    await onExport(finalColumns);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Download className="w-4 h-4 mr-2" />
+          Download
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Download Registrations</DialogTitle>
+          <DialogDescription>
+            Select file format, event filter, and columns to include (max 5 columns).
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-6 py-4">
+          {/* File Format Selection */}
+          <div className="space-y-2">
+            <Label>File Format</Label>
+            <div className="grid grid-cols-3 gap-2">
+              {(['excel', 'pdf', 'word'] as ExportFormat[]).map((fmt) => (
+                <Button
+                  key={fmt}
+                  variant={format === fmt ? "default" : "outline"}
+                  onClick={() => onFormatChange(fmt)}
+                  className="capitalize"
+                >
+                  {fmt === 'excel' ? 'Excel' : fmt === 'pdf' ? 'PDF' : 'Word'}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Event Filter */}
+          <div className="space-y-2">
+            <Label>Filter by Event</Label>
+            <Select value={eventId} onValueChange={onEventIdChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select event" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Events</SelectItem>
+                {events.map((e) => (
+                  <SelectItem key={e.id} value={e.id}>
+                    {e.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Column Selection */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>Select Columns ({selectedCount}/{maxColumns})</Label>
+              {selectedCount >= maxColumns && (
+                <span className="text-xs text-muted-foreground">Maximum reached</span>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-3 p-3 border rounded-lg bg-muted/30 max-h-64 overflow-y-auto">
+              {columns.map((col) => (
+                <div key={col.key} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={col.key}
+                    checked={col.enabled}
+                    onCheckedChange={() => handleColumnToggle(col.key)}
+                    disabled={!col.enabled && selectedCount >= maxColumns}
+                  />
+                  <Label
+                    htmlFor={col.key}
+                    className="text-sm font-normal cursor-pointer flex-1"
+                  >
+                    {col.label}
+                  </Label>
+                </div>
+              ))}
+              
+              {/* Custom Column Option (only for PDF/Word) */}
+              {supportsCustomColumn && (
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="custom-column"
+                    checked={hasCustomColumn}
+                    onCheckedChange={handleCustomColumnToggle}
+                    disabled={!hasCustomColumn && selectedCount >= maxColumns}
+                  />
+                  <Label
+                    htmlFor="custom-column"
+                    className="text-sm font-normal cursor-pointer flex-1"
+                  >
+                    Add Custom Column
+                  </Label>
+                </div>
+              )}
+            </div>
+            
+            {/* Custom Column Name Input */}
+            {hasCustomColumn && supportsCustomColumn && (
+              <div className="space-y-2 p-3 border rounded-lg bg-muted/30">
+                <Label htmlFor="custom-column-name">Custom Column Name</Label>
+                <Input
+                  id="custom-column-name"
+                  placeholder="Enter column name..."
+                  value={customColumnName}
+                  onChange={(e) => setCustomColumnName(e.target.value)}
+                  className="max-w-md"
+                />
+                <p className="text-xs text-muted-foreground">
+                  This column will be empty in the exported document
+                </p>
+              </div>
+            )}
+            
+            {selectedCount === 0 && (
+              <p className="text-xs text-destructive">Please select at least one column</p>
+            )}
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleExport}
+            disabled={selectedCount === 0 || (hasCustomColumn && !customColumnName.trim())}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
